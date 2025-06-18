@@ -39,7 +39,7 @@ def sidebar(request):
         MENUS = request.MENUS
 
         for app in base_dir_apps:
-            if apps.is_installed(app):
+            if apps.is_installed(app) and app not in ["helpdesk", "project", "payroll", "recruitment"]:
                 try:
                     sidebar = importlib.import_module(app + ".sidebar")
 
