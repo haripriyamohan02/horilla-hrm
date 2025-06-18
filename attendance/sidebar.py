@@ -16,6 +16,10 @@ IMG_SRC = "images/ui/attendances.svg"
 
 SUBMENUS = [
     {
+        "menu": _("My Attendances"),
+        "redirect": reverse("view-my-attendance"),
+    },
+    {
         "menu": _("Dashboard"),
         "redirect": reverse("attendance-dashboard"),
         "accessibility": "attendance.sidebar.dashboard_accessibility",
@@ -47,10 +51,6 @@ SUBMENUS = [
         "menu": _("Late Come Early Out"),
         "redirect": reverse("late-come-early-out-view"),
         "accessibility": "attendance.sidebar.tracking_accessibility",
-    },
-    {
-        "menu": _("My Attendances"),
-        "redirect": reverse("view-my-attendance"),
     },
 ]
 
