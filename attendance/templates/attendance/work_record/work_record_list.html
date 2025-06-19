@@ -128,7 +128,7 @@
                         style="text-decoration: none"
                         href="{% url 'employee-view-individual' employee.id %}"
                     >
-                        {{ employee }}
+                        {{ employee.employee_first_name }} {{ employee.employee_last_name }} ({{ employee.employee_trl_id }})
                     </a>
                 </td>
 

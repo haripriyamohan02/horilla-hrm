@@ -182,6 +182,8 @@ urlpatterns = [
         name="total-employees-count",
     ),
     path("joining-today-count", views.joining_today_count, name="joining-today-count"),
+    path("get-monthly-attendance-summary", views.get_monthly_attendance_summary, name="get-monthly-attendance-summary"),
+    path("days-left-in-payroll-cycle", views.days_left_in_payroll_cycle, name="days-left-in-payroll-cycle"),
     path("joining-week-count", views.joining_week_count, name="joining-week-count"),
     path("dashboard-employee", views.dashboard_employee, name="dashboard-employee"),
     path(

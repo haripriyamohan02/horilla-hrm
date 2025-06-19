@@ -2492,6 +2492,7 @@ def work_info_import_file(request):
     data_frame = pd.DataFrame(
         columns=[
             "Badge ID",
+            "Employee TRL ID",
             "First Name",
             "Last Name",
             "Email",
@@ -2824,6 +2825,67 @@ def joining_today_count(request):
         ).count()
     return HttpResponse(newbies_today)
 
+@login_required
+def get_monthly_attendance_summary(request):
+    total_counted = 0
+    employee = request.user.employee_get
+    today = date.today()
+    current_year = today.year
+    current_month = today.month
+
+    # Step 1: Get all dates in the month
+    _, num_days_in_month = calendar.monthrange(current_year, current_month)
+    all_days = [date(current_year, current_month, d) for d in range(1, num_days_in_month + 1)]
+
+    # Step 2: Count Saturdays and Sundays
+    # All days from 1st of the month up to today's date
+    days_upto_today = [
+        date(current_year, current_month, d)
+        for d in range(1, today.day + 1)
+    ]
+
+    # Filter Saturdays (5) and Sundays (6)
+    weekends = [d for d in days_upto_today if d.weekday() in [5, 6]]
+    weekends_count = len(weekends)
+
+    # Step 3: Get holidays (for current month)
+    Holidays = apps.get_model("base", "holidays")  # adjust if model name differs
+    holidays = Holidays.objects.filter(
+        start_date__year=current_year,
+        start_date__month=current_month
+    ).values_list("start_date", flat=True)
+    holidays_set = set(holidays)
+    holidays_count = len(holidays_set)
+
+    # Step 4: Get attendance for employee
+    Attendance = apps.get_model("attendance", "attendance")
+    attendance_days = Attendance.objects.filter(
+        employee_id=employee.id,
+        attendance_date__year=current_year,
+        attendance_date__month=current_month,
+        is_active=True,
+    ).values_list("attendance_date", flat=True)
+    attendance_set = set(attendance_days)
+    present_days_count = len(attendance_set)
+    # Step 5: Final check - total days used
+    total_counted = present_days_count
+    return HttpResponse(total_counted)
+    
+def days_left_in_payroll_cycle(request):
+    today = date.today()
+
+    if today.day >= 27:
+        # We are in a new payroll cycle starting from this month's 27th to next month's 26th
+        if today.month == 12:
+            end_of_cycle = date(today.year + 1, 1, 26)
+        else:
+            end_of_cycle = date(today.year, today.month + 1, 26)
+    else:
+        # We are still in the payroll cycle that started on last month's 27th
+        end_of_cycle = date(today.year, today.month, 26)
+
+    days_left = (end_of_cycle - today).days
+    return HttpResponse(days_left)
 
 @login_required
 def joining_week_count(request):
