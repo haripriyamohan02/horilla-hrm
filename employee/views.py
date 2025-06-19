@@ -2866,9 +2866,8 @@ def get_monthly_attendance_summary(request):
     ).values_list("attendance_date", flat=True)
     attendance_set = set(attendance_days)
     present_days_count = len(attendance_set)
-    print("present_days_count", present_days_count, "weekends_count", weekends_count, "holidays_count", holidays_count)
     # Step 5: Final check - total days used
-    total_counted = present_days_count + holidays_count + weekends_count
+    total_counted = present_days_count
     return HttpResponse(total_counted)
     
 def days_left_in_payroll_cycle(request):
