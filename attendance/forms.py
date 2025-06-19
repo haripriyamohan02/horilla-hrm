@@ -186,6 +186,8 @@ class AttendanceUpdateForm(BaseModelForm):
                 "onchange": "dynamicBatchAttendance($(this))",
             }
         )
+        if "batch_attendance_id" in self.fields:
+            del self.fields["batch_attendance_id"]
 
     def as_p(self, *args, **kwargs):
         """
@@ -330,6 +332,8 @@ class AttendanceForm(BaseModelForm):
                 "onchange": "dynamicBatchAttendance($(this))",
             }
         )
+        if "batch_attendance_id" in self.fields:
+            del self.fields["batch_attendance_id"]
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -684,17 +688,6 @@ class NewRequestForm(AttendanceRequestForm):
                     }
                 ),
                 initial=view_initial.get("employee_id"),
-            ),
-            "create_bulk": forms.BooleanField(
-                required=False,
-                label=_("Create Bulk"),
-                widget=forms.CheckboxInput(
-                    attrs={
-                        "class": "oh-checkbox",
-                        "hx-target": "#objectCreateModalTarget",
-                        "hx-get": "/attendance/request-new-attendance?bulk=True",
-                    }
-                ),
             ),
         }
         new_dict.update(old_dict)

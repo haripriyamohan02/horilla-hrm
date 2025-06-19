@@ -146,33 +146,6 @@ def request_new(request):
     """
     This method is used to create new attendance requests
     """
-
-    if request.GET.get("bulk") and eval_validate(request.GET.get("bulk")):
-        employee = request.user.employee_get
-        if request.GET.get("employee_id"):
-            form = BulkAttendanceRequestForm(initial=request.GET)
-        else:
-            form = BulkAttendanceRequestForm(initial={"employee_id": employee})
-        if request.method == "POST":
-            form = BulkAttendanceRequestForm(request.POST)
-            form.instance.attendance_clock_in_date = request.POST.get("from_date")
-            form.instance.attendance_date = request.POST.get("from_date")
-            if form.is_valid():
-                instance = form.save(commit=False)
-                messages.success(request, _("Attendance request created"))
-                return HttpResponse(
-                    render(
-                        request,
-                        "requests/attendance/request_new_form.html",
-                        {"form": form},
-                    ).content.decode("utf-8")
-                    + "<script>location.reload();</script>"
-                )
-        return render(
-            request,
-            "requests/attendance/request_new_form.html",
-            {"form": form, "bulk": True},
-        )
     if request.GET.get("employee_id"):
         form = NewRequestForm(initial=request.GET.dict())
     else:
