@@ -79,17 +79,14 @@
                                 hx-target="#tab_contents">
                                 {% trans "In Date" %}
                             </div>
-                            <div data-cell-index="6" data-cell-title='{% trans "Check-Out" %}' class="oh-sticky-table__th">
-                                {% trans
-                                "Check-Out" %}</div>
+                            <div data-cell-index="6" data-cell-title="Check-Out" class="oh-sticky-table__th">Check-Out</div>
                             <div data-cell-index="7" data-cell-title='{% trans "Out Date" %}'
                                 class="oh-sticky-table__th {% if request.sort_option.order == '-attendance_clock_out_date' %}arrow-up {% elif request.sort_option.order == 'attendance_clock_out_date' %}arrow-down {% else %}arrow-up-down {% endif %}"
                                 hx-get="{% url 'attendance-search' %}?{{pd}}&sortby=attendance_clock_out_date"
                                 hx-target="#tab_contents">
                                 {% trans "Out Date" %}
                             </div>
-                            <div data-cell-index="8" data-cell-title='{% trans "Shift" %}' class="oh-sticky-table__th">{% trans "Shift"
-                                %}</div>
+                            <div data-cell-index="8" data-cell-title="Shift" class="oh-sticky-table__th">Shift</div>
                             <div data-cell-index="9" data-cell-title='{% trans "Work Type" %}' class="oh-sticky-table__th">
                                 {% trans "Work Type" %}</div>
                             <div data-cell-index="10" data-cell-title='{% trans "Min Hour" %}' class="oh-sticky-table__th">
