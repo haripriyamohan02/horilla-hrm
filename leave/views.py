@@ -15,7 +15,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import ProtectedError, Q
+from django.db.models import ProtectedError, Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -4251,7 +4251,7 @@ def create_allocationrequest_comment(request, leave_id):
                             verb_ar="تلقى طلب تخصيص الإجازة الخاص بك تعليقًا.",
                             verb_de="Ihr Antrag auf Urlaubszuweisung hat einen Kommentar erhalten.",
                             verb_es="Tu solicitud de asignación de permisos ha recibido un comentario.",
-                            verb_fr="Votre demande d'allocation de congé a reçu un commentaire.",
+                            verb_fr=f"La demande d'allocation de congé de {leave.employee_id} a reçu un commentaire.",
                             redirect=reverse("leave-allocation-request-view")
                             + f"?id={leave.id}",
                             icon="chatbox-ellipses",
@@ -4282,7 +4282,7 @@ def create_allocationrequest_comment(request, leave_id):
                         verb_ar="تلقى طلب تخصيص الإجازة الخاص بك تعليقًا.",
                         verb_de="Ihr Antrag auf Urlaubszuweisung hat einen Kommentar erhalten.",
                         verb_es="Tu solicitud de asignación de permisos ha recibido un comentario.",
-                        verb_fr="Votre demande d'allocation de congé a reçu un commentaire.",
+                        verb_fr=f"La demande d'allocation de congé de {leave.employee_id} a reçu un commentaire.",
                         redirect=reverse("leave-allocation-request-view")
                         + f"?id={leave.id}",
                         icon="chatbox-ellipses",
@@ -5051,7 +5051,7 @@ if apps.is_installed("attendance"):
                                 recipient=rec,
                                 verb="Your compensatory leave request has received a comment.",
                                 verb_ar="تلقى طلب إجازة العوض الخاص بك تعليقًا.",
-                                verb_de="Ihr Antrag auf Freizeitausgleich hat einen Kommentar erhalten.",
+                                verb_de=f"Ihr Antrag auf Freizeitausgleich hat einen Kommentar erhalten.",
                                 verb_es="Su solicitud de permiso compensatorio ha recibido un comentario.",
                                 verb_fr="Votre demande de congé compensatoire a reçu un commentaire.",
                                 redirect=reverse("view-compensatory-leave")
@@ -5082,7 +5082,7 @@ if apps.is_installed("attendance"):
                             recipient=rec,
                             verb="Your compensatory leave request has received a comment.",
                             verb_ar="تلقى طلب إجازة العوض الخاص بك تعليقًا.",
-                            verb_de="Ihr Antrag auf Freizeitausgleich hat einen Kommentar erhalten.",
+                            verb_de=f"Ihr Antrag auf Freizeitausgleich hat einen Kommentar erhalten.",
                             verb_es="Su solicitud de permiso compensatorio ha recibido un comentario.",
                             verb_fr="Votre demande de congé compensatoire a reçu un commentaire.",
                             redirect=reverse("view-compensatory-leave")
@@ -5339,3 +5339,21 @@ def leave_allocation_approve(request):
             # "current_date":date.today(),
         },
     )
+
+
+@login_required
+def total_leaves_count(request):
+    today = date.today()
+    user = request.user
+    employee = getattr(user, 'employee_get', None)
+    total = 0
+    if employee:
+        total = (
+            LeaveRequest.objects.filter(
+                employee_id=employee,
+                status="approved",
+                start_date__year=today.year,
+                start_date__month=today.month,
+            ).aggregate(total=Sum("requested_days"))["total"] or 0
+        )
+    return HttpResponse(int(total) if total == int(total) else round(total, 2))
