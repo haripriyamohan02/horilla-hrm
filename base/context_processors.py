@@ -33,9 +33,9 @@ class AllCompany:
     class Urls:
         url = "/static/images/tringapps_logo.png"
 
-    company = "TRL"
+    company = "All Companies"
     icon = Urls()
-    text = "Tringapps"
+    text = "All Companies"
     id = None
 
 
@@ -59,8 +59,8 @@ def get_companies(request):
     companies = [
         [
             "all",
-            "TRL",
-            "https://ui-avatars.com/api/?name=All+TRL&background=random",
+            "All Companies",
+            "https://ui-avatars.com/api/?name=All+Companies&background=random",
             False,
         ],
     ] + companies
@@ -111,7 +111,7 @@ def update_selected_company(request):
                 getattr(employee, "employee_work_info", None), "company_id", None
             )
             if emp_company != company:
-                text = "Other Company"
+                text = ""
                 if company_id == user_company:
                     text = "My Company"
                 company = {
@@ -131,11 +131,11 @@ def update_selected_company(request):
                 )
 
     if company_id == "all":
-        text = "Tringapps"
+        text = "All Companies"
     elif company_id == user_company:
         text = "My Company"
     else:
-        text = "Other Company"
+        text = ""
 
     company = {
         "company": company.company,
