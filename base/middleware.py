@@ -74,11 +74,11 @@ class CompanyMiddleware:
         )
         if company_id and request.session.get("selected_company") != "all":
             if company_id == "all":
-                text = "Tringapps"
+                text = "All Companies"
             elif company_id == user_company_id:
                 text = "My Company"
             else:
-                text = "Other Company"
+                text = ""
 
             request.session["selected_company"] = str(company_id.id)
             request.session["selected_company_instance"] = {
