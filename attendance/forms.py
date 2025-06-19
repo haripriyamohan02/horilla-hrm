@@ -188,6 +188,8 @@ class AttendanceUpdateForm(BaseModelForm):
         )
         if "batch_attendance_id" in self.fields:
             del self.fields["batch_attendance_id"]
+        if "batch_attendance_id" in self.fields:
+            del self.fields["batch_attendance_id"]
 
     def as_p(self, *args, **kwargs):
         """
@@ -332,6 +334,8 @@ class AttendanceForm(BaseModelForm):
                 "onchange": "dynamicBatchAttendance($(this))",
             }
         )
+        if "batch_attendance_id" in self.fields:
+            del self.fields["batch_attendance_id"]
         if "batch_attendance_id" in self.fields:
             del self.fields["batch_attendance_id"]
 
