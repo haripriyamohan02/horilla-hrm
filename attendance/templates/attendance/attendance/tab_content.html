@@ -127,7 +127,7 @@
                                                 <img src="{{attendance.employee_id.get_avatar}}" class="oh-profile__image"
                                                     alt="Mary Magdalene" />
                                             </div>
-                                            <span class="oh-profile__name oh-text--dark">{{attendance.employee_id}}</span>
+                                            <span class="oh-profile__name oh-text--dark">{{attendance.employee_id.employee_first_name}} {{attendance.employee_id.employee_last_name}} ({{attendance.employee_id.employee_trl_id}})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -354,7 +354,7 @@
                                                 <img src="{{attendance.employee_id.get_avatar}}" class="oh-profile__image"
                                                     alt="Mary Magdalene" />
                                             </div>
-                                            <span class="oh-profile__name oh-text--dark">{{attendance.employee_id}}</span>
+                                            <span class="oh-profile__name oh-text--dark">{{attendance.employee_id.employee_first_name}} {{attendance.employee_id.employee_last_name}} ({{attendance.employee_id.employee_trl_id}})</span>
                                         </div>
                                     </div>
                                     <div data-cell-index="21" class="oh-sticky-table__td">{{attendance.batch_attendance_id}}
@@ -590,7 +590,7 @@
                                         <img src="{{attendance.employee_id.get_avatar}}" class="oh-profile__image"
                                             alt="Mary Magdalene" />
                                     </div>
-                                    <span class="oh-profile__name oh-text--dark">{{attendance.employee_id}}</span>
+                                    <span class="oh-profile__name oh-text--dark">{{attendance.employee_id.employee_first_name}} {{attendance.employee_id.employee_last_name}} ({{attendance.employee_id.employee_trl_id}})</span>
                                 </div>
                             </div>
                             <div data-cell-index="41" class="oh-sticky-table__td">{{attendance.batch_attendance_id}}

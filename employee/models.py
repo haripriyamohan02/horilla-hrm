@@ -64,6 +64,7 @@ class Employee(models.Model):
         ("divorced", trans("Divorced")),
     )
     badge_id = models.CharField(max_length=50, null=True, blank=True)
+    employee_trl_id = models.CharField(max_length=50, null=True, blank=True, unique=True, verbose_name=_('Employee TRL ID'))
     employee_user_id = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -432,8 +433,8 @@ class Employee(models.Model):
         last_name = (
             self.employee_last_name if self.employee_last_name is not None else ""
         )
-        badge_id = (f"({self.badge_id})") if self.badge_id is not None else ""
-        return f"{self.employee_first_name} {last_name} {badge_id}"
+        trl_id = (f"({self.employee_trl_id})") if self.employee_trl_id is not None else ""
+        return f"{self.employee_first_name} {last_name} {trl_id}"
 
     def check_online(self):
         """
