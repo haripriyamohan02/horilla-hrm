@@ -325,7 +325,7 @@ def late_come_early_out_search(request):
 @hx_request_required
 def filter_own_attendance(request):
     """
-    This method is used to filter own attendances
+    This method is used to filter attendances. Admins see all, employees see only their own.
     """
     params = [
         "employee_id",
@@ -341,7 +341,10 @@ def filter_own_attendance(request):
             if param != "attendance_date__gte" and param != "attendance_date__lte"
         ]
 
-    attendances = Attendance.objects.filter(employee_id=request.user.employee_get)
+    if request.user.has_perm("attendance.view_attendance"):
+        attendances = Attendance.objects.all()
+    else:
+        attendances = Attendance.objects.filter(employee_id=request.user.employee_get)
     attendances = AttendanceFilters(request.GET, queryset=attendances).qs
     previous_data = request.GET.urlencode()
     data_dict = parse_qs(previous_data)
