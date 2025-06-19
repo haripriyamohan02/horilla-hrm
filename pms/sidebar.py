@@ -33,10 +33,10 @@ SUBMENUS = [
         "redirect": reverse_lazy("view-key-result"),
         "accessibility": "pms.sidebar.key_result_accessibility",
     },
-    {
-        "menu": trans("Employee Bonus Point"),
-        "redirect": reverse_lazy("employee-bonus-point"),
-    },
+    # {
+    #     "menu": trans("Employee Bonus Point"),
+    #     "redirect": reverse_lazy("employee-bonus-point"),
+    # },
     {
         "menu": trans("Period"),
         "redirect": reverse_lazy("period-view"),
