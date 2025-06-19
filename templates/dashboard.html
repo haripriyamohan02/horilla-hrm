@@ -226,7 +226,9 @@
                         </div>
                     </div>
                 </div>
-                
+                <div class="oh-dashboard__movable-cards row mt-4" id="tileContainer">
+                    {% include "dashboard_tile_container.html" %}
+                </div>
             </div>
         </div>
         <div class="oh-dashboard__right  col-12 col-sm-12 col-md-12 col-lg-3">
@@ -262,7 +264,7 @@
         </div>
     </div>
 </div>
-<!-- <div class="oh-modal" id="sendMailModal" role="dialog" aria-labelledby="sendMailModal" aria-hidden="true">
+<div class="oh-modal" id="sendMailModal" role="dialog" aria-labelledby="sendMailModal" aria-hidden="true">
     <div class="oh-modal__dialog">
         <div class="oh-modal__dialog-header">
             <span class="oh-modal__dialog-title" id="sendMailModalLabel">
@@ -304,7 +306,7 @@
     </div>
 </div>
 
-{% include "announcement_single_view.html" %} -->
+{% include "announcement_single_view.html" %}
 
 
 </main>
