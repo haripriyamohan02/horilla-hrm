@@ -38,23 +38,13 @@ SUBMENUS = [
         "accessibility": "leave.sidebar.assign_accessibility",
     },
     {
-        "menu": trans("Leave Allocation Request"),
+        "menu": trans("Special leave request"),
         "redirect": reverse("leave-allocation-request-view"),
     },
     {
         "menu": trans("Holidays"),
         "redirect": reverse("holiday-view"),
         "accessibility": "leave.sidebar.holiday_accessibility",
-    },
-    {
-        "menu": trans("Company Leaves"),
-        "redirect": reverse("company-leave-view"),
-        "accessibility": "leave.sidebar.company_leave_accessibility",
-    },
-    {
-        "menu": trans("Restrict Leaves"),
-        "redirect": reverse("restrict-view"),
-        "accessibility": "leave.sidebar.restrict_leave_accessibility",
     },
 ]
 
@@ -88,18 +78,6 @@ def assign_accessibility(request, submenu, user_perm, *args, **kwargs):
 def holiday_accessibility(request, submenu, user_perms, *args, **kwargs):
     return not request.user.is_superuser and not request.user.has_perm(
         "base.view_holidays"
-    )
-
-
-def company_leave_accessibility(request, submenu, user_perms, *args, **kwargs):
-    return not request.user.is_superuser and not request.user.has_perm(
-        "base.view_companyleaves"
-    )
-
-
-def restrict_leave_accessibility(request, submenu, user_perms, *args, **kwargs):
-    return not request.user.is_superuser and not request.user.has_perm(
-        "leave.view_restrictleave"
     )
 
 

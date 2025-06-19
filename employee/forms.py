@@ -168,6 +168,7 @@ class EmployeeForm(ModelForm):
         )
         widgets = {
             "dob": TextInput(attrs={"type": "date", "id": "dob"}),
+            "employee_trl_id": TextInput(attrs={"placeholder": _("Employee TRL ID")}),
         }
 
     def __init__(self, *args, **kwargs):
