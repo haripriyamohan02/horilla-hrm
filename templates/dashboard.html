@@ -206,22 +206,17 @@
                     </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-8 mt-2">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-8 mt-2 h-100 ">
                     <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent h-100">
                         <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
-                            <span class="oh-card-dashboard__title pointer" id="employee-previous" title="{% trans 'Previous' %}">
-                                <ion-icon name="caret-back-outline"></ion-icon>
-                            </span>
-                            <span class="oh-card-dashboard__title">{% trans "Employee Leaves" %}</span>
-                            <span class="oh-card-dashboard__title float-end pointer" id="employee-next" title="{% trans 'next' %}">
-                                <ion-icon name="caret-forward"></ion-icon>
-                            </span>
+                            <span class="oh-card-dashboard__title">{% trans "Attendance" %}</span>
+                            <input type="month" class="float-end month"
+                                hx-get="{% url 'filter-own-attendance' %}?month=2024-06"
+                                hx-target="#leaveRequest" hx-trigger="change delay:100ms">
                         </div>
-                        <div class="d-flex flex-row-reverse">
-                            <input type="month" class="mb-2 float-end pointer" name="" id="dash_month" />
-                        </div>
-                        <div class="oh-card-dashboard__body" id="employee_leave_canvas">
-                            <canvas id="employeeLeave" class="pointer"></canvas>
+                        <div class="oh-card-dashboard__body" id="leaveRequest"
+                            hx-get="{% url 'filter-own-attendance' %}" hx-trigger="load">
+                            <div class="animated-background"></div>
                         </div>
                     </div>
                 </div>
@@ -307,6 +302,7 @@
 
 {% include "announcement_single_view.html" %}
 
+{% include 'attendance/own_attendance/attendances.html' %}
 
 </main>
 
