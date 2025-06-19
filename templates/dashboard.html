@@ -109,6 +109,17 @@
         z-index: 1000;
         /* Ensure it's behind the canvas */
     }
+
+    .oh-card-dashboard--attendance-fixed {
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    .oh-card-dashboard--attendance-fixed .oh-card-dashboard__body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        min-height: 0;
+    }
 </style>
 
 <div class="oh-wrapper">
@@ -207,7 +218,7 @@
                     </div>
                 </div>
                 <div class="col-12 col-sm-12 col-md-12 col-lg-8 mt-2 h-100 ">
-                    <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent h-100">
+                    <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent oh-card-dashboard--attendance-fixed">
                         <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
                             <span class="oh-card-dashboard__title">{% trans "Attendance" %}</span>
                             <input type="month" class="float-end month"
