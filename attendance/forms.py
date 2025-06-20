@@ -746,8 +746,8 @@ class NewRequestForm(AttendanceRequestForm):
         if attendances.exists():
             data["employee_id"] = employee.id
             data["attendance_date"] = str(attendance_date)
-            data["attendance_clock_in_date"] = self.data["attendance_clock_in_date"]
-            data["attendance_clock_in"] = self.data["attendance_clock_in"]
+            data["attendance_clock_in_date"] = self.data.get("attendance_clock_in_date")
+            data["attendance_clock_in"] = self.data.get("attendance_clock_in")
             data["attendance_clock_out"] = (
                 None
                 if data["attendance_clock_out"] == "None"
@@ -758,8 +758,8 @@ class NewRequestForm(AttendanceRequestForm):
                 if data["attendance_clock_out_date"] == "None"
                 else data["attendance_clock_out_date"]
             )
-            data["work_type_id"] = self.data["work_type_id"]
-            data["shift_id"] = self.data["shift_id"]
+            data["work_type_id"] = self.data.get("work_type_id")
+            data["shift_id"] = self.data.get("shift_id")
             attendance = attendances.first()
             for key, value in data.items():
                 data[key] = str(value)
@@ -767,7 +767,7 @@ class NewRequestForm(AttendanceRequestForm):
             attendance.is_validate_request = True
             if attendance.request_type != "create_request":
                 attendance.request_type = "update_request"
-            attendance.request_description = self.data["request_description"]
+            attendance.request_description = self.data.get("request_description")
             attendance.save()
             self.new_instance = None
             return
@@ -775,7 +775,7 @@ class NewRequestForm(AttendanceRequestForm):
         new_instance = Attendance(**data)
         new_instance.is_validate_request = True
         new_instance.attendance_validated = False
-        new_instance.request_description = self.data["request_description"]
+        new_instance.request_description = self.data.get("request_description")
         new_instance.request_type = "create_request"
         self.new_instance = new_instance
         return
