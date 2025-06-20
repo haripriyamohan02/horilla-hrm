@@ -110,6 +110,7 @@
 </style>
 
 <div class="inner-fabs">
+    {% if request.user.is_superuser %}
     <div id="fab9" class="fab round" data-tooltip="Dashboard Charts">
         <a
             class="text-light"
@@ -121,7 +122,8 @@
             <i class="material-icons mt-2">leaderboard</i>
         </a>
     </div>
-    {% if "helpdesk"|app_installed %}
+    {% endif %}
+    <!-- {% if "helpdesk"|app_installed %}
         <div id="fab8" class="fab round" data-tooltip="Create Ticket">
             <a
                 class="text-light"
@@ -133,7 +135,7 @@
                 <i class="material-icons mt-2">sell</i>
             </a>
         </div>
-    {% endif %}
+    {% endif %} -->
     {% if "asset"|app_installed %}
     <div id="fab7" class="fab round" data-tooltip="Create Asset Request">
         <a
@@ -147,7 +149,7 @@
         </a>
     </div>
     {% endif %}
-    {% if "payroll"|app_installed %}
+    <!-- {% if "payroll"|app_installed %}
     <div id="fab6" class="fab round" data-tooltip="Create Reimbursement">
         <a
             class="text-light"
@@ -159,7 +161,7 @@
             <i class="material-icons mt-2">paid</i>
         </a>
     </div>
-    {% endif %}
+    {% endif %} -->
     <div id="fab5" class="fab round" data-tooltip="Create Work Type Request">
         <a
             class="text-light"

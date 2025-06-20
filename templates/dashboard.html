@@ -109,6 +109,17 @@
         z-index: 1000;
         /* Ensure it's behind the canvas */
     }
+
+    .oh-card-dashboard--attendance-fixed {
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    .oh-card-dashboard--attendance-fixed .oh-card-dashboard__body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        min-height: 0;
+    }
 </style>
 
 <div class="oh-wrapper">
@@ -123,10 +134,39 @@
     <div class="oh-dashboard row" id="dashboard" style="padding-bottom: 3.5rem;">
         <div class="oh-dashboard__left col-12 col-sm-12 col-md-12 col-lg-9">
             <div class="oh-dashboard__cards row">
+                {% if request.user.is_superuser %}
                 <div class="col-12 col-sm-12 col-md-6 col-lg-4">
                     <div class="oh-card-dashboard oh-card-dashboard--success tile">
-                        <a href="{% url 'attendance-dashboard' %}"
-                            style="text-decoration: none">
+                        <div class="oh-card-dashboard__header">
+                            <span class="oh-card-dashboard__title">{% trans "New Joining Today" %}</span>
+                        </div>
+                        <div class="oh-card-dashboard__body">
+                            <div class="oh-card-dashboard__counts">
+                                <span class="oh-card-dashboard__count" hx-get="{% url 'joining-today-count' %}" hx-trigger="load">
+                                    <div style="height: 67px;"></div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                    <div class="oh-card-dashboard oh-card-dashboard--warning tile">
+                        <div class="oh-card-dashboard__header">
+                            <span class="oh-card-dashboard__title">{% trans "New Joining This Week" %}</span>
+                        </div>
+                        <div class="oh-card-dashboard__body">
+                            <div class="oh-card-dashboard__counts">
+                                <span class="oh-card-dashboard__count" hx-get="{% url 'joining-week-count' %}" hx-trigger="load">
+                                    <div style="height: 67px;"></div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% elif not request.user.is_superuser %}
+                <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                    <div class="oh-card-dashboard oh-card-dashboard--success tile">
+                        <a href="{% url 'attendance-dashboard' %}" style="text-decoration: none">
                             <div class="oh-card-dashboard__header">
                                 <span class="oh-card-dashboard__title">{% trans "Total Present (This Month)" %}</span>
                             </div>
@@ -141,15 +181,14 @@
                     </div>
                 </div>
                 <div class="col-12 col-sm-12 col-md-6 col-lg-4">
-                    <div class="oh-card-dashboard oh-card-dashboard oh-card-dashboard--warning tile">
-                        <a href="{% url 'candidate-view' %}?scheduled_from={{first_day_of_week}}&scheduled_till={{last_day_of_week}}"
-                            style="text-decoration: none">
+                    <div class="oh-card-dashboard oh-card-dashboard--warning tile">
+                        <a href="#" style="text-decoration: none">
                             <div class="oh-card-dashboard__header">
-                                <span class="oh-card-dashboard__title">{% trans "New Joining This Week" %}</span>
+                                <span class="oh-card-dashboard__title">{% trans "Total Leave (This Month)" %}</span>
                             </div>
                             <div class="oh-card-dashboard__body">
                                 <div class="oh-card-dashboard__counts">
-                                    <span class="oh-card-dashboard__count" hx-get="{% url 'joining-week-count' %}" hx-trigger="load">
+                                    <span class="oh-card-dashboard__count" hx-get="{% url 'total-leaves-count' %}" hx-trigger="load">
                                         <div style="height: 67px;"></div>
                                     </span>
                                 </div>
@@ -157,22 +196,40 @@
                         </a>
                     </div>
                 </div>
+                {% endif %}
                 <div class="col-12 col-sm-12 col-md-6 col-lg-4">
-                    <a href="{% url 'employee-view' %}" style="text-decoration: none">
-                            <div class="oh-card-dashboard oh-card-dashboard--neutral tile">
-                                <div class="oh-card-dashboard__header">
-                                    <span class="oh-card-dashboard__title">{% trans "Days left for next payroll" %}</span>
-                                </div>
-                                <div class="oh-card-dashboard__body">
-                                    <div class="oh-card-dashboard__counts">
-                                        <span class="oh-card-dashboard__count" hx-get="{% url 'days-left-in-payroll-cycle' %}"
-                                            hx-trigger="load">
-                                            <div style="height: 67px;"></div>
-                                        </span>
-                                    </div>
+                    {% if request.user.is_superuser %}
+                    <div class="oh-card-dashboard oh-card-dashboard--neutral tile">
+                        <a href="{% url 'employee-view' %}" style="text-decoration: none">
+                            <div class="oh-card-dashboard__header">
+                                <span class="oh-card-dashboard__title">{% trans "Total Employees" %}</span>
+                            </div>
+                            <div class="oh-card-dashboard__body">
+                                <div class="oh-card-dashboard__counts">
+                                    <span class="oh-card-dashboard__count" hx-get="{% url 'total-employees-count' %}" hx-trigger="load">
+                                        <div style="height: 67px;"></div>
+                                    </span>
                                 </div>
                             </div>
                         </a>
+                    </div>
+                    {% elif not request.user.is_superuser %}
+                    <a href="{% url 'employee-view' %}" style="text-decoration: none">
+                        <div class="oh-card-dashboard oh-card-dashboard--neutral tile">
+                            <div class="oh-card-dashboard__header">
+                                <span class="oh-card-dashboard__title">{% trans "Days left for next payroll" %}</span>
+                            </div>
+                            <div class="oh-card-dashboard__body">
+                                <div class="oh-card-dashboard__counts">
+                                    <span class="oh-card-dashboard__count" hx-get="{% url 'days-left-in-payroll-cycle' %}"
+                                        hx-trigger="load">
+                                        <div style="height: 67px;"></div>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -207,26 +264,23 @@
                     </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-8 mt-2">
-                    <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent h-100">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-8 mt-2 h-100 ">
+                    <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent oh-card-dashboard--attendance-fixed">
                         <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
-                            <span class="oh-card-dashboard__title pointer" id="employee-previous" title="{% trans 'Previous' %}">
-                                <ion-icon name="caret-back-outline"></ion-icon>
-                            </span>
-                            <span class="oh-card-dashboard__title">{% trans "Employee Leaves" %}</span>
-                            <span class="oh-card-dashboard__title float-end pointer" id="employee-next" title="{% trans 'next' %}">
-                                <ion-icon name="caret-forward"></ion-icon>
-                            </span>
+                            <span class="oh-card-dashboard__title">{% trans "Attendance" %}</span>
+                            <input type="month" class="float-end month"
+                                hx-get="{% url 'filter-own-attendance' %}?month=2024-06"
+                                hx-target="#leaveRequest" hx-trigger="change delay:100ms">
                         </div>
-                        <div class="d-flex flex-row-reverse">
-                            <input type="month" class="mb-2 float-end pointer" name="" id="dash_month" />
-                        </div>
-                        <div class="oh-card-dashboard__body" id="employee_leave_canvas">
-                            <canvas id="employeeLeave" class="pointer"></canvas>
+                        <div class="oh-card-dashboard__body" id="leaveRequest"
+                            hx-get="{% url 'filter-own-attendance' %}" hx-trigger="load">
+                            <div class="animated-background"></div>
                         </div>
                     </div>
                 </div>
-                
+                <div class="oh-dashboard__movable-cards row mt-4" id="tileContainer">
+                    {% include "dashboard_tile_container.html" %}
+                </div>
             </div>
         </div>
         <div class="oh-dashboard__right  col-12 col-sm-12 col-md-12 col-lg-3">
@@ -262,7 +316,7 @@
         </div>
     </div>
 </div>
-<!-- <div class="oh-modal" id="sendMailModal" role="dialog" aria-labelledby="sendMailModal" aria-hidden="true">
+<div class="oh-modal" id="sendMailModal" role="dialog" aria-labelledby="sendMailModal" aria-hidden="true">
     <div class="oh-modal__dialog">
         <div class="oh-modal__dialog-header">
             <span class="oh-modal__dialog-title" id="sendMailModalLabel">
@@ -304,8 +358,9 @@
     </div>
 </div>
 
-{% include "announcement_single_view.html" %} -->
+{% include "announcement_single_view.html" %}
 
+{% include 'attendance/own_attendance/attendances.html' %}
 
 </main>
 
