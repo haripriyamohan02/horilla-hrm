@@ -176,44 +176,6 @@ def dashboard_approve_overtimes(request):
     return render(request, "attendance/dashboard/overtime_table.html", context)
 
 
-@login_required
-@hx_request_required
-def dashboard_validate_attendances(request):
-    """
-    Displays and validates employee attendance records for the dashboard.
-
-    This view retrieves a paginated list of attendance records that have not yet
-    been validated. Only records belonging to active employees and accessible
-    subordinates, as determined by the user's permissions, are included in the results.
-    """
-    main_dashboard = None
-    referer = request.META.get("HTTP_REFERER", "/")
-    referer = "/" + "/".join(referer.split("/")[3:])
-    if referer == "/":
-        main_dashboard = True
-    page_number = request.GET.get("page")
-    validate_attendances = Attendance.objects.filter(
-        attendance_validated=False, employee_id__is_active=True
-    )
-
-    validate_attendances = filtersubordinates(
-        request=request,
-        perm="attendance.change_overtime",
-        queryset=validate_attendances,
-    )
-
-    validate_id_list = [val.id for val in validate_attendances]
-    validate_attendances_ids = json.dumps(list(validate_id_list))
-
-    validate_attendances = paginator_qry(validate_attendances, page_number)
-    context = {
-        "validate_attendances": validate_attendances,
-        "validate_attendances_ids": validate_attendances_ids,
-        "main_dashboard": main_dashboard,
-    }
-    return render(request, "attendance/dashboard/to_validate_table.html", context)
-
-
 def total_attendance(start_date, department, end_date=None):
     """
     This method is used to find total attendance

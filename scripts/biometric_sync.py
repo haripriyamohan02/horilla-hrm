@@ -1,10 +1,18 @@
 import os
 from zk import ZK, const
 import psycopg2
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    from dotenv.main import load_dotenv
 from datetime import datetime
 
 load_dotenv()
+
+# Get sync-from date from environment
+SYNC_FROM_DATE = os.getenv('SYNC_FROM_DATE')
+if SYNC_FROM_DATE:
+    SYNC_FROM_DATE = datetime.strptime(SYNC_FROM_DATE, '%Y-%m-%d')
 
 # Database connection
 conn = psycopg2.connect(
@@ -24,6 +32,9 @@ def fetch_and_store(device_ip, device_serial, direction):
         for log in logs:
             user_id = log.user_id
             timestamp = log.timestamp
+            # Only sync logs from SYNC_FROM_DATE onward if set
+            if SYNC_FROM_DATE and timestamp < SYNC_FROM_DATE:
+                continue
             # Insert into DB, ignore duplicates
             cur.execute("""
                 INSERT INTO attendance_logs (user_id, device_serial, direction, timestamp)
