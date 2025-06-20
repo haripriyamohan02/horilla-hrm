@@ -13,6 +13,7 @@ from datetime import date, datetime, timedelta
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
 from attendance.methods.utils import (
@@ -30,7 +31,6 @@ from attendance.models import (
     AttendanceLateComeEarlyOut,
     GraceTime,
 )
-from attendance.views.views import attendance_validate
 from base.context_processors import (
     enable_late_come_early_out_tracking,
     timerunner_enabled,
@@ -287,7 +287,7 @@ def clock_in(request):
                 clock_in=datetime_now,
                 in_datetime=datetime_now,
             )
-            return HttpResponse(_("Biometric punch-in recorded."))
+            return render(request, "attendance/components/in_out_component.html")
         # --- End fix for biometric punch-in always creating attendance ---
 
         # UI or other punch-in logic (unchanged)
@@ -319,15 +319,11 @@ def clock_in(request):
                 end_time=end_time_sec,
                 in_datetime=datetime_now,
             )
-            return HttpResponse(_("Check-in recorded."))
-        return HttpResponse(
-            _(
-                "You Don't have work information filled or your employee detail neither entered "
-            )
-        )
+            return render(request, "attendance/components/in_out_component.html")
+        return render(request, "attendance/components/in_out_component.html")
     else:
         messages.error(request, _( "Check in/Check out feature is not enabled."))
-        return HttpResponse("<script>location.reload();</script>")
+        return render(request, "attendance/components/in_out_component.html")
 
 
 def clock_out_attendance_and_activity(
@@ -555,11 +551,7 @@ def clock_out(request):
         employee, work_info = employee_exists(request)
 
         if not work_info:
-            return HttpResponse(
-                _(
-                    "You Don't have work information filled or your employee detail neither entered "
-                )
-            )
+            return render(request, "attendance/components/in_out_component.html")
 
         shift = work_info.shift_id
         date_today = date.today()
@@ -617,52 +609,7 @@ def clock_out(request):
                         shift=shift,
                     )
 
-        script = ""
-        hidden_label = ""
-        time_runner_enabled = timerunner_enabled(request)["enabled_timerunner"]
-        mouse_in = ""
-        mouse_out = ""
-        if time_runner_enabled:
-            script = """
-                <script>
-                $(document).ready(function () {{
-                    $('.at-work-seconds').html(secondsToDuration({at_work_seconds_forecasted}))
-                }});
-                run = 0;
-                at_work_seconds = {at_work_seconds_forecasted};
-                </script>
-            """.format(
-                at_work_seconds_forecasted=employee.get_forecasted_at_work()[
-                    "forecasted_at_work_seconds"
-                ],
-            )
-            hidden_label = """
-            style="display:none"
-            """
-            mouse_in = """ onmouseenter="$(this).find('div.at-work-seconds').hide();$(this).find('span').show();" """
-            mouse_out = """onmouseleave="$(this).find('div.at-work-seconds').show();$(this).find('span').hide();" """
-        return HttpResponse(
-            """
-                <button class="oh-btn oh-btn--success-outline mr-2"
-                {mouse_in}
-                {mouse_out}
-                hx-get="/attendance/clock-in"
-                hx-target='#attendance-activity-container'
-                hx-swap='innerHTML'>
-                <ion-icon class="oh-navbar__clock-icon mr-2 text-success"
-                name="enter-outline"></ion-icon>
-                <span class="hr-check-in-out-text" {hidden_label} >{check_in}</span>
-                <div class="at-work-seconds"></div>
-                </button>
-                {script}
-                """.format(
-                check_in=_("Check-In"),
-                script=script,
-                hidden_label=hidden_label,
-                mouse_in=mouse_in,
-                mouse_out=mouse_out,
-            )
-        )
+        return render(request, "attendance/components/in_out_component.html")
     else:
         messages.error(request, _("Check in/Check out feature is not enabled."))
-        return HttpResponse("<script>location.reload();</script>")
+        return render(request, "attendance/components/in_out_component.html")

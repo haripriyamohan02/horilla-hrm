@@ -130,23 +130,6 @@ from horilla.decorators import (
 from notifications.signals import notify
 
 
-def attendance_validate(attendance):
-    """
-    This method is is used to check condition for at work in AttendanceValidationCondition
-    model instance it return true if at work is smaller than condition
-    args:
-        attendance : attendance object
-    """
-
-    conditions = AttendanceValidationCondition.objects.all()
-    # Set the default condition for 'at work' to 9:00 AM
-    condition_for_at_work = strtime_seconds("09:00")
-    if conditions.exists():
-        condition_for_at_work = strtime_seconds(conditions[0].validation_at_work)
-    at_work = strtime_seconds(attendance.attendance_worked_hour)
-    return condition_for_at_work >= at_work
-
-
 @login_required
 @hx_request_required
 def profile_attendance_tab(request):
@@ -1347,82 +1330,6 @@ def validate_bulk_attendance(request):
             messages.error(request, msg)
 
     return JsonResponse({"message": "success"})
-
-
-@login_required
-@manager_can_enter("attendance.change_attendance")
-def validate_this_attendance(request, obj_id):
-    """
-    This method is used to validate attendance
-    args:
-        id  : attendance id
-    """
-    try:
-        attendance = Attendance.objects.get(id=obj_id)
-        attendance.attendance_validated = True
-        attendance.save()
-        urlencode = request.GET.urlencode()
-        modified_url = f"/attendance/attendance-view/?{urlencode}"
-        messages.success(
-            request,
-            (
-                f"{attendance.employee_id} {attendance.attendance_date.strftime('%d %b %Y') }"
-                + " "
-                + _("Attendance validated.")
-            ),
-        )
-        notify.send(
-            request.user.employee_get,
-            recipient=attendance.employee_id.employee_user_id,
-            verb=f"Your attendance for the date {attendance.attendance_date} is validated",
-            verb_ar=f"تم تحقيق حضورك في تاريخ {attendance.attendance_date}",
-            verb_de=f"Deine Anwesenheit für das Datum {attendance.attendance_date} ist bestätigt.",
-            verb_es=f"Se valida tu asistencia para la fecha {attendance.attendance_date}.",
-            verb_fr=f"Votre présence pour la date {attendance.attendance_date} est validée.",
-            redirect=reverse("view-my-attendance") + f"?id={attendance.id}",
-            icon="checkmark",
-        )
-    except (Attendance.DoesNotExist, ValueError):
-        messages.error(request, _("Attendance not found"))
-
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
-
-
-@login_required
-def revalidate_this_attendance(request, obj_id):
-    """
-    This method is used to not validate the attendance.
-    args:
-        id  : attendance id
-    """
-
-    attendance = Attendance.objects.get(id=obj_id)
-    if is_reportingmanger(request, attendance) or request.user.has_perm(
-        "attendance.change_attendance"
-    ):
-        attendance.attendance_validated = False
-        attendance.save()
-        with contextlib.suppress(Exception):
-            notify.send(
-                request.user.employee_get,
-                recipient=(
-                    attendance.employee_id.employee_work_info.reporting_manager_id.employee_user_id
-                ),
-                verb=f"{attendance.employee_id} requested revalidation for \
-                    {attendance.attendance_date} attendance",
-                verb_ar=f"{attendance.employee_id} طلب إعادة\
-                      التحقق من حضور تاريخ {attendance.attendance_date}",
-                verb_de=f"{attendance.employee_id} beantragte eine Neubewertung der \
-                    Teilnahme am {attendance.attendance_date}",
-                verb_es=f"{attendance.employee_id} solicitó la validación nuevamente \
-                    para la asistencia del {attendance.attendance_date}",
-                verb_fr=f"{attendance.employee_id} a demandé une revalidation pour la \
-                    présence du {attendance.attendance_date}",
-                redirect=reverse("view-my-attendance") + f"?id={attendance.id}",
-                icon="refresh",
-            )
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
-    return HttpResponse("You Cannot Request for others attendance")
 
 
 @login_required
