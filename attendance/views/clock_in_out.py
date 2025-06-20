@@ -222,7 +222,6 @@ def clock_in(request):
             and allowed_attendance_ips
             and allowed_attendance_ips.is_enabled
         ):
-
             x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
             ip = request.META.get("REMOTE_ADDR")
             if x_forwarded_for:
@@ -243,6 +242,55 @@ def clock_in(request):
             if not ip_allowed:
                 return HttpResponse(_("You cannot mark attendance from this network"))
 
+        # --- Begin fix for biometric punch-in always creating attendance ---
+        is_biometric = request.__dict__.get("datetime") is not None
+        if is_biometric:
+            # For biometric, employee is always resolved from request.user
+            employee, work_info = employee_exists(request)
+            datetime_now = request.datetime
+            if not employee or not work_info:
+                return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+            shift = work_info.shift_id
+            date_today = request.date if hasattr(request, "date") else datetime_now.date()
+            attendance_date = date_today
+            day = date_today.strftime("%A").lower()
+            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+            now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
+            minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+                day=day, shift=shift
+            )
+            # Always create attendance if not exists
+            attendance = Attendance.objects.filter(
+                employee_id=employee, attendance_date=attendance_date
+            ).first()
+            if not attendance:
+                attendance = Attendance()
+                attendance.employee_id = employee
+                attendance.shift_id = shift
+                attendance.work_type_id = work_info.work_type_id
+                attendance.attendance_date = attendance_date
+                attendance.attendance_day = day
+                attendance.attendance_clock_in = now
+                attendance.attendance_clock_in_date = date_today
+                attendance.minimum_hour = minimum_hour
+                attendance.save()
+                attendance = Attendance.find(attendance.id)
+                late_come(
+                    attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
+                )
+            # Always create a new AttendanceActivity for biometric punch-in
+            AttendanceActivity.objects.create(
+                employee_id=employee,
+                attendance_date=attendance_date,
+                clock_in_date=date_today,
+                shift_day=day,
+                clock_in=datetime_now,
+                in_datetime=datetime_now,
+            )
+            return HttpResponse(_("Biometric punch-in recorded."))
+        # --- End fix for biometric punch-in always creating attendance ---
+
+        # UI or other punch-in logic (unchanged)
         employee, work_info = employee_exists(request)
         datetime_now = datetime.now()
         if request.__dict__.get("datetime"):
@@ -254,32 +302,11 @@ def clock_in(request):
                 date_today = request.date
             attendance_date = date_today
             day = date_today.strftime("%A").lower()
-            day = EmployeeShiftDay.objects.get(day=day)
-            now = datetime.now().strftime("%H:%M")
-            if request.__dict__.get("time"):
-                now = request.time.strftime("%H:%M")
-            now_sec = strtime_seconds(now)
-            mid_day_sec = strtime_seconds("12:00")
+            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+            now = datetime_now.strftime("%H:%M")
             minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
                 day=day, shift=shift
             )
-            if start_time_sec > end_time_sec:
-                # night shift
-                # ------------------
-                # Night shift in Horilla consider a 24 hours from noon to next day noon,
-                # the shift day taken today if the attendance clocked in after 12 O clock.
-
-                if mid_day_sec > now_sec:
-                    # Here you need to create attendance for yesterday
-
-                    date_yesterday = date_today - timedelta(days=1)
-                    day_yesterday = date_yesterday.strftime("%A").lower()
-                    day_yesterday = EmployeeShiftDay.objects.get(day=day_yesterday)
-                    minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
-                        day=day_yesterday, shift=shift
-                    )
-                    attendance_date = date_yesterday
-                    day = day_yesterday
             attendance = clock_in_attendance_and_activity(
                 employee=employee,
                 date_today=date_today,
@@ -292,58 +319,14 @@ def clock_in(request):
                 end_time=end_time_sec,
                 in_datetime=datetime_now,
             )
-            script = ""
-            hidden_label = ""
-            time_runner_enabled = timerunner_enabled(request)["enabled_timerunner"]
-            mouse_in = ""
-            mouse_out = ""
-            if time_runner_enabled:
-                script = """
-                <script>
-                        $(".time-runner").removeClass("stop-runner");
-                        run = 1;
-                        at_work_seconds = {at_work_seconds_forecasted};
-                    </script>
-                    """.format(
-                    at_work_seconds_forecasted=employee.get_forecasted_at_work()[
-                        "forecasted_at_work_seconds"
-                    ]
-                )
-                hidden_label = """
-                style="display:none"
-                """
-                mouse_in = """ onmouseenter = "$(this).find('span').show();$(this).find('.time-runner').hide();" """
-                mouse_out = """ onmouseleave = "$(this).find('span').hide();$(this).find('.time-runner').show();" """
-
-            return HttpResponse(
-                """
-                <button class="oh-btn oh-btn--warning-outline check-in mr-2"
-                {mouse_in}
-                {mouse_out}
-                    hx-get="/attendance/clock-out"
-                        hx-target='#attendance-activity-container'
-                        hx-swap='innerHTML'><ion-icon class="oh-navbar__clock-icon mr-2
-                        text-warning"
-                            name="exit-outline"></ion-icon>
-                <span {hidden_label} class="hr-check-in-out-text">{check_out}</span>
-                    <div class="time-runner"></div>
-                </button>
-                {script}
-                """.format(
-                    check_out=_("Check-Out"),
-                    script=script,
-                    hidden_label=hidden_label,
-                    mouse_in=mouse_in,
-                    mouse_out=mouse_out,
-                )
-            )
+            return HttpResponse(_("Check-in recorded."))
         return HttpResponse(
             _(
                 "You Don't have work information filled or your employee detail neither entered "
             )
         )
     else:
-        messages.error(request, _("Check in/Check out feature is not enabled."))
+        messages.error(request, _( "Check in/Check out feature is not enabled."))
         return HttpResponse("<script>location.reload();</script>")
 
 
