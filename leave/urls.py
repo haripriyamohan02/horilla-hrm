@@ -371,6 +371,7 @@ urlpatterns = [
             "template": "leave/restrict/restrict_form.html",
         },
     ),
+    path('total-leaves-count/', views.total_leaves_count, name='total-leaves-count'),
 ]
 
 if apps.is_installed("recruitment"):
