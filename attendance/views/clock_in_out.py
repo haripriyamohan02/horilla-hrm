@@ -347,7 +347,9 @@ def clock_in(request):
         return HttpResponse("<script>location.reload();</script>")
 
 
-def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=None):
+def clock_out_attendance_and_activity(
+    employee, work_info, date_today, now, out_datetime=None, is_biometric=False
+):
     """
     Clock out the attendance and activity
     args:
@@ -356,15 +358,17 @@ def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=No
         now         : now
     """
 
-    attendance_activities = AttendanceActivity.objects.filter(
-        employee_id=employee,
-    ).order_by("attendance_date", "id")
+    attendance_activities = (
+        AttendanceActivity.objects.filter(
+            employee_id=employee,
+        )
+        .order_by("attendance_date", "id")
+        .select_related("employee_id")
+    )
     attendance_activity = None  # Initialize attendance_activity
 
     if attendance_activities.filter(clock_out__isnull=True).exists():
-        attendance_activity = attendance_activities.filter(
-            clock_out__isnull=True
-        ).last()
+        attendance_activity = attendance_activities.filter(clock_out__isnull=True).last()
         attendance_activity.clock_out = out_datetime
         attendance_activity.clock_out_date = date_today
         attendance_activity.out_datetime = out_datetime
@@ -378,6 +382,8 @@ def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=No
         duration = 0
         for activity in attendance_activities:
             in_datetime, out_datetime = activity_datetime(activity)
+            if not (in_datetime and out_datetime):
+                continue
             difference = out_datetime - in_datetime
             days_second = difference.days * 24 * 3600
             seconds = difference.seconds
@@ -385,9 +391,14 @@ def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=No
             duration = duration + total_seconds
         duration = format_time(duration)
         # update clock out of attendance
-        attendance = Attendance.objects.filter(employee_id=employee).order_by(
-            "-attendance_date", "-id"
-        )[0]
+        attendance = Attendance.objects.filter(
+            employee_id=employee, attendance_date=attendance_activity.attendance_date
+        ).first()
+        if not attendance:
+            logger.error(
+                "Attendance record not found for activity %s", attendance_activity.id
+            )
+            return None
         attendance.attendance_clock_out = now + ":00"
         attendance.attendance_clock_out_date = date_today
         attendance.attendance_worked_hour = duration
@@ -395,11 +406,71 @@ def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=No
         attendance.attendance_overtime = overtime_calculation(attendance)
 
         # Validate the attendance as per the condition
-        attendance.attendance_validated = attendance_validate(attendance)
+        attendance.attendance_validated = True
         attendance.save()
 
         return attendance
+    elif is_biometric:
+        shift = work_info.shift_id
+        attendance_date = date_today
+        day = date_today.strftime("%A").lower()
+        day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
 
+        minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+            day=day, shift=shift
+        )
+        now_sec = strtime_seconds(now)
+        mid_day_sec = strtime_seconds("12:00")
+
+        if start_time_sec > end_time_sec and now_sec < mid_day_sec:
+            attendance_date = date_today - timedelta(days=1)
+            day = attendance_date.strftime("%A").lower()
+            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+            minimum_hour, _, _ = shift_schedule_today(day=day, shift=shift)
+
+        attendance, created = Attendance.objects.get_or_create(
+            employee_id=employee,
+            attendance_date=attendance_date,
+            defaults={
+                "shift_id": shift,
+                "work_type_id": work_info.work_type_id,
+                "attendance_day": day,
+                "minimum_hour": minimum_hour,
+            },
+        )
+
+        AttendanceActivity.objects.create(
+            employee_id=employee,
+            attendance_date=attendance_date,
+            clock_out_date=date_today,
+            shift_day=day,
+            clock_out=out_datetime,
+            out_datetime=out_datetime,
+        )
+
+        attendance_activities = AttendanceActivity.objects.filter(
+            employee_id=employee, attendance_date=attendance_date
+        )
+
+        duration = 0
+        for activity in attendance_activities:
+            in_datetime, out_datetime = activity_datetime(activity)
+            if not (in_datetime and out_datetime):
+                continue
+            difference = out_datetime - in_datetime
+            days_second = difference.days * 24 * 3600
+            seconds = difference.seconds
+            total_seconds = days_second + seconds
+            duration = duration + total_seconds
+
+        duration = format_time(duration)
+        attendance.attendance_clock_out = now + ":00"
+        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_worked_hour = duration
+        attendance.attendance_overtime = overtime_calculation(attendance)
+        attendance.attendance_validated = True
+        attendance.save()
+        return attendance
     logger.error("No attendance clock in activity found that needs clocking out.")
     return
 
@@ -499,12 +570,20 @@ def clock_out(request):
         if request.__dict__.get("datetime"):
             datetime_now = request.datetime
         employee, work_info = employee_exists(request)
+
+        if not work_info:
+            return HttpResponse(
+                _(
+                    "You Don't have work information filled or your employee detail neither entered "
+                )
+            )
+
         shift = work_info.shift_id
         date_today = date.today()
         if request.__dict__.get("date"):
             date_today = request.date
         day = date_today.strftime("%A").lower()
-        day = EmployeeShiftDay.objects.get(day=day)
+        day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
         attendance = (
             Attendance.objects.filter(employee_id=employee)
             .order_by("id", "attendance_date")
@@ -518,8 +597,14 @@ def clock_out(request):
         minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
             day=day, shift=shift
         )
+        is_biometric = request.__dict__.get("datetime") is not None
         attendance = clock_out_attendance_and_activity(
-            employee=employee, date_today=date_today, now=now, out_datetime=datetime_now
+            employee=employee,
+            work_info=work_info,
+            date_today=date_today,
+            now=now,
+            out_datetime=datetime_now,
+            is_biometric=is_biometric,
         )
         if attendance:
             early_out_instance = attendance.late_come_early_out.filter(type="early_out")
