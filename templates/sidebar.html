@@ -139,7 +139,6 @@ function initializeSummernote(candId,searchWords,) {
         </a>
       </li>
       {% for menues in sidebar %}
-      {% if menues.app != 'helpdesk' and menues.app != 'project' and menues.app != 'payroll' and menues.app != 'recruitment' %}
       <li
         class="oh-sidebar__menu-item"
         x-data="{ isOpen: getOpenState('{{menues.app}}GenericNav') }"
@@ -185,8 +184,59 @@ function initializeSummernote(candId,searchWords,) {
           </ul>
         </div>
       </li>
-      {% endif %}
       {% endfor %}
+
+      <li
+        class="oh-sidebar__menu-item"
+        x-data="{ isOpen: getOpenState('transferNav') }"
+       >
+        <a
+          class="oh-sidebar__menu-link"
+          data-id="transferNav"
+          x-on:click.prevent="isOpen = !isOpen; saveOpenState('transferNav', isOpen)"
+          x-bind:class="isOpen ? 'oh-sidebar__menu-link--active' : ''"
+          style="cursor: pointer"
+        >
+          <div class="oh-sidebar__menu-icon">
+            <svg
+              fill="#ffffff"
+              height="20"
+              width="24"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="#ffffff"
+            >
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g
+                id="SVGRepo_tracerCarrier"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></g>
+              <g id="SVGRepo_iconCarrier">
+                <path d="M16 14.5L19 11.5M19 11.5L16 8.5M19 11.5H5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M8 18.5L5 15.5M5 15.5L8 12.5M5 15.5H19" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </g>
+            </svg>
+          </div>
+          <span>{% trans "Transfer and Posting" %}</span>
+        </a>
+        <div
+          class="oh-sidebar__submenu"
+          id="transferNav"
+          x-show="isOpen"
+          x-transition
+          style="display: none"
+          >
+          <ul class="oh-sidebar__submenu-items">
+            <li class="oh-sidebar__submenu-item">
+              <a href="#" class="oh-sidebar__submenu-link">{% trans "Transfer Requests" %}</a>
+            </li>
+            <li class="oh-sidebar__submenu-item">
+              <a href="#" class="oh-sidebar__submenu-link">{% trans "Postings" %}</a>
+            </li>
+          </ul>
+        </div>
+      </li>
 
       {% if request.user|config_perms %}
       <li
