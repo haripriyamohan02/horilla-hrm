@@ -1,0 +1,236 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-card" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin: 16px; overflow: hidden;">
+    <div class="oh-card__header" style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; justify-content: space-between; align-items: center;">
+        <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">{% trans "Training History & Records" %}</h4>
+        <div class="oh-card__actions">
+            <button class="oh-btn oh-btn--outline oh-btn--sm" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">{% trans "Export Report" %}</button>
+        </div>
+    </div>
+    <div class="oh-card__body" style="padding: 24px;">
+        <!-- Summary Stats -->
+        <div class="oh-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Total Completed" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">342</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Total Hours" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">1,248</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Certificates Issued" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">89</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Average Score" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">87.5%</span>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="oh-filter-section" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 24px; display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Employee" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>{% trans "All Employees" %}</option>
+                    <option>John Smith</option>
+                    <option>Sarah Johnson</option>
+                    <option>Mike Davis</option>
+                </select>
+            </div>
+            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Course Category" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>{% trans "All Categories" %}</option>
+                    <option>Safety</option>
+                    <option>Leadership</option>
+                    <option>Technical</option>
+                    <option>Compliance</option>
+                </select>
+            </div>
+            <div class="oh-filter-group" style="flex: 1; min-width: 150px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Year" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>2024</option>
+                    <option>2023</option>
+                    <option>2022</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Training History Table -->
+        <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 6px;">
+            <table class="oh-table" style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px;">
+                <thead>
+                    <tr style="background: #f9fafb;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Employee" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Course Name" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Category" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Completion Date" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Duration" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Score" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Certificate" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Expiry Date" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-employee-info">
+                                <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">John Smith</strong>
+                                <small style="color: #6b7280; font-size: 12px;">Engineering</small>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #111827;">Workplace Safety Training</td>
+                        <td style="padding: 12px 16px;">
+                            <span class="oh-category-tag oh-category-tag--safety" style="background: #fef2f2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Safety</span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2024-01-15</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">8 hours</td>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="oh-score__value" style="font-weight: 600; color: #111827;">92%</span>
+                                <span class="oh-score__grade oh-score__grade--a" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">A</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% trans "Download" %}
+                            </button>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2027-01-15</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-employee-info">
+                                <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">Sarah Johnson</strong>
+                                <small style="color: #6b7280; font-size: 12px;">Management</small>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #111827;">Leadership Development Program</td>
+                        <td style="padding: 12px 16px;">
+                            <span class="oh-category-tag oh-category-tag--leadership" style="background: #ede9fe; color: #7c3aed; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Leadership</span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2024-01-10</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">40 hours</td>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="oh-score__value" style="font-weight: 600; color: #111827;">88%</span>
+                                <span class="oh-score__grade oh-score__grade--b" style="background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">B+</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% trans "Download" %}
+                            </button>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">{% trans "No Expiry" %}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-employee-info">
+                                <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">Mike Davis</strong>
+                                <small style="color: #6b7280; font-size: 12px;">IT</small>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #111827;">Data Privacy & Security</td>
+                        <td style="padding: 12px 16px;">
+                            <span class="oh-category-tag oh-category-tag--compliance" style="background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Compliance</span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2023-12-20</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">12 hours</td>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="oh-score__value" style="font-weight: 600; color: #111827;">95%</span>
+                                <span class="oh-score__grade oh-score__grade--a" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">A+</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% trans "Download" %}
+                            </button>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2025-12-20</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-employee-info">
+                                <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">Lisa Wilson</strong>
+                                <small style="color: #6b7280; font-size: 12px;">Sales</small>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #111827;">Customer Service Excellence</td>
+                        <td style="padding: 12px 16px;">
+                            <span class="oh-category-tag oh-category-tag--soft-skills" style="background: #f0f9ff; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Soft Skills</span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2023-11-15</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">16 hours</td>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="oh-score__value" style="font-weight: 600; color: #111827;">84%</span>
+                                <span class="oh-score__grade oh-score__grade--b" style="background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">B</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% trans "Download" %}
+                            </button>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">{% trans "No Expiry" %}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-employee-info">
+                                <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">Robert Brown</strong>
+                                <small style="color: #6b7280; font-size: 12px;">Operations</small>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #111827;">Project Management Fundamentals</td>
+                        <td style="padding: 12px 16px;">
+                            <span class="oh-category-tag oh-category-tag--technical" style="background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Technical</span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">2023-10-30</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">60 hours</td>
+                        <td style="padding: 12px 16px;">
+                            <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="oh-score__value" style="font-weight: 600; color: #111827;">91%</span>
+                                <span class="oh-score__grade oh-score__grade--a" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">A</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {% trans "Download" %}
+                            </button>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">{% trans "No Expiry" %}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

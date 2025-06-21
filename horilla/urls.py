@@ -38,6 +38,7 @@ urlpatterns = [
     path("employee/", include("employee.urls")),
     path("horilla-widget/", include("horilla_widgets.urls")),
     path("transfer/", include("transfer.urls")),
+    path("training/", include("training.urls")),
     re_path(
         "^inbox/notifications/", include(notifications.urls, namespace="notifications")
     ),

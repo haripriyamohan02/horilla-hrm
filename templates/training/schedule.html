@@ -1,0 +1,187 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-card" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin: 16px; overflow: hidden;">
+    <div class="oh-card__header" style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; justify-content: space-between; align-items: center;">
+        <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">{% trans "Training Schedule" %}</h4>
+        <div class="oh-card__actions">
+            <button class="oh-btn oh-btn--outline oh-btn--sm" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-right: 8px;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">{% trans "Add Training" %}</button>
+        </div>
+    </div>
+    <div class="oh-card__body" style="padding: 24px;">
+        <!-- Summary Stats -->
+        <div class="oh-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Upcoming Sessions" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">12</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "This Week" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">5</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Enrolled Trainees" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">48</span>
+            </div>
+            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
+                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Available Slots" %}</span>
+                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">23</span>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="oh-filter-section" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 24px; display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Date Range" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>{% trans "Next 7 Days" %}</option>
+                    <option>{% trans "Next 30 Days" %}</option>
+                    <option>{% trans "This Month" %}</option>
+                    <option>{% trans "Next Month" %}</option>
+                </select>
+            </div>
+            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Course Category" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>{% trans "All Categories" %}</option>
+                    <option>Safety</option>
+                    <option>Leadership</option>
+                    <option>Technical</option>
+                    <option>Compliance</option>
+                </select>
+            </div>
+            <div class="oh-filter-group" style="flex: 1; min-width: 150px;">
+                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Status" %}</label>
+                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
+                    <option>{% trans "All Status" %}</option>
+                    <option>{% trans "Scheduled" %}</option>
+                    <option>{% trans "In Progress" %}</option>
+                    <option>{% trans "Completed" %}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Training Schedule Table -->
+        <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 6px;">
+            <table class="oh-table" style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px;">
+                <thead>
+                    <tr style="background: #f9fafb;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Course Name" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Instructor" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Date & Time" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Duration" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Enrolled" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Capacity" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Status" %}</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Workplace Safety Training</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">Dr. Sarah Wilson</td>
+                        <td style="padding: 12px 16px;">
+                            <div>
+                                <div style="color: #111827; font-weight: 500;">Jan 25, 2024</div>
+                                <div style="color: #6b7280; font-size: 12px;">09:00 - 17:00</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">8 hours</td>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">12</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">15</td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Scheduled" %}</span>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Leadership Development Program</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">Michael Chen</td>
+                        <td style="padding: 12px 16px;">
+                            <div>
+                                <div style="color: #111827; font-weight: 500;">Jan 26, 2024</div>
+                                <div style="color: #6b7280; font-size: 12px;">10:00 - 16:00</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">6 hours</td>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">8</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">12</td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "In Progress" %}</span>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Data Privacy & Security</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">Jennifer Adams</td>
+                        <td style="padding: 12px 16px;">
+                            <div>
+                                <div style="color: #111827; font-weight: 500;">Jan 28, 2024</div>
+                                <div style="color: #6b7280; font-size: 12px;">13:00 - 17:00</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">4 hours</td>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">15</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">20</td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Scheduled" %}</span>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Customer Service Excellence</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">Robert Martinez</td>
+                        <td style="padding: 12px 16px;">
+                            <div>
+                                <div style="color: #111827; font-weight: 500;">Jan 30, 2024</div>
+                                <div style="color: #6b7280; font-size: 12px;">09:30 - 15:30</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">6 hours</td>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">10</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">15</td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Scheduled" %}</span>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Project Management Fundamentals</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">Lisa Thompson</td>
+                        <td style="padding: 12px 16px;">
+                            <div>
+                                <div style="color: #111827; font-weight: 500;">Feb 02, 2024</div>
+                                <div style="color: #6b7280; font-size: 12px;">08:00 - 17:00</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; color: #6b7280;">8 hours</td>
+                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">6</td>
+                        <td style="padding: 12px 16px; color: #6b7280;">10</td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Pending" %}</span>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
+                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
