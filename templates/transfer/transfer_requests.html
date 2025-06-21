@@ -1,0 +1,47 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-card">
+    <div class="oh-card__header">
+        <h4 class="oh-card__title">{% trans "Transfer Requests" %}</h4>
+    </div>
+    <div class="oh-card__body">
+        <table class="oh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Employee" %}</th>
+                    <th>{% trans "Current Department" %}</th>
+                    <th>{% trans "Requested Department" %}</th>
+                    <th>{% trans "Reason" %}</th>
+                    <th>{% trans "Status" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>Sales</td>
+                    <td>Marketing</td>
+                    <td>Career growth</td>
+                    <td><span class="oh-badge oh-badge--warning">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>Engineering</td>
+                    <td>Product</td>
+                    <td>Wants to work on product side</td>
+                    <td><span class="oh-badge oh-badge--success">Approved</span></td>
+                </tr>
+                <tr>
+                    <td>Peter Jones</td>
+                    <td>Marketing</td>
+                    <td>Engineering</td>
+                    <td>Has technical background</td>
+                    <td><span class="oh-badge oh-badge--danger">Rejected</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,43 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-card">
+    <div class="oh-card__header">
+        <h4 class="oh-card__title">{% trans "Postings" %}</h4>
+    </div>
+    <div class="oh-card__body">
+        <table class="oh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Job Title" %}</th>
+                    <th>{% trans "Department" %}</th>
+                    <th>{% trans "Location" %}</th>
+                    <th>{% trans "Date Posted" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Senior Python Developer</td>
+                    <td>Engineering</td>
+                    <td>New York</td>
+                    <td>2024-01-15</td>
+                </tr>
+                <tr>
+                    <td>Marketing Manager</td>
+                    <td>Marketing</td>
+                    <td>San Francisco</td>
+                    <td>2024-01-20</td>
+                </tr>
+                <tr>
+                    <td>UX/UI Designer</td>
+                    <td>Product</td>
+                    <td>Remote</td>
+                    <td>2024-02-01</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 
