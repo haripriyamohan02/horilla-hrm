@@ -1,29 +1,29 @@
 {% extends 'index.html' %}
-{% load static %}
+{% load static %}   
 {% load i18n %}
 
 {% block content %}
 <div class="oh-card" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin: 16px; overflow: hidden;">
-    <div class="oh-card__header" style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
-        <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">{% trans "Training Dashboard" %}</h4>
+    <div class="oh-card__header" style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; background: #f8fafc;">
+        <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">{% trans "Training Dashboard" %}</h4>
     </div>
     <div class="oh-card__body" style="padding: 24px;">
         <!-- Training Overview Stats -->
         <div class="oh-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
-            <div class="oh-stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                <div class="oh-stat-card__icon" style="background: #3b82f6; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
+            <div class="oh-stat-card" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                <div class="oh-stat-card__icon" style="background: #6b7280; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 14L21 9L12 4L3 9L12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M12 14L21 9V16C21 16.5304 20.7893 17.0391 20.4142 17.4142C20.0391 17.7893 19.5304 18 19 18H5C4.46957 18 3.96086 17.7893 3.58579 17.4142C3.21071 17.0391 3 16.5304 3 16V9L12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 <div class="oh-stat-card__content">
-                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #111827;">24</h3>
+                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #1f2937;">24</h3>
                     <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">{% trans "Total Courses" %}</p>
                 </div>
             </div>
-            <div class="oh-stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                <div class="oh-stat-card__icon" style="background: #10b981; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
+            <div class="oh-stat-card" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                <div class="oh-stat-card__icon" style="background: #6b7280; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -32,31 +32,31 @@
                     </svg>
                 </div>
                 <div class="oh-stat-card__content">
-                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #111827;">156</h3>
+                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #1f2937;">156</h3>
                     <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">{% trans "Active Trainees" %}</p>
                 </div>
             </div>
-            <div class="oh-stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                <div class="oh-stat-card__icon" style="background: #8b5cf6; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
+            <div class="oh-stat-card" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                <div class="oh-stat-card__icon" style="background: #6b7280; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4905 2.02168 11.3363C2.16356 9.18203 2.99721 7.13214 4.39828 5.49883C5.79935 3.86553 7.69279 2.72636 9.79619 2.24223C11.8996 1.75809 14.1003 1.95185 16.07 2.79" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 <div class="oh-stat-card__content">
-                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #111827;">89%</h3>
+                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #1f2937;">89%</h3>
                     <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">{% trans "Completion Rate" %}</p>
                 </div>
             </div>
-            <div class="oh-stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-                <div class="oh-stat-card__icon" style="background: #f59e0b; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
+            <div class="oh-stat-card" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+                <div class="oh-stat-card__icon" style="background: #6b7280; color: white; padding: 12px; border-radius: 6px; flex-shrink: 0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                         <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 <div class="oh-stat-card__content">
-                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #111827;">42</h3>
+                    <h3 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #1f2937;">42</h3>
                     <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">{% trans "Hours This Month" %}</p>
                 </div>
             </div>
@@ -64,11 +64,11 @@
 
         <!-- Recent Training Activities -->
         <div class="oh-section-divider" style="border-top: 1px solid #e5e7eb; margin: 32px 0 24px 0;"></div>
-        <h5 class="oh-section-title" style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #111827;">{% trans "Recent Training Activities" %}</h5>
+        <h5 class="oh-section-title" style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #1f2937;">{% trans "Recent Training Activities" %}</h5>
         <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 6px;">
             <table class="oh-table oh-table--compact" style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <thead>
-                    <tr style="background: #f9fafb;">
+                    <tr style="background: #f8fafc;">
                         <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Course" %}</th>
                         <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Trainee" %}</th>
                         <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Progress" %}</th>
@@ -78,44 +78,44 @@
                 </thead>
                 <tbody>
                     <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Safety Protocols</td>
+                        <td style="padding: 12px 16px; color: #1f2937; font-weight: 500;">Safety Protocols</td>
                         <td style="padding: 12px 16px; color: #6b7280;">John Smith</td>
                         <td style="padding: 12px 16px;">
                             <div class="oh-progress-bar" style="position: relative; background: #f3f4f6; border-radius: 4px; height: 8px; width: 100px;">
-                                <div class="oh-progress-bar__fill" style="background: #3b82f6; height: 100%; border-radius: 4px; width: 85%;"></div>
+                                <div class="oh-progress-bar__fill" style="background: #4b5563; height: 100%; border-radius: 4px; width: 85%;"></div>
                                 <span class="oh-progress-bar__text" style="position: absolute; right: -30px; top: -2px; font-size: 12px; color: #6b7280; font-weight: 500;">85%</span>
                             </div>
                         </td>
                         <td style="padding: 12px 16px;">
-                            <span class="oh-badge oh-badge--success" style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "In Progress" %}</span>
+                            <span class="oh-badge oh-badge--success" style="background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; border: 1px solid #d1d5db;">{% trans "In Progress" %}</span>
                         </td>
                         <td style="padding: 12px 16px; color: #6b7280; font-size: 13px;">2024-01-15 14:30</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Leadership Development</td>
+                        <td style="padding: 12px 16px; color: #1f2937; font-weight: 500;">Leadership Development</td>
                         <td style="padding: 12px 16px; color: #6b7280;">Sarah Johnson</td>
                         <td style="padding: 12px 16px;">
                             <div class="oh-progress-bar" style="position: relative; background: #f3f4f6; border-radius: 4px; height: 8px; width: 100px;">
-                                <div class="oh-progress-bar__fill" style="background: #10b981; height: 100%; border-radius: 4px; width: 100%;"></div>
+                                <div class="oh-progress-bar__fill" style="background: #1f2937; height: 100%; border-radius: 4px; width: 100%;"></div>
                                 <span class="oh-progress-bar__text" style="position: absolute; right: -35px; top: -2px; font-size: 12px; color: #6b7280; font-weight: 500;">100%</span>
                             </div>
                         </td>
                         <td style="padding: 12px 16px;">
-                            <span class="oh-badge oh-badge--primary" style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Completed" %}</span>
+                            <span class="oh-badge oh-badge--primary" style="background: #1f2937; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Completed" %}</span>
                         </td>
                         <td style="padding: 12px 16px; color: #6b7280; font-size: 13px;">2024-01-14 16:45</td>
                     </tr>
                     <tr>
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Technical Skills</td>
+                        <td style="padding: 12px 16px; color: #1f2937; font-weight: 500;">Technical Skills</td>
                         <td style="padding: 12px 16px; color: #6b7280;">Mike Davis</td>
                         <td style="padding: 12px 16px;">
                             <div class="oh-progress-bar" style="position: relative; background: #f3f4f6; border-radius: 4px; height: 8px; width: 100px;">
-                                <div class="oh-progress-bar__fill" style="background: #f59e0b; height: 100%; border-radius: 4px; width: 45%;"></div>
+                                <div class="oh-progress-bar__fill" style="background: #9ca3af; height: 100%; border-radius: 4px; width: 45%;"></div>
                                 <span class="oh-progress-bar__text" style="position: absolute; right: -30px; top: -2px; font-size: 12px; color: #6b7280; font-weight: 500;">45%</span>
                             </div>
                         </td>
                         <td style="padding: 12px 16px;">
-                            <span class="oh-badge oh-badge--warning" style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Behind Schedule" %}</span>
+                            <span class="oh-badge oh-badge--warning" style="background: #f9fafb; color: #6b7280; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; border: 1px solid #d1d5db;">{% trans "Behind Schedule" %}</span>
                         </td>
                         <td style="padding: 12px 16px; color: #6b7280; font-size: 13px;">2024-01-12 09:15</td>
                     </tr>
