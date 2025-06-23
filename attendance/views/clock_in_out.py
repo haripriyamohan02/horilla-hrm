@@ -278,15 +278,23 @@ def clock_in(request):
                 late_come(
                     attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
                 )
-            # Always create a new AttendanceActivity for biometric punch-in
-            AttendanceActivity.objects.create(
+            # Only create a new AttendanceActivity for biometric punch-in if none is open
+            open_activity = AttendanceActivity.objects.filter(
                 employee_id=employee,
                 attendance_date=attendance_date,
-                clock_in_date=date_today,
-                shift_day=day,
-                clock_in=datetime_now,
-                in_datetime=datetime_now,
-            )
+                clock_out=None
+            ).first()
+
+            if not open_activity:
+                AttendanceActivity.objects.create(
+                    employee_id=employee,
+                    attendance_date=attendance_date,
+                    clock_in_date=date_today,
+                    shift_day=day,
+                    clock_in=datetime_now,
+                    in_datetime=datetime_now,
+                )
+            # If an open activity exists, do not create a new one
             return render(request, "attendance/components/in_out_component.html")
         # --- End fix for biometric punch-in always creating attendance ---
 
