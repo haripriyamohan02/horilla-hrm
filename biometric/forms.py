@@ -16,7 +16,7 @@ from employee.models import Employee
 from horilla.horilla_middlewares import _thread_locals
 from horilla_widgets.forms import default_select_option_template
 
-from .models import BiometricDevices, BiometricEmployees
+from .models import BiometricDevices, BiometricEmployees, DEVICE_ROLE_CHOICES
 
 
 class BiometricDeviceForm(ModelForm):
@@ -54,6 +54,7 @@ class BiometricDeviceForm(ModelForm):
                     "type": "password",
                 }
             ),
+            "role": forms.Select(choices=DEVICE_ROLE_CHOICES, attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):

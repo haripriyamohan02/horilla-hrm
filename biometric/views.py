@@ -57,11 +57,6 @@ from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArgumen
 
 logger = logging.getLogger(__name__)
 
-# Define your device IPs
-in_device_ip = "14.194.141.107"  # Replace with your actual IN device IP
-out_device_ip = "14.194.141.106"  # Replace with your actual OUT device IP
-
-
 def str_time_seconds(time):
     """
     this method is used reconvert time in H:M formate string back to seconds and return it
@@ -180,8 +175,8 @@ class ZKBioAttendance(Thread):
                                     user_id=user_id, device_id=device
                                 ).first()
                                 if bio_id:
-                                    # Hardcoded device IP logic for check-in/out
-                                    if device.machine_ip == in_device_ip:
+                                    # Use device role field for check-in/out
+                                    if device.role == 'in':
                                         try:
                                             clock_in(
                                                 Request(
@@ -196,7 +191,7 @@ class ZKBioAttendance(Thread):
                                                 "Got an error in clock_in %s", error
                                             )
                                             continue
-                                    elif device.machine_ip == out_device_ip:
+                                    elif device.role == 'out':
                                         try:
                                             clock_out(
                                                 Request(
@@ -212,7 +207,7 @@ class ZKBioAttendance(Thread):
                                             )
                                             continue
                                     else:
-                                        logger.warning(f"Unknown device IP: {device.machine_ip}")
+                                        logger.warning(f"Unknown device role: {device.role}")
                                         continue
                             else:
                                 continue
