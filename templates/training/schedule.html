@@ -24,7 +24,7 @@
         }
         
         .main-container {
-            height: 92vh;
+            height: 90vh;
             display: flex;
             flex-direction: column;
             padding: 6px;
@@ -299,7 +299,6 @@
             color: #374151;
         }
         
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -311,7 +310,7 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            padding: 20px;
+            padding: 10px;
             box-sizing: border-box;
         }
         
@@ -321,13 +320,13 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 100%;
             max-width: 900px;
-            max-height: 95vh;
+            max-height: 90vh;
             overflow-y: auto;
             position: relative;
         }
         
         .modal-header {
-            padding: 14px 22px;
+            padding: 10px 18px;
             border-bottom: 1px solid #e5e7eb;
             background: #f9fafb;
             border-radius: 12px 12px 0 0;
@@ -490,8 +489,9 @@
         }
         
         .plus-icon {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 400;
+            margin-bottom: 2px;
         }
     </style>
 </head>
@@ -733,58 +733,6 @@
                         </div>
                     </div>
 
-                    <!-- Schedule Information Section -->
-                    <div class="form-section">
-                        <h4 class="section-title">{% trans "Schedule Information" %}</h4>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    {% trans "Training Date" %} <span class="required">*</span>
-                                </label>
-                                <input type="date" name="training_date" required class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">
-                                    {% trans "Duration" %} <span class="required">*</span>
-                                </label>
-                                <select name="duration" required class="form-select">
-                                    <option value="">{% trans "Select Duration" %}</option>
-                                    <option value="2">{% trans "2 hours" %}</option>
-                                    <option value="4">{% trans "4 hours" %}</option>
-                                    <option value="6">{% trans "6 hours" %}</option>
-                                    <option value="8">{% trans "8 hours" %}</option>
-                                    <option value="16">{% trans "2 days (16 hours)" %}</option>
-                                    <option value="24">{% trans "3 days (24 hours)" %}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    {% trans "Start Time" %} <span class="required">*</span>
-                                </label>
-                                <input type="time" name="start_time" required class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">
-                                    {% trans "End Time" %} <span class="required">*</span>
-                                </label>
-                                <input type="time" name="end_time" required class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                {% trans "Training Location" %} <span class="required">*</span>
-                            </label>
-                            <input type="text" name="location" required class="form-input" placeholder="{% trans 'Enter training venue or room' %}">
-                        </div>
-                    </div>
-
                     <!-- Instructor & Capacity Section -->
                     <div class="form-section">
                         <h4 class="section-title">{% trans "Instructor & Capacity" %}</h4>
@@ -824,41 +772,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Additional Settings Section -->
-                    <div class="form-section">
-                        <h4 class="section-title">{% trans "Additional Settings" %}</h4>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">{% trans "Registration Deadline" %}</label>
-                                <input type="date" name="registration_deadline" class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">{% trans "Training Cost" %}</label>
-                                <input type="number" name="cost" min="0" step="0.01" class="form-input" placeholder="{% trans 'Cost per trainee (optional)' %}">
-                            </div>
-                        </div>
-
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="certification_provided" value="1" class="checkbox-input">
-                                {% trans "Certification Provided" %}
-                            </label>
-                            
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="mandatory_training" value="1" class="checkbox-input">
-                                {% trans "Mandatory Training" %}
-                            </label>
-                            
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="recurring_training" value="1" class="checkbox-input">
-                                {% trans "Recurring Training" %}
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Form Actions -->
                     <div class="form-actions">
                         <button type="button" onclick="closeModal()" class="btn-cancel">
