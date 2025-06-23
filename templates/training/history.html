@@ -3,370 +3,644 @@
 {% load i18n %}
 
 {% block content %}
-<div class="oh-card" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin: 3px; overflow: hidden;">
-    <div class="oh-card__header" style="padding: 20px 18px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; justify-content: space-between; align-items: center;">
-        <h4 class="oh-card__title" style="font-size: 18px; font-weight: 600; color: #111827; margin: 0;">Training History & Records</h4>
-        <div class="oh-card__actions">
-            <button id="exportBtn" class="oh-btn oh-btn--outline oh-btn--sm" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#ffffff'">Export Report</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training History & Records</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            height: 90vh;
+            overflow: hidden;
+        }
+        
+        .main-container {
+            height: 94vh;
+            display: flex;
+            flex-direction: column;
+            padding: 3px;
+            gap: 10px;
+        }
+        
+        .oh-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .oh-card__header {
+            padding: 15px 18px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .oh-card__title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .oh-btn {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .oh-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .oh-card__body {
+            padding: 3px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .oh-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        
+        .oh-summary-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .oh-summary-item__label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .oh-summary-item__value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .oh-filter-section {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .oh-filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .oh-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .oh-select, .oh-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            background: #ffffff;
+        }
+        
+        .table-container {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+            max-height: 500px;
+        }
+        
+        .table-scroll {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            position: relative;
+        }
+        
+        .oh-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 800px;
+        }
+        
+        .oh-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f9fafb;
+        }
+        
+        .oh-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .oh-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .oh-employee-info strong {
+            display: block;
+            color: #111827;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .oh-employee-info small {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .oh-category-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .oh-score {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .oh-score__value {
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .oh-score__grade {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .oh-btn--link {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 0;
+        }
+        
+        .oh-btn--link:hover {
+            color: #1d4ed8;
+        }
+        
+        .no-results-row {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .no-results-cell {
+            border: none !important;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="oh-card">
+            <div class="oh-card__header">
+                <h4 class="oh-card__title">Training History & Records</h4>
+                <div class="oh-card__actions">
+                    <button id="exportBtn" class="oh-btn">Export Report</button>
+                </div>
+            </div>
+            <div class="oh-card__body">
+                <!-- Summary Stats -->
+                <div id="summaryGrid" class="oh-summary-grid">
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">Total Completed</span>
+                        <span id="totalCompleted" class="oh-summary-item__value">0</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">Total Hours</span>
+                        <span id="totalHours" class="oh-summary-item__value">0</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">Certificates Issued</span>
+                        <span id="totalCertificates" class="oh-summary-item__value">0</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">Average Score</span>
+                        <span id="averageScore" class="oh-summary-item__value">0%</span>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="oh-filter-section">
+                    <div class="oh-filter-group">
+                        <label class="oh-label">Employee</label>
+                        <select id="employeeFilter" class="oh-select">
+                            <option value="">All Employees</option>
+                        </select>
+                    </div>
+                    <div class="oh-filter-group">
+                        <label class="oh-label">Course Category</label>
+                        <select id="categoryFilter" class="oh-select">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="oh-filter-group" style="min-width: 150px;">
+                        <label class="oh-label">Year</label>
+                        <select id="yearFilter" class="oh-select">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+                    <div class="oh-filter-group">
+                        <label class="oh-label">Search</label>
+                        <input id="searchFilter" type="text" placeholder="Search courses..." class="oh-input">
+                    </div>
+                </div>
+
+                <!-- Training History Table -->
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table id="trainingTable" class="oh-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Course Name</th>
+                                    <th>Category</th>
+                                    <th>Completion Date</th>
+                                    <th>Duration</th>
+                                    <th>Score</th>
+                                    <th>Certificate</th>
+                                    <th>Expiry Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainingTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="oh-card__body" style="padding: 7px;">
-        <!-- Summary Stats -->
-        <div id="summaryGrid" class="oh-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 16px;">
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">Total Completed</span>
-                <span id="totalCompleted" class="oh-summary-item__value" style="font-size: 18px; font-weight: 700; color: #111827;">0</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">Total Hours</span>
-                <span id="totalHours" class="oh-summary-item__value" style="font-size: 18px; font-weight: 700; color: #111827;">0</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">Certificates Issued</span>
-                <span id="totalCertificates" class="oh-summary-item__value" style="font-size: 18px; font-weight: 700; color: #111827;">0</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">Average Score</span>
-                <span id="averageScore" class="oh-summary-item__value" style="font-size: 18px; font-weight: 700; color: #111827;">0%</span>
-            </div>
-        </div>
 
-        <!-- Filter Section -->
-        <div class="oh-filter-section" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 18px; display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">Employee</label>
-                <select id="employeeFilter" class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option value="">All Employees</option>
-                </select>
-            </div>
-            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">Course Category</label>
-                <select id="categoryFilter" class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option value="">All Categories</option>
-                </select>
-            </div>
-            <div class="oh-filter-group" style="flex: 1; min-width: 150px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">Year</label>
-                <select id="yearFilter" class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option value="">All Years</option>
-                </select>
-            </div>
-            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">Search</label>
-                <input id="searchFilter" type="text" placeholder="Search courses..." class="oh-input" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-            </div>
-        </div>
+    <script>
+        // Sample training data
+        const trainingData = [
+            {
+                employee: "John Smith",
+                department: "Engineering",
+                course: "Workplace Safety Training",
+                category: "Safety",
+                completionDate: "2024-01-15",
+                duration: "8 hours",
+                durationHours: 8,
+                score: 92,
+                certificate: true,
+                expiryDate: "2027-01-15"
+            },
+            {
+                employee: "Sarah Johnson",
+                department: "Management",
+                course: "Leadership Development Program",
+                category: "Leadership",
+                completionDate: "2024-01-10",
+                duration: "40 hours",
+                durationHours: 40,
+                score: 88,
+                certificate: true,
+                expiryDate: null
+            },
+            {
+                employee: "Mike Davis",
+                department: "IT",
+                course: "Data Privacy & Security",
+                category: "Compliance",
+                completionDate: "2023-12-20",
+                duration: "12 hours",
+                durationHours: 12,
+                score: 95,
+                certificate: true,
+                expiryDate: "2026-12-20"
+            },
+            {
+                employee: "Emily Chen",
+                department: "HR",
+                course: "Advanced Excel Training",
+                category: "Technical",
+                completionDate: "2024-02-05",
+                duration: "16 hours",
+                durationHours: 16,
+                score: 91,
+                certificate: true,
+                expiryDate: null
+            },
+            {
+                employee: "David Wilson",
+                department: "Sales",
+                course: "Customer Service Excellence",
+                category: "Technical",
+                completionDate: "2024-01-20",
+                duration: "6 hours",
+                durationHours: 6,
+                score: 85,
+                certificate: true,
+                expiryDate: "2026-01-20"
+            },
+            {
+                employee: "Lisa Brown",
+                department: "Finance",
+                course: "Financial Compliance Training",
+                category: "Compliance",
+                completionDate: "2023-11-15",
+                duration: "24 hours",
+                durationHours: 24,
+                score: 89,
+                certificate: true,
+                expiryDate: "2026-11-15"
+            },
+            {
+                employee: "Alex Rodriguez",
+                department: "Marketing",
+                course: "Digital Marketing Certification",
+                category: "Technical",
+                completionDate: "2024-03-01",
+                duration: "20 hours",
+                durationHours: 20,
+                score: 94,
+                certificate: true,
+                expiryDate: "2026-03-01"
+            },
+            {
+                employee: "Jessica Taylor",
+                department: "Operations",
+                course: "Project Management Professional",
+                category: "Leadership",
+                completionDate: "2024-02-15",
+                duration: "35 hours",
+                durationHours: 35,
+                score: 87,
+                certificate: true,
+                expiryDate: "2027-02-15"
+            }
+        ];
 
-        <!-- Training History Table -->
-        <div style="overflow-x: auto; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; max-height: 500px;">
-            <table id="trainingTable" class="oh-table" style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px;">
-                <thead style="position: sticky; top: 0; z-index: 10;">
-                    <tr style="background: #f9fafb;">
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Employee</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Course Name</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Category</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Completion Date</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Duration</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Score</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Certificate</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">Expiry Date</th>
+        let filteredData = [...trainingData];
+
+        // Initialize the application
+        function init() {
+            populateFilters();
+            renderTable(filteredData);
+            updateSummaryStats(filteredData);
+            setupEventListeners();
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const employees = [...new Set(trainingData.map(item => item.employee))].sort();
+            const categories = [...new Set(trainingData.map(item => item.category))].sort();
+            const years = [...new Set(trainingData.map(item => new Date(item.completionDate).getFullYear()))].sort((a, b) => b - a);
+
+            populateSelect('employeeFilter', employees);
+            populateSelect('categoryFilter', categories);
+            populateSelect('yearFilter', years);
+        }
+
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Render the table
+        function renderTable(data) {
+            const tbody = document.getElementById('trainingTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="no-results-row">
+                        <td colspan="8" class="no-results-cell">
+                            No training records found matching your criteria.
+                        </td>
                     </tr>
-                </thead>
-                <tbody id="trainingTableBody">
-                </tbody>
-            </table>
-        </div>
-        
-        <div id="noResults" style="display: none; text-align: center; padding: 40px; color: #6b7280;">
-            <p style="font-size: 16px; margin: 0;">No training records found matching your criteria.</p>
-        </div>
-    </div>
-</div>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td>
+                        <div class="oh-employee-info">
+                            <strong>${item.employee}</strong>
+                            <small>${item.department}</small>
+                        </div>
+                    </td>
+                    <td style="color: #111827;">${item.course}</td>
+                    <td>
+                        <span class="oh-category-tag" style="${getCategoryStyle(item.category)}">${item.category}</span>
+                    </td>
+                    <td style="color: #6b7280;">${item.completionDate}</td>
+                    <td style="color: #6b7280;">${item.duration}</td>
+                    <td>
+                        <div class="oh-score">
+                            <span class="oh-score__value">${item.score}%</span>
+                            <span class="oh-score__grade" style="${getGradeStyle(item.score)}">${getGrade(item.score)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        ${item.certificate ? `
+                            <button class="oh-btn--link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Download
+                            </button>
+                        ` : '<span style="color: #6b7280;">N/A</span>'}
+                    </td>
+                    <td style="color: #6b7280;">${item.expiryDate || 'No Expiry'}</td>
+                </tr>
+            `).join('');
+        }
 
-<script>
-// Sample training data
-const trainingData = [
-    {
-        employee: "John Smith",
-        department: "Engineering",
-        course: "Workplace Safety Training",
-        category: "Safety",
-        completionDate: "2024-01-15",
-        duration: "8 hours",
-        durationHours: 8,
-        score: 92,
-        certificate: true,
-        expiryDate: "2027-01-15"
-    },
-    {
-        employee: "Sarah Johnson",
-        department: "Management",
-        course: "Leadership Development Program",
-        category: "Leadership",
-        completionDate: "2024-01-10",
-        duration: "40 hours",
-        durationHours: 40,
-        score: 88,
-        certificate: true,
-        expiryDate: null
-    },
-    {
-        employee: "Mike Davis",
-        department: "IT",
-        course: "Data Privacy & Security",
-        category: "Compliance",
-        completionDate: "2023-12-20",
-        duration: "12 hours",
-        durationHours: 12,
-        score: 95,
-        certificate: true,
-        expiryDate: "2026-12-20"
-    },
-    {
-        employee: "Emily Chen",
-        department: "HR",
-        course: "Advanced Excel Training",
-        category: "Technical",
-        completionDate: "2024-02-05",
-        duration: "16 hours",
-        durationHours: 16,
-        score: 91,
-        certificate: true,
-        expiryDate: null
-    },
-    {
-        employee: "David Wilson",
-        department: "Sales",
-        course: "Customer Service Excellence",
-        category: "Technical",
-        completionDate: "2024-01-20",
-        duration: "6 hours",
-        durationHours: 6,
-        score: 85,
-        certificate: true,
-        expiryDate: "2026-01-20"
-    }
-];
+        // Helper functions for styling
+        function getCategoryStyle(category) {
+            const styles = {
+                'Safety': 'background: #fef2f2; color: #dc2626;',
+                'Leadership': 'background: #ede9fe; color: #7c3aed;',
+                'Compliance': 'background: #fef3c7; color: #d97706;',
+                'Technical': 'background: #ecfdf5; color: #059669;'
+            };
+            return styles[category] || 'background: #f3f4f6; color: #374151;';
+        }
 
-let filteredData = [...trainingData];
+        function getGradeStyle(score) {
+            if (score >= 95) return 'background: #dcfce7; color: #166534;';
+            if (score >= 90) return 'background: #dcfce7; color: #166534;';
+            if (score >= 85) return 'background: #dbeafe; color: #1e40af;';
+            if (score >= 80) return 'background: #fef3c7; color: #d97706;';
+            return 'background: #fef2f2; color: #dc2626;';
+        }
 
-// Initialize the application
-function init() {
-    populateFilters();
-    renderTable(filteredData);
-    updateSummaryStats(filteredData);
-    setupEventListeners();
-}
+        function getGrade(score) {
+            if (score >= 97) return 'A+';
+            if (score >= 93) return 'A';
+            if (score >= 90) return 'A-';
+            if (score >= 87) return 'B+';
+            if (score >= 83) return 'B';
+            if (score >= 80) return 'B-';
+            if (score >= 77) return 'C+';
+            if (score >= 73) return 'C';
+            return 'C-';
+        }
 
-// Populate filter dropdowns
-function populateFilters() {
-    const employees = [...new Set(trainingData.map(item => item.employee))].sort();
-    const categories = [...new Set(trainingData.map(item => item.category))].sort();
-    const years = [...new Set(trainingData.map(item => new Date(item.completionDate).getFullYear()))].sort((a, b) => b - a);
+        // Update summary statistics
+        function updateSummaryStats(data) {
+            const totalCompleted = data.length;
+            const totalHours = data.reduce((sum, item) => sum + item.durationHours, 0);
+            const totalCertificates = data.filter(item => item.certificate).length;
+            const averageScore = data.length > 0 ? (data.reduce((sum, item) => sum + item.score, 0) / data.length).toFixed(1) : 0;
 
-    populateSelect('employeeFilter', employees);
-    populateSelect('categoryFilter', categories);
-    populateSelect('yearFilter', years);
-}
+            document.getElementById('totalCompleted').textContent = totalCompleted;
+            document.getElementById('totalHours').textContent = totalHours.toLocaleString();
+            document.getElementById('totalCertificates').textContent = totalCertificates;
+            document.getElementById('averageScore').textContent = averageScore + '%';
+        }
 
-function populateSelect(selectId, options) {
-    const select = document.getElementById(selectId);
-    options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        select.appendChild(optionElement);
-    });
-}
+        // Apply filters
+        function applyFilters() {
+            const employeeFilter = document.getElementById('employeeFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
 
-// Render the table
-function renderTable(data) {
-    const tbody = document.getElementById('trainingTableBody');
-    const noResults = document.getElementById('noResults');
-    
-    if (data.length === 0) {
-        tbody.innerHTML = '';
-        noResults.style.display = 'block';
-        return;
-    }
-    
-    noResults.style.display = 'none';
-    
-    tbody.innerHTML = data.map(item => `
-        <tr style="border-bottom: 1px solid #f3f4f6;">
-            <td style="padding: 12px 16px;">
-                <div class="oh-employee-info">
-                    <strong style="display: block; color: #111827; font-weight: 600; font-size: 14px;">${item.employee}</strong>
-                    <small style="color: #6b7280; font-size: 12px;">${item.department}</small>
-                </div>
-            </td>
-            <td style="padding: 12px 16px; color: #111827;">${item.course}</td>
-            <td style="padding: 12px 16px;">
-                <span class="oh-category-tag ${getCategoryClass(item.category)}" style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${item.category}</span>
-            </td>
-            <td style="padding: 12px 16px; color: #6b7280;">${item.completionDate}</td>
-            <td style="padding: 12px 16px; color: #6b7280;">${item.duration}</td>
-            <td style="padding: 12px 16px;">
-                <div class="oh-score" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="oh-score__value" style="font-weight: 600; color: #111827;">${item.score}%</span>
-                    <span class="oh-score__grade ${getGradeClass(item.score)}" style="padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">${getGrade(item.score)}</span>
-                </div>
-            </td>
-            <td style="padding: 12px 16px;">
-                ${item.certificate ? `
-                    <button class="oh-btn oh-btn--link oh-btn--xs" style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Download
-                    </button>
-                ` : '<span style="color: #6b7280;">N/A</span>'}
-            </td>
-            <td style="padding: 12px 16px; color: #6b7280;">${item.expiryDate || 'No Expiry'}</td>
-        </tr>
-    `).join('');
-}
+            filteredData = trainingData.filter(item => {
+                const employeeMatch = !employeeFilter || item.employee === employeeFilter;
+                const categoryMatch = !categoryFilter || item.category === categoryFilter;
+                const yearMatch = !yearFilter || new Date(item.completionDate).getFullYear().toString() === yearFilter;
+                const searchMatch = !searchFilter || 
+                    item.employee.toLowerCase().includes(searchFilter) ||
+                    item.course.toLowerCase().includes(searchFilter) ||
+                    item.category.toLowerCase().includes(searchFilter);
 
-// Helper functions for styling
-function getCategoryClass(category) {
-    const classes = {
-        'Safety': 'background: #fef2f2; color: #dc2626;',
-        'Leadership': 'background: #ede9fe; color: #7c3aed;',
-        'Compliance': 'background: #fef3c7; color: #d97706;',
-        'Technical': 'background: #ecfdf5; color: #059669;'
-    };
-    return `style="${classes[category] || 'background: #f3f4f6; color: #374151;'}"`;
-}
+                return employeeMatch && categoryMatch && yearMatch && searchMatch;
+            });
 
-function getGradeClass(score) {
-    if (score >= 95) return 'style="background: #dcfce7; color: #166534;"';
-    if (score >= 90) return 'style="background: #dcfce7; color: #166534;"';
-    if (score >= 85) return 'style="background: #dbeafe; color: #1e40af;"';
-    if (score >= 80) return 'style="background: #fef3c7; color: #d97706;"';
-    return 'style="background: #fef2f2; color: #dc2626;"';
-}
+            renderTable(filteredData);
+            updateSummaryStats(filteredData);
+        }
 
-function getGrade(score) {
-    if (score >= 97) return 'A+';
-    if (score >= 93) return 'A';
-    if (score >= 90) return 'A-';
-    if (score >= 87) return 'B+';
-    if (score >= 83) return 'B';
-    if (score >= 80) return 'B-';
-    if (score >= 77) return 'C+';
-    if (score >= 73) return 'C';
-    return 'C-';
-}
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('employeeFilter').addEventListener('change', applyFilters);
+            document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+            document.getElementById('yearFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
 
-// Update summary statistics
-function updateSummaryStats(data) {
-    const totalCompleted = data.length;
-    const totalHours = data.reduce((sum, item) => sum + item.durationHours, 0);
-    const totalCertificates = data.filter(item => item.certificate).length;
-    const averageScore = data.length > 0 ? (data.reduce((sum, item) => sum + item.score, 0) / data.length).toFixed(1) : 0;
+            // Export functionality
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                const table = document.getElementById('trainingTable');
+                let csv = [];
+                
+                // Get headers
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => 
+                    `"${th.textContent.trim()}"`
+                );
+                csv.push(headers.join(','));
+                
+                // Get data rows
+                filteredData.forEach(item => {
+                    const row = [
+                        `"${item.employee}"`,
+                        `"${item.course}"`,
+                        `"${item.category}"`,
+                        `"${item.completionDate}"`,
+                        `"${item.duration}"`,
+                        `"${item.score}%"`,
+                        `"${item.certificate ? 'Available' : 'N/A'}"`,
+                        `"${item.expiryDate || 'No Expiry'}"`
+                    ];
+                    csv.push(row.join(','));
+                });
 
-    document.getElementById('totalCompleted').textContent = totalCompleted;
-    document.getElementById('totalHours').textContent = totalHours.toLocaleString();
-    document.getElementById('totalCertificates').textContent = totalCertificates;
-    document.getElementById('averageScore').textContent = averageScore + '%';
-}
+                const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "training_history_report.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
 
-// Apply filters
-function applyFilters() {
-    const employeeFilter = document.getElementById('employeeFilter').value;
-    const categoryFilter = document.getElementById('categoryFilter').value;
-    const yearFilter = document.getElementById('yearFilter').value;
-    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
-
-    filteredData = trainingData.filter(item => {
-        const employeeMatch = !employeeFilter || item.employee === employeeFilter;
-        const categoryMatch = !categoryFilter || item.category === categoryFilter;
-        const yearMatch = !yearFilter || new Date(item.completionDate).getFullYear().toString() === yearFilter;
-        const searchMatch = !searchFilter || 
-            item.employee.toLowerCase().includes(searchFilter) ||
-            item.course.toLowerCase().includes(searchFilter) ||
-            item.category.toLowerCase().includes(searchFilter);
-
-        return employeeMatch && categoryMatch && yearMatch && searchMatch;
-    });
-
-    renderTable(filteredData);
-    updateSummaryStats(filteredData);
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    document.getElementById('employeeFilter').addEventListener('change', applyFilters);
-    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-    document.getElementById('yearFilter').addEventListener('change', applyFilters);
-    document.getElementById('searchFilter').addEventListener('input', applyFilters);
-
-    // Export functionality
-    document.getElementById('exportBtn').addEventListener('click', function() {
-        const table = document.getElementById('trainingTable');
-        let csv = [];
-        
-        // Get headers
-        const headers = Array.from(table.querySelectorAll('thead th')).map(th => 
-            `"${th.textContent.trim()}"`
-        );
-        csv.push(headers.join(','));
-        
-        // Get data rows
-        filteredData.forEach(item => {
-            const row = [
-                `"${item.employee}"`,
-                `"${item.course}"`,
-                `"${item.category}"`,
-                `"${item.completionDate}"`,
-                `"${item.duration}"`,
-                `"${item.score}%"`,
-                `"${item.certificate ? 'Available' : 'N/A'}"`,
-                `"${item.expiryDate || 'No Expiry'}"`
-            ];
-            csv.push(row.join(','));
-        });
-
-        const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "training_history_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', init);
-</script>
-
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
-
-<script>
-document.getElementById("exportBtn").addEventListener("click", function () {
-    const table = document.getElementById("trainingTable");
-    let csv = [];
-    for (let row of table.rows) {
-        let rowData = [];
-        for (let cell of row.cells) {
-            let text = cell.innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/,/g, "");
-            rowData.push('"' + text + '"');
-        }
-        csv.push(rowData.join(","));
-    }
-    const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "training_history_report.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-});
-</script>
 
 {% endblock %}
