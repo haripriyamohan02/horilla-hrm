@@ -221,7 +221,6 @@ def valid_import_file_headers(data_frame):
 
     required_keys = [
         "Badge ID",
-        "Employee TRL ID",
         "First Name",
         "Last Name",
         "Phone",
@@ -265,7 +264,6 @@ def process_employee_records(data_frame):
         )
     )
     existing_companies = frozenset(Company.objects.values_list("company", flat=True))
-    existing_trl_ids = frozenset(Employee.objects.values_list("employee_trl_id", flat=True))
     success_list, error_list = [], []
     employee_dicts = data_frame.to_dict("records")
 
@@ -284,7 +282,6 @@ def process_employee_records(data_frame):
         raw_phone = emp.get("Phone", "")
         phone = normalize_phone(raw_phone)
         badge_id = clean_badge_id(emp.get("Badge ID"))
-        employee_trl_id = emp.get("Employee TRL ID", "").strip()
         first_name = convert_nan("First Name", emp)
         last_name = convert_nan("Last Name", emp)
         gender = str(emp.get("Gender") or "").strip().lower()
@@ -366,18 +363,6 @@ def process_employee_records(data_frame):
             errors["Company Error"] = f"Company '{company}' does not exist."
             save = False
 
-        # Employee TRL ID validation
-        if not employee_trl_id:
-            errors["Employee TRL ID Error"] = "Employee TRL ID cannot be empty."
-            save = False
-        elif employee_trl_id in existing_trl_ids:
-            errors["Employee TRL ID Error"] = "An employee with this TRL ID already exists."
-            save = False
-        else:
-            emp["Employee TRL ID"] = employee_trl_id
-            existing_trl_ids = set(existing_trl_ids)
-            existing_trl_ids.add(employee_trl_id)
-
         # Salary validation
         if basic_salary not in [None, ""]:
             try:
@@ -404,7 +389,6 @@ def process_employee_records(data_frame):
             emp["Phone"] = phone
             emp["Date Joining"] = joining_date
             emp["Contract End Date"] = contract_end_date
-            emp["Employee TRL ID"] = employee_trl_id
             success_list.append(emp)
             created_count += 1
         else:
@@ -479,7 +463,6 @@ def bulk_create_employee_import(success_lists):
         Employee(
             employee_user_id=existing_users[row["Email"]],
             badge_id=row["Badge ID"],
-            employee_trl_id=row["Employee TRL ID"],
             employee_first_name=convert_nan("First Name", row),
             employee_last_name=convert_nan("Last Name", row),
             email=row["Email"],
