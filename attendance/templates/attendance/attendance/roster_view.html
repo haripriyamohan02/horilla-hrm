@@ -117,6 +117,9 @@
 
         .tab-nav {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
             background: #fafbfc;
             border-bottom: 1px solid #e5e7eb;
             flex-shrink: 0;
@@ -327,6 +330,13 @@
             color: #009688;
         }
 
+        .tab-header
+        {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
         .empty-state {
             text-align: center;
             color: #6b7280;
@@ -413,8 +423,11 @@
         <!-- Tabs -->
         <div class="tabs">
             <div class="tab-nav">
-                <button class="tab-btn active" data-target="roster">Roster Overview</button>
+                <div class="tab-header" data-target="roster" >Roster Overview</div>
                 <!-- <button class="tab-btn" data-target="assign">Shift Assignment</button> -->
+                <div>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search employee by name..." style="max-width: 300px;">
+                </div>
             </div>
 
             <div class="tab-content">
@@ -523,18 +536,21 @@
                 document.getElementById('weekShifts').textContent = weekShifts;
             }
 
-            function renderRoster() {
+            function renderRoster(filterText = "") {
                 const tbody = document.getElementById("rosterTableBody");
                 tbody.innerHTML = "";
+                const filteredData = rosterData
+                    .filter(item => item.employee.toLowerCase().includes(filterText.toLowerCase()))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
                 
-                if (rosterData.length === 0) {
+                if (filteredData.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No roster data available</td></tr>';
                     return;
                 }
 
-                rosterData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                rosterData.forEach((item) => {
+                filteredData.forEach((item) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td style="font-weight: 500;">${item.employee}</td>
@@ -548,6 +564,11 @@
             }
 
             renderRoster();
+
+            document.getElementById("searchInput").addEventListener("input", function () {
+                const searchValue = this.value.trim();
+                renderRoster(searchValue);
+            });
 
             // Tab switching
             document.querySelectorAll(".tab-btn").forEach((btn) => {
