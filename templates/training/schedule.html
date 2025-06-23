@@ -3,412 +3,1047 @@
 {% load i18n %}
 
 {% block content %}
-<div class="oh-card" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin: 6px; overflow: hidden;">
-    <div class="oh-card__header" style="padding: 15px 18px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; justify-content: space-between; align-items: center;">
-        <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">{% trans "Training Schedule" %}</h4>
-        <div class="oh-card__actions">
-            <button onclick="openCreateTrainingModal()" class="oh-btn oh-btn--create" style="background: #e53e3e; border: none; color: #ffffff; padding: 8px 16px; border-radius: 1px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c53030'" onmouseout="this.style.background='#e53e3e'">
-                <span style="font-size: 16px; font-weight: 400;">+</span>
-                {% trans "Create" %}
-            </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            height: 60vh;
+            overflow: hidden;
+        }
+        
+        .main-container {
+            height: 92vh;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            gap: 10px;
+        }
+        
+        .oh-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .oh-card__header {
+            padding: 15px 18px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .oh-card__title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .oh-btn {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .oh-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .oh-btn--create {
+            background: #e53e3e;
+            border: none;
+            color: #ffffff;
+        }
+        
+        .oh-btn--create:hover {
+            background: #c53030;
+        }
+        
+        .oh-card__body {
+            /* padding: 14px; */
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .oh-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+        }
+        
+        .oh-summary-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .oh-summary-item__label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .oh-summary-item__value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .oh-filter-section {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .oh-filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .oh-filter-group--sm {
+            min-width: 150px;
+        }
+        
+        .oh-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .oh-select, .oh-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            background: #ffffff;
+        }
+        
+        .table-container {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+            max-height: 400px;
+        }
+        
+        .table-scroll {
+            flex: 1;
+            overflow: auto;
+            min-height: 0;
+        }
+        
+        .oh-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 800px;
+        }
+        
+        .oh-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f9fafb;
+        }
+        
+        .oh-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .oh-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .oh-table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .course-name {
+            color: #111827;
+            font-weight: 500;
+        }
+        
+        .instructor-name {
+            color: #6b7280;
+        }
+        
+        .date-time-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .date-primary {
+            color: #111827;
+            font-weight: 500;
+        }
+        
+        .time-secondary {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .duration-text {
+            color: #6b7280;
+        }
+        
+        .enrolled-count {
+            color: #111827;
+            font-weight: 500;
+        }
+        
+        .capacity-text {
+            color: #6b7280;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-scheduled {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-completed {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: color 0.2s;
+        }
+        
+        .action-btn--edit {
+            color: #3b82f6;
+        }
+        
+        .action-btn--edit:hover {
+            color: #1d4ed8;
+        }
+        
+        .action-btn--view {
+            color: #6b7280;
+        }
+        
+        .action-btn--view:hover {
+            color: #374151;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 900px;
+            max-height: 95vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-header {
+            padding: 14px 22px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 8px;
+            line-height: 1;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 22px;
+        }
+        
+        .form-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            margin: 0 0 24px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .required {
+            color: #dc2626;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            background: #ffffff;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #dc2626;
+        }
+        
+        .form-actions {
+            padding-top: 14px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+        }
+        
+        .btn-cancel {
+            background: #ffffff;
+            border: 2px solid #d1d5db;
+            color: #374151;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-cancel:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .btn-submit {
+            background: #dc2626;
+            border: none;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-submit:hover {
+            background: #b91c1c;
+        }
+        
+        .plus-icon {
+            font-size: 16px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="oh-card">
+            <div class="oh-card__header">
+                <h4 class="oh-card__title">{% trans "Training Schedule" %}</h4>
+                <div class="oh-card__actions">
+                    <button onclick="openCreateTrainingModal()" class="oh-btn oh-btn--create">
+                        <span class="plus-icon">+</span>
+                        {% trans "Create" %}
+                    </button>
+                </div>
+            </div>
+            <div class="oh-card__body">
+                <!-- Summary Stats -->
+                <div class="oh-summary-grid">
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">{% trans "Upcoming Sessions" %}</span>
+                        <span class="oh-summary-item__value" id="upcomingSessions">12</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">{% trans "This Week" %}</span>
+                        <span class="oh-summary-item__value" id="thisWeek">5</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">{% trans "Enrolled Trainees" %}</span>
+                        <span class="oh-summary-item__value" id="enrolledTrainees">48</span>
+                    </div>
+                    <div class="oh-summary-item">
+                        <span class="oh-summary-item__label">{% trans "Available Slots" %}</span>
+                        <span class="oh-summary-item__value" id="availableSlots">23</span>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="oh-filter-section">
+                    <div class="oh-filter-group">
+                        <label class="oh-label">{% trans "Date Range" %}</label>
+                        <select class="oh-select" id="dateRangeFilter">
+                            <option value="">{% trans "Next 7 Days" %}</option>
+                            <option value="30">{% trans "Next 30 Days" %}</option>
+                            <option value="month">{% trans "This Month" %}</option>
+                            <option value="next_month">{% trans "Next Month" %}</option>
+                        </select>
+                    </div>
+                    <div class="oh-filter-group">
+                        <label class="oh-label">{% trans "Course Category" %}</label>
+                        <select class="oh-select" id="categoryFilter">
+                            <option value="">{% trans "All Categories" %}</option>
+                            <option value="Safety">Safety</option>
+                            <option value="Leadership">Leadership</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Compliance">Compliance</option>
+                        </select>
+                    </div>
+                    <div class="oh-filter-group oh-filter-group--sm">
+                        <label class="oh-label">{% trans "Status" %}</label>
+                        <select class="oh-select" id="statusFilter">
+                            <option value="">{% trans "All Status" %}</option>
+                            <option value="Scheduled">{% trans "Scheduled" %}</option>
+                            <option value="In Progress">{% trans "In Progress" %}</option>
+                            <option value="Completed">{% trans "Completed" %}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Training Schedule Table -->
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table class="oh-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Course Name" %}</th>
+                                    <th>{% trans "Instructor" %}</th>
+                                    <th>{% trans "Date & Time" %}</th>
+                                    <th>{% trans "Duration" %}</th>
+                                    <th>{% trans "Enrolled" %}</th>
+                                    <th>{% trans "Capacity" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainingTableBody">
+                                <tr data-category="Safety" data-status="Scheduled" data-date="2024-01-25">
+                                    <td class="course-name">Workplace Safety Training</td>
+                                    <td class="instructor-name">Dr. Sarah Wilson</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jan 25, 2024</div>
+                                            <div class="time-secondary">09:00 - 17:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">8 hours</td>
+                                    <td class="enrolled-count">12</td>
+                                    <td class="capacity-text">15</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
+                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                    </td>
+                                </tr>
+                                <tr data-category="Leadership" data-status="In Progress" data-date="2024-01-26">
+                                    <td class="course-name">Leadership Development Program</td>
+                                    <td class="instructor-name">Michael Chen</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jan 26, 2024</div>
+                                            <div class="time-secondary">10:00 - 16:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">6 hours</td>
+                                    <td class="enrolled-count">8</td>
+                                    <td class="capacity-text">12</td>
+                                    <td>
+                                        <span class="status-badge status-progress">{% trans "In Progress" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
+                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                    </td>
+                                </tr>
+                                <tr data-category="Compliance" data-status="Scheduled" data-date="2024-01-28">
+                                    <td class="course-name">Data Privacy & Security</td>
+                                    <td class="instructor-name">Jennifer Adams</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jan 28, 2024</div>
+                                            <div class="time-secondary">13:00 - 17:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">4 hours</td>
+                                    <td class="enrolled-count">15</td>
+                                    <td class="capacity-text">20</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
+                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                    </td>
+                                </tr>
+                                <tr data-category="Technical" data-status="Completed" data-date="2024-02-15">
+                                    <td class="course-name">Advanced Technical Skills</td>
+                                    <td class="instructor-name">David Kumar</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Feb 15, 2024</div>
+                                            <div class="time-secondary">09:00 - 17:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">8 hours</td>
+                                    <td class="enrolled-count">10</td>
+                                    <td class="capacity-text">12</td>
+                                    <td>
+                                        <span class="status-badge status-completed">{% trans "Completed" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
+                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                    </td>
+                                </tr>
+                                <tr data-category="Safety" data-status="Scheduled" data-date="2024-03-05">
+                                    <td class="course-name">Emergency Response Training</td>
+                                    <td class="instructor-name">Lisa Rodriguez</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Mar 05, 2024</div>
+                                            <div class="time-secondary">08:00 - 12:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">4 hours</td>
+                                    <td class="enrolled-count">18</td>
+                                    <td class="capacity-text">25</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
+                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="oh-card__body" style="padding: 14px;">
-        <!-- Summary Stats -->
-        <div class="oh-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Upcoming Sessions" %}</span>
-                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">12</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "This Week" %}</span>
-                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">5</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Enrolled Trainees" %}</span>
-                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">48</span>
-            </div>
-            <div class="oh-summary-item" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; text-align: center;">
-                <span class="oh-summary-item__label" style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">{% trans "Available Slots" %}</span>
-                <span class="oh-summary-item__value" style="font-size: 24px; font-weight: 700; color: #111827;">23</span>
-            </div>
-        </div>
 
-        <!-- Filter Section -->
-        <div class="oh-filter-section" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 24px; display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Date Range" %}</label>
-                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option>{% trans "Next 7 Days" %}</option>
-                    <option>{% trans "Next 30 Days" %}</option>
-                    <option>{% trans "This Month" %}</option>
-                    <option>{% trans "Next Month" %}</option>
-                </select>
+    <!-- Create Training Modal -->
+    <div id="trainingScheduleModal" class="modal-overlay">
+        <div class="modal-container">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3 class="modal-title">{% trans "Create Training Schedule" %}</h3>
+                <button onclick="closeModal()" class="modal-close">×</button>
             </div>
-            <div class="oh-filter-group" style="flex: 1; min-width: 200px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Course Category" %}</label>
-                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option>{% trans "All Categories" %}</option>
-                    <option>Safety</option>
-                    <option>Leadership</option>
-                    <option>Technical</option>
-                    <option>Compliance</option>
-                </select>
-            </div>
-            <div class="oh-filter-group" style="flex: 1; min-width: 150px;">
-                <label class="oh-label" style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px;">{% trans "Status" %}</label>
-                <select class="oh-select oh-select--sm" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background: #ffffff;">
-                    <option>{% trans "All Status" %}</option>
-                    <option>{% trans "Scheduled" %}</option>
-                    <option>{% trans "In Progress" %}</option>
-                    <option>{% trans "Completed" %}</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- Training Schedule Table -->
-        <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 6px;">
-            <table class="oh-table" style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 800px;">
-                <thead>
-                    <tr style="background: #f9fafb;">
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Course Name" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Instructor" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Date & Time" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Duration" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Enrolled" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Capacity" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Status" %}</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb;">{% trans "Actions" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Workplace Safety Training</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">Dr. Sarah Wilson</td>
-                        <td style="padding: 12px 16px;">
-                            <div>
-                                <div style="color: #111827; font-weight: 500;">Jan 25, 2024</div>
-                                <div style="color: #6b7280; font-size: 12px;">09:00 - 17:00</div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="trainingScheduleForm" method="post" action="{% url 'create-training-schedule' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Course Information Section -->
+                    <div class="form-section">
+                        <h4 class="section-title">{% trans "Course Information" %}</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Course Name" %} <span class="required">*</span>
+                                </label>
+                                <input type="text" name="course_name" required class="form-input" placeholder="{% trans 'Enter course name' %}">
                             </div>
-                        </td>
-                        <td style="padding: 12px 16px; color: #6b7280;">8 hours</td>
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">12</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">15</td>
-                        <td style="padding: 12px 16px;">
-                            <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Scheduled" %}</span>
-                        </td>
-                        <td style="padding: 12px 16px;">
-                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
-                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Leadership Development Program</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">Michael Chen</td>
-                        <td style="padding: 12px 16px;">
-                            <div>
-                                <div style="color: #111827; font-weight: 500;">Jan 26, 2024</div>
-                                <div style="color: #6b7280; font-size: 12px;">10:00 - 16:00</div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Course Category" %} <span class="required">*</span>
+                                </label>
+                                <select name="course_category" required class="form-select">
+                                    <option value="">{% trans "Select Category" %}</option>
+                                    <option value="safety">{% trans "Safety" %}</option>
+                                    <option value="leadership">{% trans "Leadership" %}</option>
+                                    <option value="technical">{% trans "Technical" %}</option>
+                                    <option value="compliance">{% trans "Compliance" %}</option>
+                                    <option value="soft_skills">{% trans "Soft Skills" %}</option>
+                                    <option value="management">{% trans "Management" %}</option>
+                                </select>
                             </div>
-                        </td>
-                        <td style="padding: 12px 16px; color: #6b7280;">6 hours</td>
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">8</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">12</td>
-                        <td style="padding: 12px 16px;">
-                            <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "In Progress" %}</span>
-                        </td>
-                        <td style="padding: 12px 16px;">
-                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
-                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">Data Privacy & Security</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">Jennifer Adams</td>
-                        <td style="padding: 12px 16px;">
-                            <div>
-                                <div style="color: #111827; font-weight: 500;">Jan 28, 2024</div>
-                                <div style="color: #6b7280; font-size: 12px;">13:00 - 17:00</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">{% trans "Course Description" %}</label>
+                            <textarea name="course_description" rows="4" class="form-textarea" placeholder="{% trans 'Enter course description and objectives' %}"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Information Section -->
+                    <div class="form-section">
+                        <h4 class="section-title">{% trans "Schedule Information" %}</h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Training Date" %} <span class="required">*</span>
+                                </label>
+                                <input type="date" name="training_date" required class="form-input">
                             </div>
-                        </td>
-                        <td style="padding: 12px 16px; color: #6b7280;">4 hours</td>
-                        <td style="padding: 12px 16px; color: #111827; font-weight: 500;">15</td>
-                        <td style="padding: 12px 16px; color: #6b7280;">20</td>
-                        <td style="padding: 12px 16px;">
-                            <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{% trans "Scheduled" %}</span>
-                        </td>
-                        <td style="padding: 12px 16px;">
-                            <button style="background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; margin-right: 8px;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'">{% trans "Edit" %}</button>
-                            <button style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">{% trans "View" %}</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Create Training Modal -->
-<div id="trainingScheduleModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; box-sizing: border-box;">
-    <div style="background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; position: relative;">
-        <!-- Modal Header -->
-        <div style="padding: 14px 22px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; border-radius: 12px 12px 0 0; position: sticky; top: 0; z-index: 10;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; font-size: 24px; font-weight: 700; color: #111827;">{% trans "Create Training Schedule" %}</h3>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 28px; color: #6b7280; cursor: pointer; padding: 8px; line-height: 1; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='#f3f4f6'; this.style.color='#374151'" onmouseout="this.style.background='none'; this.style.color='#6b7280'">×</button>
-            </div>
-        </div>
-
-        <!-- Modal Body -->
-        <div style="padding: 22px;">
-            <form id="trainingScheduleForm" method="post" action="{% url 'create-training-schedule' %}">
-                {% csrf_token %}
-                
-                <!-- Course Information Section -->
-                <div style="margin-bottom: 40px;">
-                    <h4 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">{% trans "Course Information" %}</h4>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Course Name" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <input type="text" name="course_name" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Enter course name' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Duration" %} <span class="required">*</span>
+                                </label>
+                                <select name="duration" required class="form-select">
+                                    <option value="">{% trans "Select Duration" %}</option>
+                                    <option value="2">{% trans "2 hours" %}</option>
+                                    <option value="4">{% trans "4 hours" %}</option>
+                                    <option value="6">{% trans "6 hours" %}</option>
+                                    <option value="8">{% trans "8 hours" %}</option>
+                                    <option value="16">{% trans "2 days (16 hours)" %}</option>
+                                    <option value="24">{% trans "3 days (24 hours)" %}</option>
+                                </select>
+                            </div>
                         </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Start Time" %} <span class="required">*</span>
+                                </label>
+                                <input type="time" name="start_time" required class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "End Time" %} <span class="required">*</span>
+                                </label>
+                                <input type="time" name="end_time" required class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                {% trans "Training Location" %} <span class="required">*</span>
+                            </label>
+                            <input type="text" name="location" required class="form-input" placeholder="{% trans 'Enter training venue or room' %}">
+                        </div>
+                    </div>
+
+                    <!-- Instructor & Capacity Section -->
+                    <div class="form-section">
+                        <h4 class="section-title">{% trans "Instructor & Capacity" %}</h4>
                         
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Course Category" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <select name="course_category" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                                <option value="">{% trans "Select Category" %}</option>
-                                <option value="safety">{% trans "Safety" %}</option>
-                                <option value="leadership">{% trans "Leadership" %}</option>
-                                <option value="technical">{% trans "Technical" %}</option>
-                                <option value="compliance">{% trans "Compliance" %}</option>
-                                <option value="soft_skills">{% trans "Soft Skills" %}</option>
-                                <option value="management">{% trans "Management" %}</option>
-                            </select>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Instructor" %} <span class="required">*</span>
+                                </label>
+                                <select name="instructor" required class="form-select">
+                                    <option value="">{% trans "Select Instructor" %}</option>
+                                    <option value="dr_sarah_wilson">Dr. Sarah Wilson</option>
+                                    <option value="michael_chen">Michael Chen</option>
+                                    <option value="jennifer_adams">Jennifer Adams</option>
+                                    <option value="david_kumar">David Kumar</option>
+                                    <option value="lisa_rodriguez">Lisa Rodriguez</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Maximum Capacity" %} <span class="required">*</span>
+                                </label>
+                                <input type="number" name="max_capacity" required min="1" max="100" class="form-input" placeholder="{% trans 'Maximum number of trainees' %}">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">{% trans "Prerequisites" %}</label>
+                                <textarea name="prerequisites" rows="3" class="form-textarea" placeholder="{% trans 'Any required qualifications or prior training' %}"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{% trans "Training Materials" %}</label>
+                                <textarea name="materials" rows="3" class="form-textarea" placeholder="{% trans 'Required materials, handouts, or equipment' %}"></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 24px;">
-                        <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                            {% trans "Course Description" %}
-                        </label>
-                        <textarea name="course_description" rows="4" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; resize: vertical; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Enter course description and objectives' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'"></textarea>
-                    </div>
-                </div>
-
-                <!-- Schedule Information Section -->
-                <div style="margin-bottom: 40px;">
-                    <h4 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">{% trans "Schedule Information" %}</h4>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Training Date" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <input type="date" name="training_date" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
+                    <!-- Additional Settings Section -->
+                    <div class="form-section">
+                        <h4 class="section-title">{% trans "Additional Settings" %}</h4>
                         
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Duration" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <select name="duration" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                                <option value="">{% trans "Select Duration" %}</option>
-                                <option value="2">{% trans "2 hours" %}</option>
-                                <option value="4">{% trans "4 hours" %}</option>
-                                <option value="6">{% trans "6 hours" %}</option>
-                                <option value="8">{% trans "8 hours" %}</option>
-                                <option value="16">{% trans "2 days (16 hours)" %}</option>
-                                <option value="24">{% trans "3 days (24 hours)" %}</option>
-                            </select>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">{% trans "Registration Deadline" %}</label>
+                                <input type="date" name="registration_deadline" class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{% trans "Training Cost" %}</label>
+                                <input type="number" name="cost" min="0" step="0.01" class="form-input" placeholder="{% trans 'Cost per trainee (optional)' %}">
+                            </div>
                         </div>
-                    </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Start Time" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <input type="time" name="start_time" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "End Time" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <input type="time" name="end_time" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 24px;">
-                        <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                            {% trans "Training Location" %} <span style="color: #dc2626;">*</span>
-                        </label>
-                        <input type="text" name="location" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Enter training venue or room' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                    </div>
-                </div>
-
-                <!-- Instructor & Capacity Section -->
-                <div style="margin-bottom: 40px;">
-                    <h4 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">{% trans "Instructor & Capacity" %}</h4>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Instructor" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <select name="instructor" required style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                                <option value="">{% trans "Select Instructor" %}</option>
-                                <option value="dr_sarah_wilson">Dr. Sarah Wilson</option>
-                                <option value="michael_chen">Michael Chen</option>
-                                <option value="jennifer_adams">Jennifer Adams</option>
-                                <option value="david_kumar">David Kumar</option>
-                                <option value="lisa_rodriguez">Lisa Rodriguez</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Maximum Capacity" %} <span style="color: #dc2626;">*</span>
-                            </label>
-                            <input type="number" name="max_capacity" required min="1" max="100" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Maximum number of trainees' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Prerequisites" %}
-                            </label>
-                            <textarea name="prerequisites" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; resize: vertical; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Any required qualifications or prior training' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'"></textarea>
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Training Materials" %}
-                            </label>
-                            <textarea name="materials" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; resize: vertical; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Required materials, handouts, or equipment' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Settings Section -->
-                <div style="margin-bottom: 40px;">
-                    <h4 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #111827; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">{% trans "Additional Settings" %}</h4>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Registration Deadline" %}
-                            </label>
-                            <input type="date" name="registration_deadline" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                {% trans "Training Cost" %}
-                            </label>
-                            <input type="number" name="cost" min="0" step="0.01" style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #111827; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;" placeholder="{% trans 'Cost per trainee (optional)' %}" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 24px;">
-                        <div style="display: flex; gap: 32px; flex-wrap: wrap;">
-                            <label style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #374151; cursor: pointer; font-weight: 500;">
-                                <input type="checkbox" name="certification_provided" value="1" style="width: 18px; height: 18px; accent-color: #dc2626;">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="certification_provided" value="1" class="checkbox-input">
                                 {% trans "Certification Provided" %}
                             </label>
                             
-                            <label style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #374151; cursor: pointer; font-weight: 500;">
-                                <input type="checkbox" name="mandatory_training" value="1" style="width: 18px; height: 18px; accent-color: #dc2626;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="mandatory_training" value="1" class="checkbox-input">
                                 {% trans "Mandatory Training" %}
                             </label>
                             
-                            <label style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #374151; cursor: pointer; font-weight: 500;">
-                                <input type="checkbox" name="recurring_training" value="1" style="width: 18px; height: 18px; accent-color: #dc2626;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="recurring_training" value="1" class="checkbox-input">
                                 {% trans "Recurring Training" %}
                             </label>
                         </div>
                     </div>
-                </div>
 
-                <!-- Form Actions -->
-                <div style="padding-top: 14px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 16px;">
-                    <button type="button" onclick="closeModal()" style="background: #ffffff; border: 2px solid #d1d5db; color: #374151; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#9ca3af'" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#d1d5db'">
-                        {% trans "Cancel" %}
-                    </button>
-                    <button type="submit" style="background: #dc2626; border: none; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
-                        {% trans "Create Training Schedule" %}
-                    </button>
-                </div>
-            </form>
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" onclick="closeModal()" class="btn-cancel">
+                            {% trans "Cancel" %}
+                        </button>
+                        <button type="submit" class="btn-submit">
+                            {% trans "Create Training Schedule" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-function openCreateTrainingModal() {
-    const modal = document.getElementById('trainingScheduleModal');
-    modal.style.display = 'flex';
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    const modal = document.getElementById('trainingScheduleModal');
-    modal.style.display = 'none';
-    // Restore body scroll
-    document.body.style.overflow = 'auto';
-}
-
-// Close modal when clicking outside
-document.getElementById('trainingScheduleModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeModal();
-    }
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-    }
-});
-
-// Form validation and submission
-document.getElementById('trainingScheduleForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    <script>
+    // Store original table data
+    let originalTableData = [];
     
-    // Basic validation
-    const startTime = document.querySelector('input[name="start_time"]').value;
-    const endTime = document.querySelector('input[name="end_time"]').value;
-    
-    if (startTime && endTime && startTime >= endTime) {
-        alert('{% trans "End time must be after start time" %}');
-        return;
-    }
-    
-    // Submit the form
-    this.submit();
-});
-
-// Auto-calculate end time based on start time and duration
-document.querySelector('select[name="duration"]').addEventListener('change', function() {
-    const startTimeInput = document.querySelector('input[name="start_time"]');
-    const endTimeInput = document.querySelector('input[name="end_time"]');
-    
-    if (startTimeInput.value && this.value) {
-        const startTime = new Date('2000-01-01 ' + startTimeInput.value);
-        const duration = parseInt(this.value);
-        const endTime = new Date(startTime.getTime() + (duration * 60 * 60 * 1000));
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Store original table rows
+        const rows = document.querySelectorAll('#trainingTableBody tr');
+        rows.forEach(row => {
+            originalTableData.push(row.cloneNode(true));
+        });
         
-        const endTimeString = endTime.toTimeString().slice(0, 5);
-        endTimeInput.value = endTimeString;
+        // Add event listeners to filters
+        document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    });
+
+    function applyFilters() {
+        const dateRange = document.getElementById('dateRangeFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        
+        const tableBody = document.getElementById('trainingTableBody');
+        const currentDate = new Date();
+        
+        // Clear table
+        tableBody.innerHTML = '';
+        
+        // Filter rows
+        let filteredRows = originalTableData.filter(row => {
+            const rowData = row.cloneNode(true);
+            const rowCategory = rowData.getAttribute('data-category') || '';
+            const rowStatus = rowData.getAttribute('data-status') || '';
+            const rowDate = new Date(rowData.getAttribute('data-date'));
+            
+            // Category filter
+            if (category && rowCategory !== category) {
+                return false;
+            }
+            
+            // Status filter
+            if (status && rowStatus !== status) {
+                return false;
+            }
+            
+            // Date range filter
+            if (dateRange) {
+                const daysDiff = Math.ceil((rowDate - currentDate) / (1000 * 60 * 60 * 24));
+                
+                switch(dateRange) {
+                    case '30':
+                        if (daysDiff < 0 || daysDiff > 30) return false;
+                        break;
+                    case 'month':
+                        if (rowDate.getMonth() !== currentDate.getMonth() || 
+                            rowDate.getFullYear() !== currentDate.getFullYear()) return false;
+                        break;
+                    case 'next_month':
+                        const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+                        if (rowDate.getMonth() !== nextMonth.getMonth() || 
+                            rowDate.getFullYear() !== nextMonth.getFullYear()) return false;
+                        break;
+                    default: // Next 7 days
+                        if (daysDiff < 0 || daysDiff > 7) return false;
+                        break;
+                }
+            }
+            
+            return true;
+        });
+        
+        // Add filtered rows to table
+        filteredRows.forEach(row => {
+            tableBody.appendChild(row.cloneNode(true));
+        });
+        
+        // Update summary stats
+        updateSummaryStats(filteredRows);
     }
-});
-</script>
+
+    function updateSummaryStats(filteredRows) {
+        let upcomingSessions = 0;
+        let thisWeekSessions = 0;
+        let totalEnrolled = 0;
+        let totalAvailable = 0;
+        
+        const currentDate = new Date();
+        const oneWeekFromNow = new Date(currentDate.getTime() + (7 * 24 * 60 * 60 * 1000));
+        
+        filteredRows.forEach(row => {
+            const rowDate = new Date(row.getAttribute('data-date'));
+            const enrolled = parseInt(row.querySelector('.enrolled-count').textContent);
+            const capacity = parseInt(row.querySelector('.capacity-text').textContent);
+            
+            // Count upcoming sessions
+            if (rowDate > currentDate) {
+                upcomingSessions++;
+            }
+            
+            // Count this week sessions
+            if (rowDate >= currentDate && rowDate <= oneWeekFromNow) {
+                thisWeekSessions++;
+            }
+            
+            totalEnrolled += enrolled;
+            totalAvailable += (capacity - enrolled);
+        });
+        
+        document.getElementById('upcomingSessions').textContent = upcomingSessions;
+        document.getElementById('thisWeek').textContent = thisWeekSessions;
+        document.getElementById('enrolledTrainees').textContent = totalEnrolled;
+        document.getElementById('availableSlots').textContent = totalAvailable;
+    }
+
+    function openCreateTrainingModal() {
+        const modal = document.getElementById('trainingScheduleModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('trainingScheduleModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('trainingScheduleModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // Form validation and submission
+    document.getElementById('trainingScheduleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const startTime = document.querySelector('input[name="start_time"]').value;
+        const endTime = document.querySelector('input[name="end_time"]').value;
+        
+        if (startTime && endTime && startTime >= endTime) {
+            alert('{% trans "End time must be after start time" %}');
+            return;
+        }
+        
+        this.submit();
+    });
+
+    // Auto-calculate end time based on start time and duration
+    document.querySelector('select[name="duration"]').addEventListener('change', function() {
+        const startTimeInput = document.querySelector('input[name="start_time"]');
+        const endTimeInput = document.querySelector('input[name="end_time"]');
+        
+        if (startTimeInput.value && this.value) {
+            const startTime = new Date('2000-01-01 ' + startTimeInput.value);
+            const duration = parseInt(this.value);
+            const endTime = new Date(startTime.getTime() + (duration * 60 * 60 * 1000));
+            
+            const endTimeString = endTime.toTimeString().slice(0, 5);
+            endTimeInput.value = endTimeString;
+        }
+    });
+    </script>
+</body>
+</html>
 {% endblock %}
