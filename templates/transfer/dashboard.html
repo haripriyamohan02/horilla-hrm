@@ -1,0 +1,407 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<style>
+    .summary-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-left-width: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .summary-card.total { border-left-color: #0d6efd; }
+    .summary-card.pending { border-left-color: #ffc107; }
+    .summary-card.approved { border-left-color: #198754; }
+    .summary-card.rejected { border-left-color: #dc3545; }
+
+    .summary-card.total .summary-card__icon { color: #0d6efd; }
+    .summary-card.pending .summary-card__icon { color: #ffc107; }
+    .summary-card.approved .summary-card__icon { color: #198754; }
+    .summary-card.rejected .summary-card__icon { color: #dc3545; }
+
+    .summary-card__count { font-size: 2.5rem; font-weight: bold; color: #333; }
+    .summary-card__title { font-size: 1rem; color: #777; }
+    .summary-card__icon { font-size: 2rem; opacity: 0.8; }
+</style>
+
+<div class="oh-card">
+    <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 class="oh-card__title">{% trans "Transfer & Posting" %}</h4>
+        <!-- <div class="oh-card__actions">
+             <a href="#" class="oh-btn oh-btn--sm oh-btn--primary" onclick="toggleModal('createTransferModal')">
+                 <ion-icon name="add-outline" class="mr-2"></ion-icon>
+                 {% trans "New Transfer" %}
+             </a>
+        </div> -->
+    </div>
+
+    <div class="oh-card__body">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="summary-card total">
+                    <div>
+                        <div id="total-transfers" class="summary-card__count">0</div>
+                        <div class="summary-card__title">{% trans "Total Transfers" %}</div>
+                    </div>
+                    <ion-icon name="swap-horizontal-outline" class="summary-card__icon"></ion-icon>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card pending">
+                    <div>
+                        <div id="pending-transfers" class="summary-card__count">0</div>
+                        <div class="summary-card__title">{% trans "Pending" %}</div>
+                    </div>
+                    <ion-icon name="time-outline" class="summary-card__icon"></ion-icon>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card approved">
+                    <div>
+                        <div id="approved-transfers" class="summary-card__count">0</div>
+                        <div class="summary-card__title">{% trans "Approved" %}</div>
+                    </div>
+                    <ion-icon name="checkmark-circle-outline" class="summary-card__icon"></ion-icon>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card rejected">
+                    <div>
+                        <div id="rejected-transfers" class="summary-card__count">0</div>
+                        <div class="summary-card__title">{% trans "Rejected" %}</div>
+                    </div>
+                    <ion-icon name="close-circle-outline" class="summary-card__icon"></ion-icon>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="oh-form-group" style="width: 300px;">
+                <input type="text" id="search-input" class="oh-input" placeholder="{% trans 'Search transfers...' %}">
+            </div>
+            <div class="d-flex">
+                <div class="oh-form-group mr-2">
+                    <select id="status-filter" class="oh-input" style="border: 1px solid #ced4da;">
+                        <option value="All">{% trans "All Status" %}</option>
+                        <option value="PENDING">{% trans "Pending" %}</option>
+                        <option value="APPROVED">{% trans "Approved" %}</option>
+                        <option value="REJECTED">{% trans "Rejected" %}</option>
+                    </select>
+                </div>
+                <div class="oh-form-group mr-2">
+                    <select id="type-filter" class="oh-input" style="border: 1px solid #ced4da;">
+                        <option value="All">{% trans "All Types" %}</option>
+                        <option value="DEPARTMENT">{% trans "Department" %}</option>
+                        <option value="POSITION">{% trans "Position" %}</option>
+                        <option value="LOCATION">{% trans "Location" %}</option>
+                    </select>
+                </div>
+                <a href="#" class="oh-btn oh-btn--outline-danger">
+                    <ion-icon name="download-outline" class="mr-2"></ion-icon>
+                    {% trans "Export" %}
+                </a>
+            </div>
+        </div>
+
+        <table class="oh-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Employee" %}</th>
+                    <th>{% trans "Transfer Type" %}</th>
+                    <th>{% trans "From" %}</th>
+                    <th>{% trans "To" %}</th>
+                    <th>{% trans "Request Date" %}</th>
+                    <th>{% trans "Effective Date" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody id="transfer-table-body">
+                <!-- Rows will be injected by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="oh-modal" id="detailsModal"><div class="oh-modal__dialog" id="detailsModalContent"></div></div>
+
+<!-- Issue Order Modal -->
+<div class="oh-modal" id="issueOrderModal"><div class="oh-modal__dialog" id="issueOrderModalContent"></div></div>
+
+<div class="oh-modal" id="createTransferModal">
+    <div class="oh-modal__dialog" style="max-width: 800px; width: 90%; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;">
+        <div class="oh-modal__dialog-header" style="padding: 20px 24px 16px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+            <h5 class="oh-modal__dialog-title" style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">New Transfer Request</h5>
+            <button class="oh-modal__close" onclick="toggleModal('createTransferModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+        <div class="oh-modal__dialog-body" style="padding: 24px;">
+            <form id="create-transfer-form">
+                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="employee" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Employee *</label>
+                            <input type="text" id="employee" class="oh-input" placeholder="Enter employee name" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="transfer_type" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Transfer Type *</label>
+                            <select id="transfer_type" class="oh-input" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: white; transition: border-color 0.15s ease-in-out;">
+                                <option value="">Select transfer type</option>
+                                <option value="DEPARTMENT">Department</option>
+                                <option value="POSITION">Position</option>
+                                <option value="LOCATION">Location</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="from" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">From *</label>
+                            <input type="text" id="from" class="oh-input" placeholder="Current department/position" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="to" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">To *</label>
+                            <input type="text" id="to" class="oh-input" placeholder="New department/position" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="request_date" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Request Date *</label>
+                            <input type="date" id="request_date" class="oh-input" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="effective_date" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Effective Date *</label>
+                            <input type="date" id="effective_date" class="oh-input" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                        </div>
+                    </div>
+                </div>
+                <div class="oh-form-group" style="margin-bottom: 0;">
+                    <label for="reason" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Reason for Transfer</label>
+                    <textarea id="reason" class="oh-input" rows="3" placeholder="Enter reason for transfer (optional)" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; resize: vertical; min-height: 80px; transition: border-color 0.15s ease-in-out;"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="oh-modal__dialog-footer" style="padding: 16px 24px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="oh-btn oh-btn--secondary" onclick="toggleModal('createTransferModal')" style="padding: 10px 20px; border: 1px solid #6c757d; background-color: transparent; color: #6c757d; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s ease-in-out;">Cancel</button>
+            <button class="oh-btn oh-btn--danger" id="save-transfer-btn" style="padding: 10px 20px; border: 1px solid #dc3545; background-color: #dc3545; color: white; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s ease-in-out;">Save Transfer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add focus styles
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.oh-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.borderColor = '#007bff';
+            this.style.boxShadow = '0 0 0 0.2rem rgba(0,123,255,0.25)';
+        });
+        input.addEventListener('blur', function() {
+            this.style.borderColor = '#ced4da';
+            this.style.boxShadow = 'none';
+        });
+    });
+    
+    const buttons = document.querySelectorAll('.oh-btn');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            if (this.classList.contains('oh-btn--danger')) {
+                this.style.backgroundColor = '#c82333';
+                this.style.borderColor = '#bd2130';
+            } else {
+                this.style.backgroundColor = '#6c757d';
+                this.style.color = 'white';
+            }
+        });
+        button.addEventListener('mouseleave', function() {
+            if (this.classList.contains('oh-btn--danger')) {
+                this.style.backgroundColor = '#dc3545';
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.backgroundColor = 'transparent';
+                this.style.color = '#6c757d';
+            }
+        });
+    });
+});
+</script>
+
+<a href="#" class="oh-fab oh-fab--danger" style="position: fixed; bottom: 2rem; right: 2rem;" onclick="toggleModal('createTransferModal')">
+    <ion-icon name="add-outline"></ion-icon>
+</a>
+
+<script>
+    function toggleModal(modalID) {
+        document.getElementById(modalID).classList.toggle('oh-modal--show');
+    }
+
+    let allTransfers = [];
+
+    function renderTable(transfers) {
+        const tableBody = document.getElementById('transfer-table-body');
+        tableBody.innerHTML = '';
+        transfers.forEach(t => {
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>
+                    <div class="oh-profile">
+                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(t.employee)}&background=random" class="oh-profile__image mr-2 ml-2" />
+                        <div class="oh-profile__name">${t.employee}<br/><small>${t.email}</small></div>
+                    </div>
+                </td>
+                <td data-type="${t.type}"><span class="oh-badge ${t.type === 'DEPARTMENT' ? 'oh-badge--dark' : 'oh-badge'}">${t.type}</span></td>
+                <td>${t.from}</td>
+                <td>${t.to}</td>
+                <td>${t.request_date}</td>
+                <td>${t.effective_date}</td>
+                <td data-status="${t.status}"><span class="oh-badge oh-badge--${t.status === 'PENDING' ? 'warning' : t.status === 'APPROVED' ? 'success' : 'danger'}">${t.status}</span></td>
+                <td>
+                    <div class="oh-btn-group" style="display: flex; gap: 5px;">
+                        <a href="#" class="oh-btn oh-btn--sm oh-btn--light" title="View" onclick="viewDetails(${t.id})"><ion-icon name="eye-outline"></ion-icon></a>
+                        ${t.status === 'PENDING' ? `
+                        <a href="#" class="oh-btn oh-btn--sm oh-btn--success" title="Approve" onclick="approveTransfer(${t.id})"><ion-icon name="checkmark-outline"></ion-icon></a>
+                        <a href="#" class="oh-btn oh-btn--sm oh-btn--danger" title="Reject" onclick="rejectTransfer(${t.id})"><ion-icon name="close-outline"></ion-icon></a>
+                        ` : ''}
+                        ${t.status === 'APPROVED' ? `
+                        <a href="#" class="oh-btn oh-btn--sm oh-btn--primary" title="Issue Order" onclick="issueOrder(${t.id})">Issue Order</a>
+                        ` : ''}
+                    </div>
+                </td>
+            `;
+        });
+        updateSummaryCounts(transfers);
+    }
+
+    function approveTransfer(transferId) {
+        updateTransferStatus(transferId, 'APPROVED');
+        filterTable();
+    }
+
+    function rejectTransfer(transferId) {
+        updateTransferStatus(transferId, 'REJECTED');
+        filterTable();
+    }
+
+    function viewDetails(transferId) {
+        const transfer = getTransferById(transferId);
+        const modalContent = document.getElementById('detailsModalContent');
+        modalContent.innerHTML = `
+            <div class="oh-modal__dialog-header">
+                <h5 class="oh-modal__dialog-title">Transfer Details</h5>
+                <button class="oh-modal__close" onclick="toggleModal('detailsModal')">&times;</button>
+            </div>
+            <div class="oh-modal__dialog-body">
+                <p><strong>Employee:</strong> ${transfer.employee}</p>
+                <p><strong>Type:</strong> ${transfer.type}</p>
+                <p><strong>From:</strong> ${transfer.from}</p>
+                <p><strong>To:</strong> ${transfer.to}</p>
+                <p><strong>Request Date:</strong> ${transfer.request_date}</p>
+                <p><strong>Effective Date:</strong> ${transfer.effective_date}</p>
+                <p><strong>Status:</strong> ${transfer.status}</p>
+            </div>
+        `;
+        toggleModal('detailsModal');
+    }
+
+    function issueOrder(transferId) {
+        const transfer = getTransferById(transferId);
+        const modalContent = document.getElementById('issueOrderModalContent');
+        modalContent.innerHTML = `
+            <div class="oh-modal__dialog-header">
+                <h5 class="oh-modal__dialog-title">Transfer Order</h5>
+                <button class="oh-modal__close" onclick="toggleModal('issueOrderModal')">&times;</button>
+            </div>
+            <div class="oh-modal__dialog-body" id="printable-order">
+                <h3 style="text-align: center; margin-bottom: 2rem;"><u>TRANSFER ORDER</u></h3>
+                <p><strong>Order No:</strong> ${transfer.id}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                <br/>
+                <p>This is to certify that <strong>${transfer.employee}</strong> is hereby transferred from <strong>${transfer.from}</strong> to 
+                <strong>${transfer.to}</strong> as a <strong>${transfer.type}</strong> transfer, with an effective date of 
+                <strong>${transfer.effective_date}</strong>.</p>
+                <br/>
+                <p>This order is issued with the approval of the competent authority.</p>
+                <br/><br/>
+                <div style="text-align: right;">
+                    <p>_________________________</p>
+                    <p><strong>Authorized Signatory</strong></p>
+                </div>
+            </div>
+            <div class="oh-modal__dialog-footer">
+                <button class="oh-btn oh-btn--primary" onclick="window.print()">Print Order</button>
+            </div>
+        `;
+        toggleModal('issueOrderModal');
+    }
+
+    function updateSummaryCounts(transfers) {
+        document.getElementById('total-transfers').textContent = transfers.length;
+        document.getElementById('pending-transfers').textContent = transfers.filter(t => t.status === 'PENDING').length;
+        document.getElementById('approved-transfers').textContent = transfers.filter(t => t.status === 'APPROVED').length;
+        document.getElementById('rejected-transfers').textContent = transfers.filter(t => t.status === 'REJECTED').length;
+    }
+
+    function filterTable() {
+        const searchQuery = document.getElementById('search-input').value.toLowerCase();
+        const statusFilter = document.getElementById('status-filter').value;
+        const typeFilter = document.getElementById('type-filter').value;
+
+        const filteredTransfers = allTransfers.filter(t => {
+            const matchesSearch = t.employee.toLowerCase().includes(searchQuery);
+            const matchesStatus = (statusFilter === 'All') || (t.status === statusFilter);
+            const matchesType = (typeFilter === 'All') || (t.type === typeFilter);
+            return matchesSearch && matchesStatus && matchesType;
+        });
+
+        renderTable(filteredTransfers);
+    }
+    
+    document.getElementById('search-input').addEventListener('keyup', filterTable);
+    document.getElementById('status-filter').addEventListener('change', filterTable);
+    document.getElementById('type-filter').addEventListener('change', filterTable);
+
+    document.getElementById('save-transfer-btn').addEventListener('click', function() {
+        const newTransfer = {
+            employee: document.getElementById('employee').value,
+            email: 'new.user@company.com', // Placeholder
+            type: document.getElementById('transfer_type').value,
+            from: document.getElementById('from').value,
+            to: document.getElementById('to').value,
+            request_date: document.getElementById('request_date').value,
+            effective_date: document.getElementById('effective_date').value,
+            status: 'PENDING',
+            reason: document.getElementById('reason').value // Placeholder
+        };
+
+        if (!newTransfer.employee) return;
+        
+        addTransfer(newTransfer);
+        allTransfers = getTransfers();
+        filterTable();
+
+        document.getElementById('create-transfer-form').reset();
+        toggleModal('createTransferModal');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        allTransfers = getTransfers();
+        filterTable();
+    });
+</script>
+{% endblock %} 
