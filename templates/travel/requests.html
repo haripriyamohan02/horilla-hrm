@@ -6,7 +6,7 @@
 <div class="oh-wrapper">
     <div class="oh-main">
         <div class="oh-main__content">
-            <div class="d-flex align-items-center justify-content-between mb-3" style="gap: 1rem;">
+            <div class="d-flex align-items-center justify-content-between mb-3 mt-4" style="gap: 1rem;">
                 <div class="d-flex align-items-center" style="gap: 0.75rem;">
                     <!-- <img src="{% static 'images/ui/ticket.png' %}" style="width: 38px; height: 38px; border-radius: 8px; background: #f5f6fa; object-fit: contain;" alt="Travel Icon"> -->
                     <h1 class="oh-main__title mb-0" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -1px;">{% trans "Travel Requests" %}</h1>
@@ -23,7 +23,7 @@
                         <ion-icon name="bar-chart-outline" class="me-1"></ion-icon>
                         {% trans "Group By" %}
                     </button>
-                    <div class="dropdown">
+                    <!-- <div class="dropdown">
                         <button class="oh-btn" type="button" data-bs-toggle="dropdown">
                             {% trans "Actions" %}
                         </button>
@@ -31,7 +31,7 @@
                             <li><a class="dropdown-item" href="#">{% trans "Export" %}</a></li>
                             <li><a class="dropdown-item" href="#">{% trans "Import" %}</a></li>
                         </ul>
-                    </div>
+                    </div> -->
                     <button class="oh-btn oh-btn--danger" data-toggle="oh-modal-toggle" data-target="#newTravelRequestModal">
                         <ion-icon name="add-outline" class="me-1"></ion-icon>
                         {% trans "Create" %}
@@ -41,7 +41,7 @@
 
             <!-- Status filters -->
             <div class="d-flex gap-3 mb-4 mt-2">
-                <button class="oh-btn oh-btn--light">{% trans "Select All Requests" %}</button>
+                <!-- <button class="oh-btn oh-btn--light">{% trans "Select All Requests" %}</button> -->
                 <div class="ms-auto d-flex gap-4">
                     <div class="d-flex align-items-center">
                         <span class="oh-dot oh-dot--warning me-2"></span>
