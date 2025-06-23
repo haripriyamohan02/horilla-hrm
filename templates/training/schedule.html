@@ -7,7 +7,7 @@
     <div class="oh-card__header" style="padding: 15px 18px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; justify-content: space-between; align-items: center;">
         <h4 class="oh-card__title" style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">{% trans "Training Schedule" %}</h4>
         <div class="oh-card__actions">
-            <button onclick="openCreateTrainingModal()" class="oh-btn oh-btn--create" style="background: #e53e3e; border: none; color: #ffffff; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c53030'" onmouseout="this.style.background='#e53e3e'">
+            <button onclick="openCreateTrainingModal()" class="oh-btn oh-btn--create" style="background: #e53e3e; border: none; color: #ffffff; padding: 8px 16px; border-radius: 1px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#c53030'" onmouseout="this.style.background='#e53e3e'">
                 <span style="font-size: 16px; font-weight: 400;">+</span>
                 {% trans "Create" %}
             </button>
@@ -160,7 +160,7 @@
         </div>
 
         <!-- Modal Body -->
-        <div style="padding: 32px;">
+        <div style="padding: 22px;">
             <form id="trainingScheduleForm" method="post" action="{% url 'create-training-schedule' %}">
                 {% csrf_token %}
                 
@@ -337,11 +337,11 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div style="padding-top: 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 16px;">
+                <div style="padding-top: 14px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 16px;">
                     <button type="button" onclick="closeModal()" style="background: #ffffff; border: 2px solid #d1d5db; color: #374151; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#9ca3af'" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#d1d5db'">
                         {% trans "Cancel" %}
                     </button>
-                    <button type="submit" style="background: #dc2626; border: none; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                    <button type="submit" style="background: #dc2626; border: none; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
                         {% trans "Create Training Schedule" %}
                     </button>
                 </div>
