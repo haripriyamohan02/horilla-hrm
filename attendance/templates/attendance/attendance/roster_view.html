@@ -5,9 +5,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roster Management</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roster Management</title>
     <style>
         * {
             margin: 0;
@@ -398,233 +398,224 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Roster Management</h1>
-        </div>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Roster Management</h1>
+  </div>
 
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalEmployees">0</div>
-                <div class="stat-label">Total Assignments</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="todayShifts">0</div>
-                <div class="stat-label">Today's Shifts</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="weekShifts">0</div>
-                <div class="stat-label">This Week</div>
-            </div>
-        </div>
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-number" id="totalEmployees">0</div>
+      <div class="stat-label">Total Assignments</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="todayShifts">0</div>
+      <div class="stat-label">Today's Shifts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="weekShifts">0</div>
+      <div class="stat-label">This Week</div>
+    </div>
+  </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab-nav">
-                <div class="tab-header" data-target="roster" >Roster Overview</div>
-                <!-- <button class="tab-btn" data-target="assign">Shift Assignment</button> -->
-                <div>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search employee by name..." style="max-width: 300px;">
-                </div>
-            </div>
-
-            <div class="tab-content">
-                <!-- Roster Tab -->
-                <div id="roster" class="tab-pane active">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Employee</th>
-                                    <th>Date</th>
-                                    <th>Shift</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rosterTableBody">
-                                <tr>
-                                    <td colspan="3" class="empty-state">Loading roster data...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Assignment Tab -->
-                <div id="assign" class="tab-pane">
-                    <div class="form-section">
-                        <h3>Assign New Shift</h3>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="shiftDate">Date</label>
-                                <input type="date" id="shiftDate" class="form-control">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="shiftSelector">Shift</label>
-                                <select id="shiftSelector" class="form-control">
-                                    <option value="">Select Shift</option>
-                                    <option value="Morning">Morning (6AM - 2PM)</option>
-                                    <option value="Evening">Evening (2PM - 10PM)</option>
-                                    <option value="Night">Night (10PM - 6AM)</option>
-                                </select>
-                            </div>
-                            
-                            <button class="btn btn-primary" id="assignBtn">Assign</button>
-                        </div>
-
-                        <div class="assignment-history">
-                            <h4>Recent Assignments</h4>
-                            <div id="assignedShifts">
-                                <div class="empty-state">No recent assignments</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab-nav">
+      <div class="tab-header" data-target="roster">Roster Overview</div>
+      <div>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search employee..." style="max-width: 300px;">
+      </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Generate more sample data to test scrolling
-            const rosterData = [];
-            const employees = [
-                "Sandhya", "Ritha", "Dinesh", "Vignesh", "Suresh",
-                "Ramesh", "Priya", "Anjali", "Karthik", "Meena",
-                "Amit", "Neha", "Rahul", "Sneha", "Vivek",
-                "Pooja", "Arjun", "Divya", "Manoj", "Kavya"
-            ];
-        
-            const shifts = ["Morning", "Evening", "Night"];
+    <div class="tab-content">
+      <!-- Roster Tab -->
+      <div id="roster" class="tab-pane active">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Date</th>
+                <th>Shift</th>
+                <th>Assigned By</th>
+                <th>Department</th>
+              </tr>
+            </thead>
+            <tbody id="rosterTableBody">
+              <tr>
+                <td colspan="5" class="empty-state">Loading roster data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-            // Generate sample data for the next 30 days
-            for (let i = 0; i < 60; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() + (i % 30));
-                const employee = employees[Math.floor(Math.random() * employees.length)];
-                const shift = shifts[Math.floor(Math.random() * shifts.length)];
-                
-                rosterData.push({
-                    employee: employee,
-                    date: date.toISOString().split('T')[0],
-                    shift: shift
-                });
-            }
+      <!-- Assignment Tab -->
+      <div id="assign" class="tab-pane">
+        <div class="form-section">
+          <h3>Assign New Shift</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="shiftDate">Date</label>
+              <input type="date" id="shiftDate" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="shiftSelector">Shift</label>
+              <select id="shiftSelector" class="form-control">
+                <option value="">Select Shift</option>
+                <option value="Morning">Morning (6AM - 2PM)</option>
+                <option value="Evening">Evening (2PM - 10PM)</option>
+                <option value="Night">Night (10PM - 6AM)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="assignBtn">Assign</button>
+          </div>
 
-            function getShiftBadgeClass(shift) {
-                return `shift-${shift.toLowerCase()}`;
-            }
+          <div class="assignment-history">
+            <h4>Recent Assignments</h4>
+            <div id="assignedShifts">
+              <div class="empty-state">No recent assignments</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-            function updateStats() {
-                const today = new Date().toISOString().split('T')[0];
-                const weekStart = new Date();
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rosterData = [];
+  const employees = [
+    "Sandhya", "Ritha", "Dinesh", "Vignesh", "Suresh",
+    "Ramesh", "Priya", "Anjali", "Karthik", "Meena",
+    "Amit", "Neha", "Rahul", "Sneha", "Vivek",
+    "Pooja", "Arjun", "Divya", "Manoj", "Kavya"
+  ];
+  const shifts = ["Morning", "Evening", "Night"];
+  const departments = ["HR", "Engineering", "Marketing", "Sales"];
+  const assignedByList = ["Admin", "Manager", "Supervisor"];
 
-                const todayShifts = rosterData.filter(item => item.date === today).length;
-                const weekShifts = rosterData.filter(item => {
-                    const itemDate = new Date(item.date);
-                    return itemDate >= weekStart && itemDate <= weekEnd;
-                }).length;
+  for (let i = 0; i < 60; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + (i % 30));
+    const employee = employees[Math.floor(Math.random() * employees.length)];
+    const shift = shifts[Math.floor(Math.random() * shifts.length)];
+    const assignedBy = assignedByList[Math.floor(Math.random() * assignedByList.length)];
+    const department = departments[Math.floor(Math.random() * departments.length)];
 
-                document.getElementById('totalEmployees').textContent = rosterData.length;
-                document.getElementById('todayShifts').textContent = todayShifts;
-                document.getElementById('weekShifts').textContent = weekShifts;
-            }
+    rosterData.push({
+      employee,
+      date: date.toISOString().split('T')[0],
+      shift,
+      assignedBy,
+      department
+    });
+  }
 
-            function renderRoster(filterText = "") {
-                const tbody = document.getElementById("rosterTableBody");
-                tbody.innerHTML = "";
-                const filteredData = rosterData
-                    .filter(item => item.employee.toLowerCase().includes(filterText.toLowerCase()))
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                if (filteredData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No roster data available</td></tr>';
-                    return;
-                }
+  function getShiftBadgeClass(shift) {
+    return `shift-${shift.toLowerCase()}`;
+  }
 
-                filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+  function updateStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
 
-                filteredData.forEach((item) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td style="font-weight: 500;">${item.employee}</td>
-                        <td>${new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</td>
-                        <td><span class="shift-badge ${getShiftBadgeClass(item.shift)}">${item.shift}</span></td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                updateStats();
-            }
+    const todayShifts = rosterData.filter(item => item.date === today).length;
+    const weekShifts = rosterData.filter(item => {
+      const itemDate = new Date(item.date);
+      return itemDate >= weekStart && itemDate <= weekEnd;
+    }).length;
 
-            renderRoster();
+    document.getElementById('totalEmployees').textContent = rosterData.length;
+    document.getElementById('todayShifts').textContent = todayShifts;
+    document.getElementById('weekShifts').textContent = weekShifts;
+  }
 
-            document.getElementById("searchInput").addEventListener("input", function () {
-                const searchValue = this.value.trim();
-                renderRoster(searchValue);
-            });
+  function renderRoster(filterText = "") {
+    const tbody = document.getElementById("rosterTableBody");
+    tbody.innerHTML = "";
+    const filteredData = rosterData
+      .filter(item => item.employee.toLowerCase().includes(filterText.toLowerCase()))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            // Tab switching
-            document.querySelectorAll(".tab-btn").forEach((btn) => {
-                btn.addEventListener("click", function () {
-                    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-                    this.classList.add("active");
+    if (filteredData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No roster data available</td></tr>';
+      return;
+    }
 
-                    document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
-                    document.getElementById(this.getAttribute("data-target")).classList.add("active");
-                });
-            });
+    filteredData.forEach((item) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td style="font-weight: 500;">${item.employee}</td>
+        <td>${new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</td>
+        <td><span class="shift-badge ${getShiftBadgeClass(item.shift)}">${item.shift}</span></td>
+        <td>${item.assignedBy}</td>
+        <td>${item.department}</td>
+      `;
+      tbody.appendChild(row);
+    });
 
-            // Assign shift
-            document.getElementById("assignBtn").addEventListener("click", function () {
-                const date = document.getElementById("shiftDate").value;
-                const shift = document.getElementById("shiftSelector").value;
+    updateStats();
+  }
 
-                if (!date || !shift) {
-                    alert("Please select both date and shift.");
-                    return;
-                }
+  renderRoster();
 
-                const entry = { employee: "Current User", date, shift };
-                rosterData.push(entry);
-                renderRoster();
+  document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.trim();
+    renderRoster(searchValue);
+  });
 
-                // Add to recent assignments
-                const assignedShifts = document.getElementById("assignedShifts");
-                if (assignedShifts.querySelector('.empty-state')) {
-                    assignedShifts.innerHTML = '';
-                }
+  document.getElementById("assignBtn").addEventListener("click", function () {
+    const date = document.getElementById("shiftDate").value;
+    const shift = document.getElementById("shiftSelector").value;
 
-                const assignmentDiv = document.createElement("div");
-                assignmentDiv.className = "assignment-item";
-                assignmentDiv.innerHTML = `
-                    <strong>Assignment Successful:</strong> 
-                    <span class="shift-badge ${getShiftBadgeClass(shift)}">${shift}</span> shift on 
-                    ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                `;
-                
-                assignedShifts.insertBefore(assignmentDiv, assignedShifts.firstChild);
-                
-                // Keep only last 3 assignments visible
-                while (assignedShifts.children.length > 3) {
-                    assignedShifts.removeChild(assignedShifts.lastChild);
-                }
+    if (!date || !shift) {
+      alert("Please select both date and shift.");
+      return;
+    }
 
-                // Clear form
-                document.getElementById("shiftDate").value = "";
-                document.getElementById("shiftSelector").value = "";
-            });
+    const entry = {
+      employee: "Current User",
+      date,
+      shift,
+      assignedBy: "Admin",
+      department: "HR"
+    };
 
-            // Set default date to today
-            document.getElementById("shiftDate").value = new Date().toISOString().split('T')[0];
-        });
-    </script>
+    rosterData.push(entry);
+    renderRoster();
+
+    const assignedShifts = document.getElementById("assignedShifts");
+    if (assignedShifts.querySelector('.empty-state')) {
+      assignedShifts.innerHTML = '';
+    }
+
+    const assignmentDiv = document.createElement("div");
+    assignmentDiv.className = "assignment-item";
+    assignmentDiv.innerHTML = `
+      <strong>Assignment Successful:</strong> 
+      <span class="shift-badge ${getShiftBadgeClass(shift)}">${shift}</span> shift on 
+      ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+    `;
+
+    assignedShifts.insertBefore(assignmentDiv, assignedShifts.firstChild);
+    while (assignedShifts.children.length > 3) {
+      assignedShifts.removeChild(assignedShifts.lastChild);
+    }
+
+    document.getElementById("shiftDate").value = "";
+    document.getElementById("shiftSelector").value = "";
+  });
+
+  document.getElementById("shiftDate").value = new Date().toISOString().split('T')[0];
+});
+</script>
 </body>
 </html>
 
