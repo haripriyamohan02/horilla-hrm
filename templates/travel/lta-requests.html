@@ -159,9 +159,11 @@
                     <div class="col-md-12" style="padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
                             <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Family Members" %} *</label>
-                            <div id="family-members-list" style="display: flex; gap: 8px; align-items: center;">
-                                <input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required style="flex: 1;">
-                                <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>
+                            <div id="family-members-list" style="display: flex; flex-direction: column; gap: 8px;">
+                                <div class="family-member-row mb-2" style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required>
+                                    <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>
+                                </div>
                             </div>
                             <button type="button" class="oh-btn oh-btn--light mt-2" id="add-family-member">
                                 <ion-icon name="add-outline"></ion-icon> {% trans "Add Family Member" %}
@@ -194,15 +196,21 @@ const familyList = document.getElementById('family-members-list');
 if (addBtn && familyList) {
     addBtn.onclick = function() {
         const row = document.createElement('div');
-        row.className = 'd-flex gap-2 mb-2 family-member-row';
+        row.className = 'family-member-row mb-2';
+        row.style.display = 'flex';
+        row.style.gap = '8px';
+        row.style.alignItems = 'center';
         row.innerHTML = `<input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required>
             <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>`;
         familyList.appendChild(row);
     };
     familyList.addEventListener('click', function(e) {
         if (e.target.closest('.remove-family-member')) {
-            const row = e.target.closest('.family-member-row');
-            if (row) row.remove();
+            const rows = familyList.querySelectorAll('.family-member-row');
+            if (rows.length > 1) {
+                const row = e.target.closest('.family-member-row');
+                if (row) row.remove();
+            }
         }
     });
 }
