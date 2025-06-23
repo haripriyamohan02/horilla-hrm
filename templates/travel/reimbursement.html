@@ -11,7 +11,7 @@
                     <h1 class="oh-main__title mb-0" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -1px;">{% trans "Travel Reimbursements" %}</h1>
                 </div>
                 <div class="d-flex align-items-center" style="gap: 0.75rem;">
-                    <button class="oh-btn oh-btn--danger" data-toggle="oh-modal-toggle" data-target="#newReimbursementModal">
+                    <button class="oh-btn oh-btn--danger" onclick="openReimbursementModal()">
                         <ion-icon name="add-outline" class="me-1"></ion-icon>
                         {% trans "Create" %}
                     </button>
@@ -59,16 +59,16 @@
                                     <span class="oh-status oh-status--warning">Pending</span>
                                 </div>
                                 <div class="oh-sticky-table__td">
-                                    <div class="oh-btn-group">
+                                    <div class="oh-btn-group gap-2">
                                         <button class="oh-btn oh-btn--success oh-btn--small" title="{% trans 'Approve' %}">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
                                         <button class="oh-btn oh-btn--danger oh-btn--small" title="{% trans 'Reject' %}">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn oh-btn--secondary oh-btn--small" title="{% trans 'View Details' %}">
+                                        <!-- <button class="oh-btn oh-btn--secondary oh-btn--small" title="{% trans 'View Details' %}">
                                             <ion-icon name="eye-outline"></ion-icon>
-                                        </button>
+                                        </button> -->
                                     </div>
                                 </div>
                             </div>
@@ -81,92 +81,141 @@
 </div>
 
 <!-- New Reimbursement Modal -->
-<div class="oh-modal" id="newReimbursementModal" role="dialog" aria-labelledby="newReimbursementModalLabel" aria-hidden="true">
-    <div class="oh-modal__dialog">
-        <div class="oh-modal__dialog-header">
-            <h2 class="oh-modal__dialog-title" id="newReimbursementModalLabel">
-                {% trans "New Reimbursement Request" %}
-            </h2>
-            <button class="oh-modal__close" aria-label="Close">
+<div id="newReimbursementModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div style="background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e0e0e0;">
+            <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #333;">New Reimbursement Request</h2>
+            <button onclick="closeReimbursementModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0; display: flex; align-items: center; justify-content: center;">
                 <ion-icon name="close-outline"></ion-icon>
             </button>
         </div>
-        <div class="oh-modal__dialog-body">
+        
+        <!-- Body -->
+        <div style="padding: 24px;">
             <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-12 col-sm-12 col-md-6">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Travel Request" %}</label>
-                            <select class="oh-select" name="travel_request" required>
-                                <option value="">{% trans "Select Travel Request" %}</option>
-                                <option value="1">Mumbai Trip (15-18 Jun)</option>
-                            </select>
-                        </div>
+                <!-- Row 1: Travel Request and Total Amount -->
+                <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 14px;">Travel Request</label>
+                        <select name="travel_request" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: white; color: #333;">
+                            <option value="">Select Travel Request</option>
+                            <option value="1">Mumbai Trip (15-18 Jun)</option>
+                        </select>
                     </div>
-                    <div class="col-12 col-sm-12 col-md-6">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Total Amount" %}</label>
-                            <input type="number" class="oh-input" name="amount" required>
-                        </div>
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 14px;">Total Amount</label>
+                        <input type="number" name="amount" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
                     </div>
                 </div>
-
-                <div class="oh-input-group">
-                    <label class="oh-label">{% trans "Expense Details" %}</label>
-                    <div class="oh-sticky-table mb-3">
-                        <div class="oh-sticky-table__table">
-                            <div class="oh-sticky-table__thead">
-                                <div class="oh-sticky-table__tr">
-                                    <div class="oh-sticky-table__th">{% trans "Category" %}</div>
-                                    <div class="oh-sticky-table__th">{% trans "Date" %}</div>
-                                    <div class="oh-sticky-table__th">{% trans "Amount" %}</div>
-                                    <div class="oh-sticky-table__th">{% trans "Bill" %}</div>
+                
+                <!-- Expense Details Section -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #333; font-size: 14px;">Expense Details</label>
+                    
+                    <!-- Table Container -->
+                    <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+                        <!-- Table Header -->
+                        <div style="background-color: #f8f9fa; display: flex; border-bottom: 1px solid #ddd;">
+                            <div style="flex: 1; padding: 12px; font-weight: 600; color: #333; border-right: 1px solid #ddd;">Category</div>
+                            <div style="flex: 1; padding: 12px; font-weight: 600; color: #333; border-right: 1px solid #ddd;">Date</div>
+                            <div style="flex: 1; padding: 12px; font-weight: 600; color: #333; border-right: 1px solid #ddd;">Amount</div>
+                            <div style="flex: 1; padding: 12px; font-weight: 600; color: #333;">Bill</div>
+                        </div>
+                        
+                        <!-- Table Body -->
+                        <div id="expenseRows">
+                            <div style="display: flex; border-bottom: 1px solid #ddd;" class="expense-row">
+                                <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                                    <select name="category[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: white;">
+                                        <option value="travel">Travel</option>
+                                        <option value="accommodation">Accommodation</option>
+                                        <option value="food">Food</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </div>
-                            </div>
-                            <div class="oh-sticky-table__tbody">
-                                <div class="oh-sticky-table__tr">
-                                    <div class="oh-sticky-table__td">
-                                        <select class="oh-select" name="category[]" required>
-                                            <option value="travel">{% trans "Travel" %}</option>
-                                            <option value="accommodation">{% trans "Accommodation" %}</option>
-                                            <option value="food">{% trans "Food" %}</option>
-                                            <option value="other">{% trans "Other" %}</option>
-                                        </select>
-                                    </div>
-                                    <div class="oh-sticky-table__td">
-                                        <input type="date" class="oh-input" name="expense_date[]" required>
-                                    </div>
-                                    <div class="oh-sticky-table__td">
-                                        <input type="number" class="oh-input" name="expense_amount[]" required>
-                                    </div>
-                                    <div class="oh-sticky-table__td">
-                                        <input type="file" class="oh-input" name="bill[]" required>
-                                    </div>
+                                <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                                    <input type="date" name="expense_date[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                                </div>
+                                <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                                    <input type="number" name="expense_amount[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                                </div>
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="file" name="bill[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: white;">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="oh-btn oh-btn--light mb-3">
+                    
+                    <!-- Add More Button -->
+                    <button type="button" onclick="addExpenseRow()" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background-color: #f8f9fa; color: #666; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; cursor: pointer; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
                         <ion-icon name="add-outline"></ion-icon>
-                        {% trans "Add More" %}
+                        Add More
                     </button>
                 </div>
-
-                <div class="oh-input-group">
-                    <label class="oh-label">{% trans "Notes" %}</label>
-                    <textarea class="oh-input" name="notes" rows="3"></textarea>
+                
+                <!-- Notes Section -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 14px;">Notes</label>
+                    <textarea name="notes" rows="3" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical; box-sizing: border-box; font-family: Arial, sans-serif;"></textarea>
                 </div>
-
-                <div class="oh-modal__dialog-footer">
-                    <button type="submit" class="oh-btn oh-btn--secondary w-100">
-                        {% trans "Submit Reimbursement" %}
+                
+                <!-- Footer -->
+                <div style="padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                    <button type="submit" style="width: 100%; padding: 12px 24px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#c0392b'" onmouseout="this.style.backgroundColor='#e74c3c'">
+                        Submit Reimbursement
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    function addExpenseRow() {
+        const expenseRows = document.getElementById('expenseRows');
+        const newRow = document.createElement('div');
+        newRow.style.cssText = 'display: flex; border-bottom: 1px solid #ddd;';
+        newRow.className = 'expense-row';
+        
+        newRow.innerHTML = `
+            <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                <select name="category[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: white;">
+                    <option value="travel">Travel</option>
+                    <option value="accommodation">Accommodation</option>
+                    <option value="food">Food</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                <input type="date" name="expense_date[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1; padding: 8px; border-right: 1px solid #ddd;">
+                <input type="number" name="expense_amount[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1; padding: 8px; position: relative;">
+                <input type="file" name="bill[]" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: white;">
+                <button type="button" onclick="removeExpenseRow(this)" style="position: absolute; top: 4px; right: 4px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            </div>
+        `;
+        
+        expenseRows.appendChild(newRow);
+    }
+    
+    function removeExpenseRow(button) {
+        const row = button.closest('.expense-row');
+        if (document.querySelectorAll('.expense-row').length > 1) {
+            row.remove();
+        }
+    }
+
+    function openReimbursementModal() {
+        document.getElementById('newReimbursementModal').style.display = 'flex';
+    }
+    function closeReimbursementModal() {
+        document.getElementById('newReimbursementModal').style.display = 'none';
+    }
+</script>
 
 <!-- View Details Modal -->
 <div class="oh-modal" id="viewDetailsModal" role="dialog" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
