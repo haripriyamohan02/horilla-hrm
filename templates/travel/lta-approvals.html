@@ -1,0 +1,165 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+
+<div class="oh-wrapper">
+    <div class="oh-main">
+        <div class="oh-main__content">
+            <div class="oh-main__heading d-flex justify-content-between">
+                <h1 class="oh-main__title">{% trans "LTA Approvals" %}</h1>
+                <div class="oh-main__titlebar-button-container">
+                    <div class="oh-dropdown" x-data="{open: false}">
+                        <button class="oh-btn ml-2" @click="open = !open" onclick="event.preventDefault()">
+                            <ion-icon name="filter" class="mr-1"></ion-icon>{% trans "Filter" %}
+                        </button>
+                        <div class="oh-dropdown__menu oh-dropdown__menu--right oh-dropdown__filter p-4" x-show="open" style="display: none" @click.outside="open = false">
+                            <div class="oh-dropdown__filter-body">
+                                <div class="oh-accordion">
+                                    <div class="oh-accordion-header" onclick="event.stopImmediatePropagation();$(this).parent().toggleClass('oh-accordion--show');">
+                                        {% trans "LTA Request" %}
+                                    </div>
+                                    <div class="oh-accordion-body">
+                                        <div class="row">
+                                            <div class="col-12 col-sm-12 col-lg-6">
+                                                <div class="oh-input-group">
+                                                    <label class="oh-label">{% trans "Block Year" %}</label>
+                                                    <select class="oh-select" name="block_year">
+                                                        <option value="">{% trans "All" %}</option>
+                                                        <option value="2023-2024">2023-2024</option>
+                                                        <option value="2024-2025">2024-2025</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-12 col-lg-6">
+                                                <div class="oh-input-group">
+                                                    <label class="oh-label">{% trans "Status" %}</label>
+                                                    <select class="oh-select" name="status">
+                                                        <option value="">{% trans "All" %}</option>
+                                                        <option value="pending">{% trans "Pending" %}</option>
+                                                        <option value="approved">{% trans "Approved" %}</option>
+                                                        <option value="rejected">{% trans "Rejected" %}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oh-dropdown__filter-footer">
+                                <button class="oh-btn oh-btn--secondary oh-btn--small w-100 filterButton" type="submit">
+                                    {% trans "Filter" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="oh-main__body">
+                <!-- Quick filters -->
+                <div class="d-flex flex-row-reverse mb-2">
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: red"></span>
+                        {% trans "Rejected" %}
+                    </span>
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: rgb(103, 171, 238)"></span>
+                        {% trans "Pending" %}
+                    </span>
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: yellowgreen"></span>
+                        {% trans "Approved" %}
+                    </span>
+                </div>
+
+                <!-- Table -->
+                <div class="oh-sticky-table">
+                    <div class="oh-sticky-table__table">
+                        <div class="oh-sticky-table__thead">
+                            <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__th">{% trans "Employee" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Block Year" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Travel Period" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Destination" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Status" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
+                            </div>
+                        </div>
+                        <div class="oh-sticky-table__tbody">
+                            <!-- Sample row, will be replaced by dynamic data -->
+                            <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td">John Doe</div>
+                                <div class="oh-sticky-table__td">2023-2024</div>
+                                <div class="oh-sticky-table__td">15 Jun - 22 Jun 2024</div>
+                                <div class="oh-sticky-table__td">Goa</div>
+                                <div class="oh-sticky-table__td">
+                                    <span class="oh-status oh-status--warning">Pending</span>
+                                </div>
+                                <div class="oh-sticky-table__td">
+                                    <div class="oh-btn-group">
+                                        <button class="oh-btn oh-btn--success oh-btn--small" title="{% trans 'Approve' %}">
+                                            <ion-icon name="checkmark-outline"></ion-icon>
+                                        </button>
+                                        <button class="oh-btn oh-btn--danger oh-btn--small" title="{% trans 'Reject' %}">
+                                            <ion-icon name="close-outline"></ion-icon>
+                                        </button>
+                                        <button class="oh-btn oh-btn--secondary oh-btn--small" title="{% trans 'View Details' %}">
+                                            <ion-icon name="eye-outline"></ion-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="oh-modal" id="viewDetailsModal" role="dialog" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="viewDetailsModalLabel">
+                {% trans "LTA Application Details" %}
+            </h2>
+            <button class="oh-modal__close" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body" id="viewDetailsForm">
+            <!-- Will be populated dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="oh-modal" id="rejectModal" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="rejectModalLabel">
+                {% trans "Reject LTA Application" %}
+            </h2>
+            <button class="oh-modal__close" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body">
+            <form>
+                <div class="oh-input-group">
+                    <label class="oh-label">{% trans "Rejection Reason" %}</label>
+                    <textarea class="oh-input" name="reject_reason" rows="3" required></textarea>
+                </div>
+                <div class="oh-modal__dialog-footer">
+                    <button type="submit" class="oh-btn oh-btn--danger w-100">
+                        {% trans "Confirm Rejection" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 

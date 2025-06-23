@@ -1,0 +1,186 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+
+<div class="oh-wrapper">
+    <div class="oh-main">
+        <div class="oh-main__content">
+            <div class="oh-main__heading d-flex justify-content-between">
+                <h1 class="oh-main__title">{% trans "Travel Reimbursements" %}</h1>
+                <div class="oh-main__titlebar-button-container">
+                    <button class="oh-btn oh-btn--primary" data-toggle="oh-modal-toggle" data-target="#newReimbursementModal">
+                        <ion-icon name="add-outline" class="me-1"></ion-icon>
+                        {% trans "New Reimbursement" %}
+                    </button>
+                </div>
+            </div>
+
+            <div class="oh-main__body">
+                <!-- Quick filters -->
+                <div class="d-flex flex-row-reverse mb-2">
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: red"></span>
+                        {% trans "Rejected" %}
+                    </span>
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: rgb(103, 171, 238)"></span>
+                        {% trans "Pending" %}
+                    </span>
+                    <span class="me-3" style="cursor: pointer">
+                        <span class="oh-dot oh-dot--small me-1" style="background-color: yellowgreen"></span>
+                        {% trans "Approved" %}
+                    </span>
+                </div>
+
+                <!-- Table -->
+                <div class="oh-sticky-table">
+                    <div class="oh-sticky-table__table">
+                        <div class="oh-sticky-table__thead">
+                            <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__th">{% trans "Employee" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Travel Request" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Amount" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Submitted Date" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Status" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
+                            </div>
+                        </div>
+                        <div class="oh-sticky-table__tbody">
+                            <!-- Sample row, will be replaced by dynamic data -->
+                            <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td">John Doe</div>
+                                <div class="oh-sticky-table__td">Mumbai Trip</div>
+                                <div class="oh-sticky-table__td">₹ 8,000</div>
+                                <div class="oh-sticky-table__td">2024-06-20</div>
+                                <div class="oh-sticky-table__td">
+                                    <span class="oh-status oh-status--warning">Pending</span>
+                                </div>
+                                <div class="oh-sticky-table__td">
+                                    <div class="oh-btn-group">
+                                        <button class="oh-btn oh-btn--success oh-btn--small" title="{% trans 'Approve' %}">
+                                            <ion-icon name="checkmark-outline"></ion-icon>
+                                        </button>
+                                        <button class="oh-btn oh-btn--danger oh-btn--small" title="{% trans 'Reject' %}">
+                                            <ion-icon name="close-outline"></ion-icon>
+                                        </button>
+                                        <button class="oh-btn oh-btn--secondary oh-btn--small" title="{% trans 'View Details' %}">
+                                            <ion-icon name="eye-outline"></ion-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Reimbursement Modal -->
+<div class="oh-modal" id="newReimbursementModal" role="dialog" aria-labelledby="newReimbursementModalLabel" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="newReimbursementModalLabel">
+                {% trans "New Reimbursement Request" %}
+            </h2>
+            <button class="oh-modal__close" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-6">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Travel Request" %}</label>
+                            <select class="oh-select" name="travel_request" required>
+                                <option value="">{% trans "Select Travel Request" %}</option>
+                                <option value="1">Mumbai Trip (15-18 Jun)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Total Amount" %}</label>
+                            <input type="number" class="oh-input" name="amount" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="oh-input-group">
+                    <label class="oh-label">{% trans "Expense Details" %}</label>
+                    <div class="oh-sticky-table mb-3">
+                        <div class="oh-sticky-table__table">
+                            <div class="oh-sticky-table__thead">
+                                <div class="oh-sticky-table__tr">
+                                    <div class="oh-sticky-table__th">{% trans "Category" %}</div>
+                                    <div class="oh-sticky-table__th">{% trans "Date" %}</div>
+                                    <div class="oh-sticky-table__th">{% trans "Amount" %}</div>
+                                    <div class="oh-sticky-table__th">{% trans "Bill" %}</div>
+                                </div>
+                            </div>
+                            <div class="oh-sticky-table__tbody">
+                                <div class="oh-sticky-table__tr">
+                                    <div class="oh-sticky-table__td">
+                                        <select class="oh-select" name="category[]" required>
+                                            <option value="travel">{% trans "Travel" %}</option>
+                                            <option value="accommodation">{% trans "Accommodation" %}</option>
+                                            <option value="food">{% trans "Food" %}</option>
+                                            <option value="other">{% trans "Other" %}</option>
+                                        </select>
+                                    </div>
+                                    <div class="oh-sticky-table__td">
+                                        <input type="date" class="oh-input" name="expense_date[]" required>
+                                    </div>
+                                    <div class="oh-sticky-table__td">
+                                        <input type="number" class="oh-input" name="expense_amount[]" required>
+                                    </div>
+                                    <div class="oh-sticky-table__td">
+                                        <input type="file" class="oh-input" name="bill[]" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="oh-btn oh-btn--light mb-3">
+                        <ion-icon name="add-outline"></ion-icon>
+                        {% trans "Add More" %}
+                    </button>
+                </div>
+
+                <div class="oh-input-group">
+                    <label class="oh-label">{% trans "Notes" %}</label>
+                    <textarea class="oh-input" name="notes" rows="3"></textarea>
+                </div>
+
+                <div class="oh-modal__dialog-footer">
+                    <button type="submit" class="oh-btn oh-btn--secondary w-100">
+                        {% trans "Submit Reimbursement" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="oh-modal" id="viewDetailsModal" role="dialog" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="viewDetailsModalLabel">
+                {% trans "Reimbursement Details" %}
+            </h2>
+            <button class="oh-modal__close" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body" id="viewDetailsForm">
+            <!-- Will be populated dynamically -->
+        </div>
+    </div>
+</div>
+
+{% endblock %} 
