@@ -38,8 +38,5 @@ class TravelRequestView(LoginRequiredMixin, TemplateView):
 class TravelReimbursementView(TemplateView):
     template_name = "travel/reimbursement.html"
 
-class LTAApplicationsView(TemplateView):
-    template_name = "travel/lta-applications.html"
-
-class LTAApprovalsView(TemplateView):
-    template_name = "travel/lta-approvals.html"
+class LTARequestsView(TemplateView):
+    template_name = 'travel/lta-requests.html'

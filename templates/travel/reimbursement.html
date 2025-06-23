@@ -6,10 +6,12 @@
 <div class="oh-wrapper">
     <div class="oh-main">
         <div class="oh-main__content">
-            <div class="oh-main__heading d-flex justify-content-between">
-                <h1 class="oh-main__title">{% trans "Travel Reimbursements" %}</h1>
-                <div class="oh-main__titlebar-button-container">
-                    <button class="oh-btn oh-btn--primary" data-toggle="oh-modal-toggle" data-target="#newReimbursementModal">
+            <div class="d-flex align-items-center justify-content-between mb-3 mt-4" style="gap: 1rem;">
+                <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <h1 class="oh-main__title mb-0" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -1px;">{% trans "Travel Reimbursements" %}</h1>
+                </div>
+                <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <button class="oh-btn oh-btn--danger" data-toggle="oh-modal-toggle" data-target="#newReimbursementModal">
                         <ion-icon name="add-outline" class="me-1"></ion-icon>
                         {% trans "New Reimbursement" %}
                     </button>
