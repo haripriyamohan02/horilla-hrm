@@ -57,6 +57,10 @@ from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArgumen
 
 logger = logging.getLogger(__name__)
 
+# Define your device IPs
+in_device_ip = "14.194.141.107"  # Replace with your actual IN device IP
+out_device_ip = "14.194.141.106"  # Replace with your actual OUT device IP
+
 
 def str_time_seconds(time):
     """
@@ -176,7 +180,8 @@ class ZKBioAttendance(Thread):
                                     user_id=user_id, device_id=device
                                 ).first()
                                 if bio_id:
-                                    if punch_code in {0, 3, 4}:
+                                    # Hardcoded device IP logic for check-in/out
+                                    if device.machine_ip == in_device_ip:
                                         try:
                                             clock_in(
                                                 Request(
@@ -190,9 +195,8 @@ class ZKBioAttendance(Thread):
                                             logger.error(
                                                 "Got an error in clock_in %s", error
                                             )
-
                                             continue
-                                    else:
+                                    elif device.machine_ip == out_device_ip:
                                         try:
                                             clock_out(
                                                 Request(
@@ -207,6 +211,9 @@ class ZKBioAttendance(Thread):
                                                 "Got an error in clock_out", error
                                             )
                                             continue
+                                    else:
+                                        logger.warning(f"Unknown device IP: {device.machine_ip}")
+                                        continue
                             else:
                                 continue
         except ConnectionResetError as error:
