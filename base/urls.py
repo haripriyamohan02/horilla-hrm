@@ -1023,6 +1023,8 @@ urlpatterns = [
         views.get_upcoming_holidays,
         name="get-upcoming-holidays",
     ),
+    path('get-next-holiday', views.get_next_holiday, name='get-next-holiday'),
+
     path("holiday-creation", views.holiday_creation, name="holiday-creation"),
     path("holiday-update/<int:obj_id>", views.holiday_update, name="holiday-update"),
     path(
