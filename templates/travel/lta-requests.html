@@ -1,0 +1,151 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+
+<div class="oh-wrapper">
+    <div class="oh-main">
+        <div class="oh-main__content">
+            <div class="d-flex align-items-center justify-content-between mb-3 mt-4" style="gap: 1rem;">
+                <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <h1 class="oh-main__title mb-0" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -1px;">{% trans "LTA Requests" %}</h1>
+                </div>
+                <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <button class="oh-btn oh-btn--danger" data-toggle="oh-modal-toggle" data-target="#newLTARequestModal">
+                        <ion-icon name="add-outline" class="me-1"></ion-icon>
+                        {% trans "Create" %}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status filters -->
+            <div class="d-flex gap-3 mb-4 mt-2">
+                <div class="ms-auto d-flex gap-4">
+                    <div class="d-flex align-items-center">
+                        <span class="oh-dot oh-dot--warning me-2"></span>
+                        {% trans "Requested" %}
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="oh-dot oh-dot--success me-2"></span>
+                        {% trans "Approved" %}
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="oh-dot oh-dot--secondary me-2"></span>
+                        {% trans "Cancelled" %}
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="oh-dot oh-dot--danger me-2"></span>
+                        {% trans "Rejected" %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="oh-sticky-table">
+                <div class="oh-sticky-table__table">
+                    <div class="oh-sticky-table__thead">
+                        <div class="oh-sticky-table__tr">
+                            <div class="oh-sticky-table__th" style="width: 40px;">
+                                <input type="checkbox" class="oh-checkbox">
+                            </div>
+                            <div class="oh-sticky-table__th">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% trans "Employee" %}
+                                    <ion-icon name="arrow-down-outline" style="font-size: 14px;"></ion-icon>
+                                </div>
+                            </div>
+                            <div class="oh-sticky-table__th">{% trans "Block Year" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Family Members" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Status" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
+                        </div>
+                    </div>
+                    <div class="oh-sticky-table__tbody">
+                        <!-- Sample row -->
+                        <div class="oh-sticky-table__tr">
+                            <div class="oh-sticky-table__td">
+                                <input type="checkbox" class="oh-checkbox">
+                            </div>
+                            <div class="oh-sticky-table__td">
+                                <div class="oh-profile oh-profile--md d-flex align-items-center gap-2">
+                                    <div class="oh-profile__avatar mr-1">
+                                        <img src="{% static 'images/ui/avatar.png' %}" class="oh-profile__image" alt="" />
+                                    </div>
+                                    <span class="oh-profile__name oh-text--dark">John Doe</span>
+                                </div>
+                            </div>
+                            <div class="oh-sticky-table__td">2022-2025</div>
+                            <div class="oh-sticky-table__td">3</div>
+                            <div class="oh-sticky-table__td">
+                                <span class="oh-status oh-status--warning">{% trans "Requested" %}</span>
+                            </div>
+                            <div class="oh-sticky-table__td">
+                                <div class="d-flex gap-2">
+                                    <button class="oh-btn oh-btn--success oh-btn--small" title="Approve">
+                                        <ion-icon name="checkmark-outline"></ion-icon>
+                                    </button>
+                                    <button class="oh-btn oh-btn--danger oh-btn--small" title="Reject">
+                                        <ion-icon name="close-outline"></ion-icon>
+                                    </button>
+                                    <button class="oh-btn oh-btn--secondary oh-btn--small" title="View Details">
+                                        <ion-icon name="eye-outline"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>{% trans "Page 1 of 1" %}</div>
+                <div class="d-flex align-items-center gap-2">
+                    {% trans "Page" %}
+                    <input type="number" class="oh-input" value="1" style="width: 60px;">
+                    {% trans "of 1" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New LTA Request Modal -->
+<div class="oh-modal" id="newLTARequestModal" role="dialog" aria-labelledby="newLTARequestModalLabel" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="newLTARequestModalLabel">
+                {% trans "Apply for LTA" %}
+            </h2>
+            <button class="oh-modal__close" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Block Year" %} *</label>
+                            <input type="text" class="oh-input" name="block_year" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Family Members" %} *</label>
+                            <input type="number" class="oh-input" name="family_members" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="oh-modal__dialog-footer">
+                    <button type="submit" class="oh-btn oh-btn--secondary w-100">
+                        {% trans "Submit LTA Request" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 
