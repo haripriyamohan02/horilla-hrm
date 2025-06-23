@@ -126,6 +126,13 @@
                     {{ biometric_form.company_id.errors }}
                 {% endif %}
             </div>
+            <div class="oh-input-group">
+                <label class="oh-label" for="{{biometric_form.role.id_for_label}}">{{biometric_form.role.label}}</label>
+                {{biometric_form.role}}
+                {% if biometric_form.role.errors %}
+                    {{biometric_form.role.errors}}
+                {% endif %}
+            </div>
         </div>
         <div class="oh-modal__dialog-footer p-0 pt-3">
             <button type="submit" class="oh-btn oh-btn--secondary oh-btn--shadow">

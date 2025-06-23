@@ -36,6 +36,11 @@ def validate_schedule_time_format(value):
         raise ValidationError(_("Invalid format, it should be HH:MM format")) from error
 
 
+DEVICE_ROLE_CHOICES = (
+    ('in', 'Check-In Device'),
+    ('out', 'Check-Out Device'),
+)
+
 class BiometricDevices(HorillaModel):
     """
     Model: BiometricDevices
@@ -102,6 +107,13 @@ class BiometricDevices(HorillaModel):
         editable=True,
         on_delete=models.PROTECT,
         verbose_name=_("Company"),
+    )
+    role = models.CharField(
+        max_length=3,
+        choices=DEVICE_ROLE_CHOICES,
+        default='in',
+        verbose_name=_('Device Role'),
+        help_text=_('Specify if this device is for check-in or check-out.'),
     )
 
     objects = HorillaCompanyManager()
