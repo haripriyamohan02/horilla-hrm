@@ -24,7 +24,7 @@
         }
         
         .main-container {
-            height: 90vh;
+            height: 91vh;
             display: flex;
             flex-direction: column;
             padding: 6px;
@@ -44,7 +44,7 @@
         }
         
         .oh-card__header {
-            padding: 15px 18px;
+            padding: 8px 14px;
             border-bottom: 1px solid #e5e7eb;
             background: #f9fafb;
             display: flex;
@@ -316,11 +316,11 @@
         
         .modal-container {
             background: white;
-            border-radius: 12px;
+            border-radius: 2px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 100%;
             max-width: 900px;
-            max-height: 90vh;
+            max-height: 92vh;
             overflow-y: auto;
             position: relative;
         }
@@ -383,7 +383,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
-            margin-bottom: 24px;
+            margin-bottom: 4px;
         }
         
         .form-group {
@@ -448,8 +448,6 @@
         }
         
         .form-actions {
-            padding-top: 14px;
-            border-top: 1px solid #e5e7eb;
             display: flex;
             justify-content: flex-end;
             gap: 16px;
@@ -460,7 +458,6 @@
             border: 2px solid #d1d5db;
             color: #374151;
             padding: 12px 24px;
-            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -477,7 +474,6 @@
             border: none;
             color: #ffffff;
             padding: 12px 24px;
-            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -717,19 +713,14 @@
                                 </label>
                                 <select name="course_category" required class="form-select">
                                     <option value="">{% trans "Select Category" %}</option>
-                                    <option value="safety">{% trans "Safety" %}</option>
-                                    <option value="leadership">{% trans "Leadership" %}</option>
-                                    <option value="technical">{% trans "Technical" %}</option>
-                                    <option value="compliance">{% trans "Compliance" %}</option>
-                                    <option value="soft_skills">{% trans "Soft Skills" %}</option>
-                                    <option value="management">{% trans "Management" %}</option>
+                                    <option value="Safety">{% trans "Safety" %}</option>
+                                    <option value="Leadership">{% trans "Leadership" %}</option>
+                                    <option value="Technical">{% trans "Technical" %}</option>
+                                    <option value="Compliance">{% trans "Compliance" %}</option>
+                                    <option value="Soft Skills">{% trans "Soft Skills" %}</option>
+                                    <option value="Management">{% trans "Management" %}</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">{% trans "Course Description" %}</label>
-                            <textarea name="course_description" rows="4" class="form-textarea" placeholder="{% trans 'Enter course description and objectives' %}"></textarea>
                         </div>
                     </div>
 
@@ -744,11 +735,11 @@
                                 </label>
                                 <select name="instructor" required class="form-select">
                                     <option value="">{% trans "Select Instructor" %}</option>
-                                    <option value="dr_sarah_wilson">Dr. Sarah Wilson</option>
-                                    <option value="michael_chen">Michael Chen</option>
-                                    <option value="jennifer_adams">Jennifer Adams</option>
-                                    <option value="david_kumar">David Kumar</option>
-                                    <option value="lisa_rodriguez">Lisa Rodriguez</option>
+                                    <option value="Dr. Sarah Wilson">Dr. Sarah Wilson</option>
+                                    <option value="Michael Chen">Michael Chen</option>
+                                    <option value="Jennifer Adams">Jennifer Adams</option>
+                                    <option value="David Kumar">David Kumar</option>
+                                    <option value="Lisa Rodriguez">Lisa Rodriguez</option>
                                 </select>
                             </div>
                             
@@ -762,13 +753,33 @@
 
                         <div class="form-grid">
                             <div class="form-group">
-                                <label class="form-label">{% trans "Prerequisites" %}</label>
-                                <textarea name="prerequisites" rows="3" class="form-textarea" placeholder="{% trans 'Any required qualifications or prior training' %}"></textarea>
+                                <label class="form-label">
+                                    {% trans "Training Date" %} <span class="required">*</span>
+                                </label>
+                                <input type="date" name="training_date" required class="form-input">
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label">{% trans "Training Materials" %}</label>
-                                <textarea name="materials" rows="3" class="form-textarea" placeholder="{% trans 'Required materials, handouts, or equipment' %}"></textarea>
+                                <label class="form-label">
+                                    {% trans "Start Time" %} <span class="required">*</span>
+                                </label>
+                                <input type="time" name="start_time" required class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "End Time" %} <span class="required">*</span>
+                                </label>
+                                <input type="time" name="end_time" required class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {% trans "Duration (hours)" %} <span class="required">*</span>
+                                </label>
+                                <input type="number" name="duration" required min="0.5" max="24" step="0.5" class="form-input" placeholder="Hours">
                             </div>
                         </div>
                     </div>
@@ -911,6 +922,9 @@
         const modal = document.getElementById('trainingScheduleModal');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Reset form
+        document.getElementById('trainingScheduleForm').reset();
     }
 
     // Close modal when clicking outside
@@ -927,29 +941,147 @@
         }
     });
 
+    // Function to format date for display
+    function formatDateForDisplay(dateString) {
+        const date = new Date(dateString);
+        const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: '2-digit' 
+        };
+        return date.toLocaleDateString('en-US', options);
+    }
+
+    // Function to format time for display
+    function formatTimeForDisplay(timeString) {
+        const [hours, minutes] = timeString.split(':');
+        return `${hours}:${minutes}`;
+    }
+
+    // Function to calculate duration in hours
+    function calculateDuration(startTime, endTime) {
+        const start = new Date(`2000-01-01 ${startTime}`);
+        const end = new Date(`2000-01-01 ${endTime}`);
+        const diffMs = end - start;
+        const diffHours = diffMs / (1000 * 60 * 60);
+        return diffHours;
+    }
+
+    // Function to add new training schedule to table
+    function addTrainingScheduleToTable(formData) {
+        const tableBody = document.getElementById('trainingTableBody');
+        
+        // Create new row
+        const newRow = document.createElement('tr');
+        newRow.setAttribute('data-category', formData.course_category);
+        newRow.setAttribute('data-status', 'Scheduled');
+        newRow.setAttribute('data-date', formData.training_date);
+        
+        // Format the date and time
+        const formattedDate = formatDateForDisplay(formData.training_date);
+        const formattedStartTime = formatTimeForDisplay(formData.start_time);
+        const formattedEndTime = formatTimeForDisplay(formData.end_time);
+        const duration = formData.duration || calculateDuration(formData.start_time, formData.end_time);
+        
+        // Set row HTML
+        newRow.innerHTML = `
+            <td class="course-name">${formData.course_name}</td>
+            <td class="instructor-name">${formData.instructor}</td>
+            <td>
+                <div class="date-time-info">
+                    <div class="date-primary">${formattedDate}</div>
+                    <div class="time-secondary">${formattedStartTime} - ${formattedEndTime}</div>
+                </div>
+            </td>
+            <td class="duration-text">${duration} hours</td>
+            <td class="enrolled-count">0</td>
+            <td class="capacity-text">${formData.max_capacity}</td>
+            <td>
+                <span class="status-badge status-scheduled">Scheduled</span>
+            </td>
+            <td>
+                <button class="action-btn action-btn--edit">Edit</button>
+                <button class="action-btn action-btn--view">View</button>
+            </td>
+        `;
+        
+        // Add to table body
+        tableBody.appendChild(newRow);
+        
+        // Add to original table data for filtering
+        originalTableData.push(newRow.cloneNode(true));
+        
+        // Update summary stats
+        updateSummaryStats(originalTableData);
+    }
+
     // Form validation and submission
     document.getElementById('trainingScheduleForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const startTime = document.querySelector('input[name="start_time"]').value;
-        const endTime = document.querySelector('input[name="end_time"]').value;
+        const formData = new FormData(this);
+        const trainingData = {};
+        
+        // Extract form data
+        for (let [key, value] of formData.entries()) {
+            trainingData[key] = value;
+        }
+        
+        // Validate times
+        const startTime = trainingData.start_time;
+        const endTime = trainingData.end_time;
         
         if (startTime && endTime && startTime >= endTime) {
-            alert('{% trans "End time must be after start time" %}');
+            alert('End time must be after start time');
             return;
         }
         
-        this.submit();
+        // Validate date (should be in the future)
+        const trainingDate = new Date(trainingData.training_date);
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        
+        if (trainingDate < currentDate) {
+            alert('Training date must be in the future');
+            return;
+        }
+        
+        // Add the new training schedule to the table
+        addTrainingScheduleToTable(trainingData);
+        
+        // Close modal and reset form
+        closeModal();
+        
+        // Show success message
+        alert('Training schedule created successfully!');
     });
 
+    // Auto-calculate duration when start/end times change
+    function updateDuration() {
+        const startTimeInput = document.querySelector('input[name="start_time"]');
+        const endTimeInput = document.querySelector('input[name="end_time"]');
+        const durationInput = document.querySelector('input[name="duration"]');
+        
+        if (startTimeInput.value && endTimeInput.value) {
+            const duration = calculateDuration(startTimeInput.value, endTimeInput.value);
+            if (duration > 0) {
+                durationInput.value = duration;
+            }
+        }
+    }
+
+    // Add event listeners for auto-calculation
+    document.querySelector('input[name="start_time"]').addEventListener('change', updateDuration);
+    document.querySelector('input[name="end_time"]').addEventListener('change', updateDuration);
+
     // Auto-calculate end time based on start time and duration
-    document.querySelector('select[name="duration"]').addEventListener('change', function() {
+    document.querySelector('input[name="duration"]').addEventListener('change', function() {
         const startTimeInput = document.querySelector('input[name="start_time"]');
         const endTimeInput = document.querySelector('input[name="end_time"]');
         
         if (startTimeInput.value && this.value) {
             const startTime = new Date('2000-01-01 ' + startTimeInput.value);
-            const duration = parseInt(this.value);
+            const duration = parseFloat(this.value);
             const endTime = new Date(startTime.getTime() + (duration * 60 * 60 * 1000));
             
             const endTimeString = endTime.toTimeString().slice(0, 5);
