@@ -38,6 +38,10 @@ SUBMENUS = [
         "redirect": reverse("work-type-request-view"),
     },
     {
+        "menu": trans("Roster Management"),
+        "redirect": reverse("roster-view"),
+    },
+    {
         "menu": trans("Rotating Shift Assign"),
         "redirect": reverse("rotating-shift-assign"),
         "accessibility": "employee.sidebar.rotating_shift_accessibility",

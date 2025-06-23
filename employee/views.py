@@ -175,6 +175,11 @@ filter_mapping = {
 }
 
 
+@login_required
+def roster_view(request):
+    return render(request, "attendance/attendance/roster_view.html")
+
+
 def _check_reporting_manager(request, *args, **kwargs):
     if kwargs.get("obj_id"):
         obj_id = kwargs["obj_id"]
@@ -2824,6 +2829,7 @@ def joining_today_count(request):
         ).count()
     return HttpResponse(newbies_today)
 
+
 @login_required
 def get_monthly_attendance_summary(request):
     total_counted = 0
@@ -2834,13 +2840,14 @@ def get_monthly_attendance_summary(request):
 
     # Step 1: Get all dates in the month
     _, num_days_in_month = calendar.monthrange(current_year, current_month)
-    all_days = [date(current_year, current_month, d) for d in range(1, num_days_in_month + 1)]
+    all_days = [
+        date(current_year, current_month, d) for d in range(1, num_days_in_month + 1)
+    ]
 
     # Step 2: Count Saturdays and Sundays
     # All days from 1st of the month up to today's date
     days_upto_today = [
-        date(current_year, current_month, d)
-        for d in range(1, today.day + 1)
+        date(current_year, current_month, d) for d in range(1, today.day + 1)
     ]
 
     # Filter Saturdays (5) and Sundays (6)
@@ -2850,8 +2857,7 @@ def get_monthly_attendance_summary(request):
     # Step 3: Get holidays (for current month)
     Holidays = apps.get_model("base", "holidays")  # adjust if model name differs
     holidays = Holidays.objects.filter(
-        start_date__year=current_year,
-        start_date__month=current_month
+        start_date__year=current_year, start_date__month=current_month
     ).values_list("start_date", flat=True)
     holidays_set = set(holidays)
     holidays_count = len(holidays_set)
@@ -2869,7 +2875,8 @@ def get_monthly_attendance_summary(request):
     # Step 5: Final check - total days used
     total_counted = present_days_count
     return HttpResponse(total_counted)
-    
+
+
 def days_left_in_payroll_cycle(request):
     today = date.today()
 
@@ -2885,6 +2892,7 @@ def days_left_in_payroll_cycle(request):
 
     days_left = (end_of_cycle - today).days
     return HttpResponse(days_left)
+
 
 @login_required
 def joining_week_count(request):

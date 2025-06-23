@@ -12,6 +12,7 @@ from employee.forms import DisciplinaryActionForm
 from employee.models import DisciplinaryAction, Employee, EmployeeTag
 from horilla_documents.models import DocumentRequest
 
+
 urlpatterns = [
     path("get-language-code/", views.get_language_code, name="get-language-code"),
     path("employee-profile/", views.employee_profile, name="employee-profile"),
@@ -182,8 +183,16 @@ urlpatterns = [
         name="total-employees-count",
     ),
     path("joining-today-count", views.joining_today_count, name="joining-today-count"),
-    path("get-monthly-attendance-summary", views.get_monthly_attendance_summary, name="get-monthly-attendance-summary"),
-    path("days-left-in-payroll-cycle", views.days_left_in_payroll_cycle, name="days-left-in-payroll-cycle"),
+    path(
+        "get-monthly-attendance-summary",
+        views.get_monthly_attendance_summary,
+        name="get-monthly-attendance-summary",
+    ),
+    path(
+        "days-left-in-payroll-cycle",
+        views.days_left_in_payroll_cycle,
+        name="days-left-in-payroll-cycle",
+    ),
     path("joining-week-count", views.joining_week_count, name="joining-week-count"),
     path("dashboard-employee", views.dashboard_employee, name="dashboard-employee"),
     path(
@@ -220,6 +229,7 @@ urlpatterns = [
         views.employee_note_delete,
         name="employee-note-delete",
     ),
+    path("roster-view/", views.roster_view, name="roster-view"),
     path("shift-tab/<int:emp_id>", views.shift_tab, name="shift-tab"),
     path(
         "about-tab/<int:obj_id>",
