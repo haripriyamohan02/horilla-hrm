@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Training History & Records</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,543 +18,689 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f8fafc;
-            height: 90vh;
-            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
         }
         
-        .main-container {
-            height: 94vh;
-            display: flex;
-            flex-direction: column;
-            padding: 3px;
-            gap: 10px;
+        .tms-main-container {
+            padding: 15px;
+            max-width: 1900px;
+            margin: 0 auto;
         }
         
-        .oh-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-        
-        .oh-card__header {
-            padding: 15px 18px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
+        .tms-page-header {
+            margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
         }
         
-        .oh-card__title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-            margin: 0;
+        .tms-page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
         }
         
-        .oh-btn {
+        .tms-export-btn {
             background: #ffffff;
             border: 1px solid #d1d5db;
             color: #374151;
-            padding: 8px 10px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
         
-        .oh-btn:hover {
+        .tms-export-btn:hover {
             background: #f9fafb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .oh-card__body {
-            padding: 3px;
-            flex: 1;
+        .tms-grid-layout {
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            gap: 20px;
         }
         
-        .oh-summary-grid {
+        /* Summary Stats */
+        .tms-metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
-            margin-bottom: 10px;
-            flex-shrink: 0;
+            margin-bottom: 4px;
         }
         
-        .oh-summary-item {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 16px;
-            text-align: center;
+        .tms-metric-box {
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
-        .oh-summary-item__label {
-            display: block;
-            font-size: 13px;
+        .tms-metric-box--green { border-top: 4px solid #10b981; }
+        .tms-metric-box--amber { border-top: 4px solid #f59e0b; }
+        .tms-metric-box--gray { border-top: 4px solid #6b7280; }
+        .tms-metric-box--red { border-top: 4px solid #ef4444; }
+        .tms-metric-box--blue { border-top: 4px solid #3b82f6; }
+        
+        .tms-metric-header {
+            padding: 12px 16px 8px;
+        }
+        
+        .tms-metric-label {
+            font-size: 12px;
+            font-weight: 600;
             color: #6b7280;
-            margin-bottom: 8px;
-            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .oh-summary-item__value {
-            font-size: 18px;
+        .tms-metric-content {
+            padding: 0 16px 16px;
+        }
+        
+        .tms-metric-value {
+            font-size: 24px;
             font-weight: 700;
-            color: #111827;
+            color: #1f2937;
         }
         
-        .oh-filter-section {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+        /* Filter Section */
+        .tms-filter-wrapper {
+            background: #ffffff;
+            border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 4px;
+        }
+        
+        .tms-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .tms-filter-group {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            flex-shrink: 0;
+            flex-direction: column;
         }
         
-        .oh-filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .oh-label {
-            display: block;
+        .tms-filter-label {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             color: #374151;
             margin-bottom: 6px;
         }
         
-        .oh-select, .oh-input {
-            width: 100%;
+        .tms-filter-input, .tms-filter-select {
             padding: 8px 12px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 14px;
-            color: #111827;
+            color: #1f2937;
             background: #ffffff;
+            transition: border-color 0.2s;
         }
         
-        .table-container {
-            flex: 1;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+        .tms-filter-input:focus, .tms-filter-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Table Section */
+        .tms-data-wrapper {
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 300px;
-            max-height: 500px;
         }
         
-        .table-scroll {
-            flex: 1;
+        .tms-data-top {
+            padding: 4px 5px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        
+        .tms-data-heading {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .tms-table-container {
+            max-height: 318px;
             overflow-y: auto;
-            min-height: 0;
             position: relative;
         }
         
-        .oh-table {
+        .tms-data-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 14px;
-            min-width: 800px;
         }
         
-        .oh-table thead {
+        .tms-data-table thead {
             position: sticky;
             top: 0;
             z-index: 10;
-            background: #f9fafb;
         }
         
-        .oh-table th {
-            padding: 12px 16px;
+        .tms-data-table th {
+            padding: 16px 20px;
             text-align: left;
             font-weight: 600;
             color: #374151;
-            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        
+        .tms-data-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+            background: #ffffff;
+        }
+        
+        .tms-data-table tbody tr:hover {
             background: #f9fafb;
         }
         
-        .oh-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
+        .tms-employee-info {
+            display: flex;
+            flex-direction: column;
         }
         
-        .oh-employee-info strong {
-            display: block;
-            color: #111827;
+        .tms-employee-name {
             font-weight: 600;
+            color: #1f2937;
             font-size: 14px;
         }
         
-        .oh-employee-info small {
+        .tms-employee-dept {
             color: #6b7280;
             font-size: 12px;
+            margin-top: 2px;
         }
         
-        .oh-category-tag {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+        .tms-course-title {
             font-weight: 500;
+            color: #1f2937;
         }
         
-        .oh-score {
+        .tms-category-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .tms-category-tag--compliance {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .tms-category-tag--finance {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .tms-category-tag--technical {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .tms-category-tag--operations {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .tms-category-tag--hr {
+            background: #fce7f3;
+            color: #be185d;
+        }
+        
+        .tms-category-tag--legal {
+            background: #f3e8ff;
+            color: #7c2d12;
+        }
+        
+        .tms-score-display {
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        .oh-score__value {
+        .tms-score-value {
             font-weight: 600;
-            color: #111827;
+            color: #1f2937;
         }
         
-        .oh-score__grade {
+        .tms-score-grade {
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
         }
         
-        .oh-btn--link {
-            background: none;
-            border: none;
-            color: #3b82f6;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 0;
+        .tms-grade-a { background: #dcfce7; color: #166534; }
+        .tms-grade-b { background: #dbeafe; color: #1e40af; }
+        .tms-grade-c { background: #fef3c7; color: #92400e; }
+        
+        .tms-date-text {
+            color: #6b7280;
+            font-size: 13px;
         }
         
-        .oh-btn--link:hover {
-            color: #1d4ed8;
+        .tms-duration-text {
+            color: #6b7280;
+            font-size: 13px;
         }
         
-        .no-results-row {
+        .tms-expiry-text {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        
+        .tms-expiry-expired {
+            color: #dc2626;
+            font-weight: 500;
+        }
+        
+        .tms-no-results {
             text-align: center;
             padding: 60px 20px;
             color: #6b7280;
             font-size: 16px;
         }
         
-        .no-results-cell {
-            border: none !important;
-            vertical-align: middle;
+        /* Custom scrollbar */
+        .tms-table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .tms-table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .tms-table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .tms-table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tms-main-container {
+                padding: 10px;
+            }
+            
+            .tms-page-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .tms-metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+            
+            .tms-filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tms-data-table {
+                min-width: 800px;
+            }
         }
     </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="oh-card">
-      <div class="oh-card__header">
-        <h4 class="oh-card__title">Training History & Records</h4>
-        <div class="oh-card__actions">
-          <button id="exportBtn" class="oh-btn">Export Report</button>
+    <div class="tms-main-container">
+        <div class="tms-page-header">
+            <h1 class="tms-page-title">Training History & Records</h1>
+            <button id="exportBtn" class="tms-export-btn">Export Report</button>
         </div>
-      </div>
-      <div class="oh-card__body">
-        <!-- Summary Stats -->
-        <div id="summaryGrid" class="oh-summary-grid">
-          <div class="oh-summary-item">
-            <span class="oh-summary-item__label">Total Completed</span>
-            <span id="totalCompleted" class="oh-summary-item__value">0</span>
-          </div>
-          <div class="oh-summary-item">
-            <span class="oh-summary-item__label">Total Hours</span>
-            <span id="totalHours" class="oh-summary-item__value">0</span>
-          </div>
-          <div class="oh-summary-item">
-            <span class="oh-summary-item__label">Certificates Issued</span>
-            <span id="totalCertificates" class="oh-summary-item__value">0</span>
-          </div>
-          <div class="oh-summary-item">
-            <span class="oh-summary-item__label">Average Score</span>
-            <span id="averageScore" class="oh-summary-item__value">0%</span>
-          </div>
-          <div class="oh-summary-item">
-            <span class="oh-summary-item__label">Expired Certificates</span>
-            <span id="expiredCertificates" class="oh-summary-item__value">0</span>
-          </div>
-        </div>
+        
+        <div class="tms-grid-layout">
+            <!-- Summary Stats -->
+            <div class="tms-metrics-grid">
+                <div class="tms-metric-box tms-metric-box--green">
+                    <div class="tms-metric-header">
+                        <span class="tms-metric-label">Total Completed</span>
+                    </div>
+                    <div class="tms-metric-content">
+                        <span id="totalCompleted" class="tms-metric-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="tms-metric-box tms-metric-box--amber">
+                    <div class="tms-metric-header">
+                        <span class="tms-metric-label">Total Hours</span>
+                    </div>
+                    <div class="tms-metric-content">
+                        <span id="totalHours" class="tms-metric-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="tms-metric-box tms-metric-box--blue">
+                    <div class="tms-metric-header">
+                        <span class="tms-metric-label">Certificates Issued</span>
+                    </div>
+                    <div class="tms-metric-content">
+                        <span id="totalCertificates" class="tms-metric-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="tms-metric-box tms-metric-box--gray">
+                    <div class="tms-metric-header">
+                        <span class="tms-metric-label">Average Score</span>
+                    </div>
+                    <div class="tms-metric-content">
+                        <span id="averageScore" class="tms-metric-value">0%</span>
+                    </div>
+                </div>
+                
+                <div class="tms-metric-box tms-metric-box--red">
+                    <div class="tms-metric-header">
+                        <span class="tms-metric-label">Expired Certificates</span>
+                    </div>
+                    <div class="tms-metric-content">
+                        <span id="expiredCertificates" class="tms-metric-value">0</span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Filter Section -->
-        <div class="oh-filter-section">
-          <div class="oh-filter-group">
-            <label class="oh-label">Employee</label>
-            <select id="employeeFilter" class="oh-select">
-              <option value="">All Employees</option>
-            </select>
-          </div>
-          <div class="oh-filter-group">
-            <label class="oh-label">Course Category</label>
-            <select id="categoryFilter" class="oh-select">
-              <option value="">All Categories</option>
-            </select>
-          </div>
-          <div class="oh-filter-group" style="min-width: 150px;">
-            <label class="oh-label">Year</label>
-            <select id="yearFilter" class="oh-select">
-              <option value="">All Years</option>
-            </select>
-          </div>
-          <div class="oh-filter-group">
-            <label class="oh-label">Search</label>
-            <input id="searchFilter" type="text" placeholder="Search courses..." class="oh-input">
-          </div>
-        </div>
+            <!-- Filter Section -->
+            <div class="tms-filter-wrapper">
+                <div class="tms-filter-grid">
+                    <div class="tms-filter-group">
+                        <label class="tms-filter-label">Employee</label>
+                        <select id="employeeFilter" class="tms-filter-select">
+                            <option value="">All Employees</option>
+                        </select>
+                    </div>
+                    <div class="tms-filter-group">
+                        <label class="tms-filter-label">Course Category</label>
+                        <select id="categoryFilter" class="tms-filter-select">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="tms-filter-group">
+                        <label class="tms-filter-label">Year</label>
+                        <select id="yearFilter" class="tms-filter-select">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+                    <div class="tms-filter-group">
+                        <label class="tms-filter-label">Search</label>
+                        <input id="searchFilter" type="text" placeholder="Search courses..." class="tms-filter-input">
+                    </div>
+                </div>
+            </div>
 
-        <!-- Training History Table -->
-        <div class="table-container">
-          <div class="table-scroll">
-            <table id="trainingTable" class="oh-table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Course Name</th>
-                  <th>Category</th>
-                  <th>Completion Date</th>
-                  <th>Duration</th>
-                  <th>Score</th>
-                  <th>Expiry Date</th>
-                </tr>
-              </thead>
-              <tbody id="trainingTableBody">
-                <!-- Data will be populated by JavaScript -->
-              </tbody>
-            </table>
-          </div>
+            <!-- Training History Table -->
+            <div class="tms-data-wrapper">
+                <div class="tms-data-top">
+                    <h3 class="tms-data-heading">Training History Records</h3>
+                </div>
+                <div class="tms-table-container">
+                    <table id="trainingTable" class="tms-data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Course Name</th>
+                                <th>Category</th>
+                                <th>Completion Date</th>
+                                <th>Duration</th>
+                                <th>Score</th>
+                                <th>Expiry Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trainingTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    const trainingData = [
-      {
-        employee: "Aarav", department: "HR", course: "POSH Compliance Training", category: "Compliance",
-        completionDate: "2024-03-10", duration: "2 hours", durationHours: 2, score: 94, certificate: true, expiryDate: "2024-05-01"
-      },
-      {
-        employee: "Priya", department: "Finance", course: "GST & Tax Regulation 2024", category: "Finance",
-        completionDate: "2024-02-18", duration: "6 hours", durationHours: 6, score: 88, certificate: true, expiryDate: "2026-02-18"
-      },
-      {
-        employee: "Rohit", department: "IT", course: "Cybersecurity Awareness", category: "Technical",
-        completionDate: "2024-01-25", duration: "3 hours", durationHours: 3, score: 97, certificate: true, expiryDate: "2026-01-25"
-      },
-      {
-        employee: "Neha", department: "Admin", course: "Office Procedures & Document Handling", category: "Operations",
-        completionDate: "2024-04-12", duration: "4 hours", durationHours: 4, score: 90, certificate: true, expiryDate: "2027-04-12"
-      },
-      {
-        employee: "Amit", department: "Payroll", course: "PF, ESI & Payroll Compliance", category: "Compliance",
-        completionDate: "2024-02-28", duration: "5 hours", durationHours: 5, score: 85, certificate: true, expiryDate: "2026-02-28"
-      },
-      {
-        employee: "Sneha", department: "HR", course: "Recruitment & Selection Best Practices", category: "HR",
-        completionDate: "2023-12-15", duration: "3 hours", durationHours: 3, score: 91, certificate: true, expiryDate: "2024-01-01"
-      },
-      {
-        employee: "Karan", department: "IT", course: "e-HRMS Software Training", category: "Technical",
-        completionDate: "2024-03-01", duration: "8 hours", durationHours: 8, score: 93, certificate: true, expiryDate: null
-      },
-      {
-        employee: "Divya", department: "Legal", course: "Labor Law Reforms 2024", category: "Legal",
-        completionDate: "2024-01-30", duration: "6 hours", durationHours: 6, score: 89, certificate: true, expiryDate: "2026-01-30"
-      },
-      {
-        employee: "Siddharth", department: "HR", course: "Employee Grievance Handling", category: "HR",
-        completionDate: "2024-05-10", duration: "3 hours", durationHours: 3, score: 92, certificate: true, expiryDate: "2026-05-10"
-      },
-      {
-        employee: "Anjali", department: "Finance", course: "Payroll Automation with Excel", category: "Technical",
-        completionDate: "2024-03-15", duration: "4 hours", durationHours: 4, score: 95, certificate: true, expiryDate: null
-      }
-    ];
+    <script>
+        const trainingData = [
+            {
+                employee: "Aarav", department: "HR", course: "POSH Compliance Training", category: "Compliance",
+                completionDate: "2024-03-10", duration: "2 hours", durationHours: 2, score: 94, certificate: true, expiryDate: "2024-05-01"
+            },
+            {
+                employee: "Priya", department: "Finance", course: "GST & Tax Regulation 2024", category: "Finance",
+                completionDate: "2024-02-18", duration: "6 hours", durationHours: 6, score: 88, certificate: true, expiryDate: "2026-02-18"
+            },
+            {
+                employee: "Rohit", department: "IT", course: "Cybersecurity Awareness", category: "Technical",
+                completionDate: "2024-01-25", duration: "3 hours", durationHours: 3, score: 97, certificate: true, expiryDate: "2026-01-25"
+            },
+            {
+                employee: "Neha", department: "Admin", course: "Office Procedures & Document Handling", category: "Operations",
+                completionDate: "2024-04-12", duration: "4 hours", durationHours: 4, score: 90, certificate: true, expiryDate: "2027-04-12"
+            },
+            {
+                employee: "Amit", department: "Payroll", course: "PF, ESI & Payroll Compliance", category: "Compliance",
+                completionDate: "2024-02-28", duration: "5 hours", durationHours: 5, score: 85, certificate: true, expiryDate: "2026-02-28"
+            },
+            {
+                employee: "Sneha", department: "HR", course: "Recruitment & Selection Best Practices", category: "HR",
+                completionDate: "2023-12-15", duration: "3 hours", durationHours: 3, score: 91, certificate: true, expiryDate: "2024-01-01"
+            },
+            {
+                employee: "Karan", department: "IT", course: "e-HRMS Software Training", category: "Technical",
+                completionDate: "2024-03-01", duration: "8 hours", durationHours: 8, score: 93, certificate: true, expiryDate: null
+            },
+            {
+                employee: "Divya", department: "Legal", course: "Labor Law Reforms 2024", category: "Legal",
+                completionDate: "2024-01-30", duration: "6 hours", durationHours: 6, score: 89, certificate: true, expiryDate: "2026-01-30"
+            },
+            {
+                employee: "Siddharth", department: "HR", course: "Employee Grievance Handling", category: "HR",
+                completionDate: "2024-05-10", duration: "3 hours", durationHours: 3, score: 92, certificate: true, expiryDate: "2026-05-10"
+            },
+            {
+                employee: "Anjali", department: "Finance", course: "Payroll Automation with Excel", category: "Technical",
+                completionDate: "2024-03-15", duration: "4 hours", durationHours: 4, score: 95, certificate: true, expiryDate: null
+            }
+        ];
 
-    let filteredData = [...trainingData];
+        let filteredData = [...trainingData];
 
-    function init() {
-      populateFilters();
-      renderTable(filteredData);
-      updateSummaryStats(filteredData);
-      setupEventListeners();
-    }
+        function init() {
+            populateFilters();
+            renderTable(filteredData);
+            updateSummaryStats(filteredData);
+            setupEventListeners();
+        }
 
-    function populateFilters() {
-      const employees = [...new Set(trainingData.map(item => item.employee))].sort();
-      const categories = [...new Set(trainingData.map(item => item.category))].sort();
-      const years = [...new Set(trainingData.map(item => new Date(item.completionDate).getFullYear()))].sort((a, b) => b - a);
+        function populateFilters() {
+            const employees = [...new Set(trainingData.map(item => item.employee))].sort();
+            const categories = [...new Set(trainingData.map(item => item.category))].sort();
+            const years = [...new Set(trainingData.map(item => new Date(item.completionDate).getFullYear()))].sort((a, b) => b - a);
 
-      populateSelect('employeeFilter', employees);
-      populateSelect('categoryFilter', categories);
-      populateSelect('yearFilter', years);
-    }
+            populateSelect('employeeFilter', employees);
+            populateSelect('categoryFilter', categories);
+            populateSelect('yearFilter', years);
+        }
 
-    function populateSelect(id, options) {
-      const select = document.getElementById(id);
-      options.forEach(option => {
-        const el = document.createElement('option');
-        el.value = option;
-        el.textContent = option;
-        select.appendChild(el);
-      });
-    }
+        function populateSelect(id, options) {
+            const select = document.getElementById(id);
+            options.forEach(option => {
+                const el = document.createElement('option');
+                el.value = option;
+                el.textContent = option;
+                select.appendChild(el);
+            });
+        }
 
-    function renderTable(data) {
-      const tbody = document.getElementById('trainingTableBody');
-      if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="no-results-cell">No training records found matching your criteria.</td></tr>`;
-        return;
-      }
+        function renderTable(data) {
+            const tbody = document.getElementById('trainingTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="tms-no-results">No training records found matching your criteria.</td></tr>`;
+                return;
+            }
 
-      tbody.innerHTML = data.map(item => `
-        <tr>
+            tbody.innerHTML = data.map(item => `
+                <tr>
                     <td>
-                        <div class="oh-employee-info">
-                            <strong>${item.employee}</strong>
-                            <small>${item.department}</small>
+                        <div class="tms-employee-info">
+                            <span class="tms-employee-name">${item.employee}</span>
+                            <span class="tms-employee-dept">${item.department}</span>
                         </div>
                     </td>
-                    <td style="color: #111827;">${item.course}</td>
+                    <td><span class="tms-course-title">${item.course}</span></td>
                     <td>
-                        <span class="oh-category-tag" style="${getCategoryStyle(item.category)}">${item.category}</span>
+                        <span class="tms-category-tag ${getCategoryClass(item.category)}">${item.category}</span>
                     </td>
-                    <td style="color: #6b7280;">${item.completionDate}</td>
-                    <td style="color: #6b7280;">${item.duration}</td>
+                    <td><span class="tms-date-text">${formatDate(item.completionDate)}</span></td>
+                    <td><span class="tms-duration-text">${item.duration}</span></td>
                     <td>
-                        <div class="oh-score">
-                            <span class="oh-score__value">${item.score}%</span>
-                            <span class="oh-score__grade" style="${getGradeStyle(item.score)}">${getGrade(item.score)}</span>
+                        <div class="tms-score-display">
+                            <span class="tms-score-value">${item.score}%</span>
+                            <span class="tms-score-grade ${getGradeClass(item.score)}">${getGrade(item.score)}</span>
                         </div>
                     </td>
-                    <td style="color: #6b7280;">${item.expiryDate || 'No Expiry'}</td>
-        </tr>
-      `).join('');
-    }
+                    <td>
+                        <span class="tms-expiry-text ${isExpired(item.expiryDate) ? 'tms-expiry-expired' : ''}">
+                            ${item.expiryDate ? formatDate(item.expiryDate) : 'No Expiry'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-        // Helper functions for styling
-        function getCategoryStyle(category) {
-            const styles = {
-                'Safety': 'background: #fef2f2; color: #dc2626;',
-                'Leadership': 'background: #ede9fe; color: #7c3aed;',
-                'Compliance': 'background: #fef3c7; color: #d97706;',
-                'Technical': 'background: #ecfdf5; color: #059669;'
+        function getCategoryClass(category) {
+            const classes = {
+                'Compliance': 'tms-category-tag--compliance',
+                'Finance': 'tms-category-tag--finance',
+                'Technical': 'tms-category-tag--technical',
+                'Operations': 'tms-category-tag--operations',
+                'HR': 'tms-category-tag--hr',
+                'Legal': 'tms-category-tag--legal'
             };
-            return styles[category] || 'background: #f3f4f6; color: #374151;';
+            return classes[category] || 'tms-category-tag--compliance';
         }
 
-        function getGradeStyle(score) {
-            if (score >= 95) return 'background: #dcfce7; color: #166534;';
-            if (score >= 90) return 'background: #dcfce7; color: #166534;';
-            if (score >= 85) return 'background: #dbeafe; color: #1e40af;';
-            if (score >= 80) return 'background: #fef3c7; color: #d97706;';
-            return 'background: #fef2f2; color: #dc2626;';
+        function getGradeClass(score) {
+            if (score >= 90) return 'tms-grade-a';
+            if (score >= 80) return 'tms-grade-b';
+            return 'tms-grade-c';
         }
 
-    function getGrade(score) {
-      if (score >= 97) return 'A+';
-      if (score >= 93) return 'A';
-      if (score >= 90) return 'A-';
-      if (score >= 87) return 'B+';
-      if (score >= 83) return 'B';
-      if (score >= 80) return 'B-';
+        function getGrade(score) {
+            if (score >= 97) return 'A+';
+            if (score >= 93) return 'A';
+            if (score >= 90) return 'A-';
+            if (score >= 87) return 'B+';
+            if (score >= 83) return 'B';
+            if (score >= 80) return 'B-';
             if (score >= 77) return 'C+';
             if (score >= 73) return 'C';
             return 'C-';
-    }
+        }
 
-    function updateSummaryStats(data) {
-      const totalCompleted = data.length;
-      const totalHours = data.reduce((sum, item) => sum + item.durationHours, 0);
-      const totalCertificates = data.filter(item => item.certificate).length;
-      const averageScore = totalCompleted > 0 ? (data.reduce((sum, item) => sum + item.score, 0) / totalCompleted).toFixed(1) : 0;
-      const expiredCertificates = data.filter(item =>
-        item.certificate && item.expiryDate && new Date(item.expiryDate) < new Date()
-      ).length;
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
 
-      document.getElementById('totalCompleted').textContent = totalCompleted;
-      document.getElementById('totalHours').textContent = totalHours;
-      document.getElementById('totalCertificates').textContent = totalCertificates;
-      document.getElementById('averageScore').textContent = averageScore + '%';
-      document.getElementById('expiredCertificates').textContent = expiredCertificates;
-    }
+        function isExpired(expiryDate) {
+            if (!expiryDate) return false;
+            return new Date(expiryDate) < new Date();
+        }
 
-    function applyFilters() {
-      const employee = document.getElementById('employeeFilter').value;
-      const category = document.getElementById('categoryFilter').value;
-      const year = document.getElementById('yearFilter').value;
-      const search = document.getElementById('searchFilter').value.toLowerCase();
+        function updateSummaryStats(data) {
+            const totalCompleted = data.length;
+            const totalHours = data.reduce((sum, item) => sum + item.durationHours, 0);
+            const totalCertificates = data.filter(item => item.certificate).length;
+            const averageScore = totalCompleted > 0 ? (data.reduce((sum, item) => sum + item.score, 0) / totalCompleted).toFixed(1) : 0;
+            const expiredCertificates = data.filter(item =>
+                item.certificate && item.expiryDate && new Date(item.expiryDate) < new Date()
+            ).length;
 
-      filteredData = trainingData.filter(item => {
-        const matchesEmployee = !employee || item.employee === employee;
-        const matchesCategory = !category || item.category === category;
-        const matchesYear = !year || new Date(item.completionDate).getFullYear().toString() === year;
-        const matchesSearch = !search ||
-          item.employee.toLowerCase().includes(search) ||
-          item.course.toLowerCase().includes(search) ||
-          item.category.toLowerCase().includes(search);
+            document.getElementById('totalCompleted').textContent = totalCompleted;
+            document.getElementById('totalHours').textContent = totalHours;
+            document.getElementById('totalCertificates').textContent = totalCertificates;
+            document.getElementById('averageScore').textContent = averageScore + '%';
+            document.getElementById('expiredCertificates').textContent = expiredCertificates;
+        }
 
-        return matchesEmployee && matchesCategory && matchesYear && matchesSearch;
-      });
+        function applyFilters() {
+            const employee = document.getElementById('employeeFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
 
-      renderTable(filteredData);
-      updateSummaryStats(filteredData);
-    }
+            filteredData = trainingData.filter(item => {
+                const matchesEmployee = !employee || item.employee === employee;
+                const matchesCategory = !category || item.category === category;
+                const matchesYear = !year || new Date(item.completionDate).getFullYear().toString() === year;
+                const matchesSearch = !search ||
+                    item.employee.toLowerCase().includes(search) ||
+                    item.course.toLowerCase().includes(search) ||
+                    item.category.toLowerCase().includes(search);
 
-    function setupEventListeners() {
-      document.getElementById('employeeFilter').addEventListener('change', applyFilters);
-      document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-      document.getElementById('yearFilter').addEventListener('change', applyFilters);
-      document.getElementById('searchFilter').addEventListener('input', applyFilters);
+                return matchesEmployee && matchesCategory && matchesYear && matchesSearch;
+            });
 
-      document.getElementById('exportBtn').addEventListener('click', function () {
-        const csv = [];
-        const headers = ["Employee", "Course Name", "Category", "Completion Date", "Duration", "Score", "Certificate", "Expiry Date"];
-        csv.push(headers.join(","));
+            renderTable(filteredData);
+            updateSummaryStats(filteredData);
+        }
 
-        filteredData.forEach(item => {
-          const row = [
-            item.employee, item.course, item.category, item.completionDate,
-            item.duration, item.score + "%", item.certificate ? 'Available' : 'N/A',
-            item.expiryDate || 'No Expiry'
-          ];
-          csv.push(row.map(v => `"${v}"`).join(","));
-        });
+        function setupEventListeners() {
+            document.getElementById('employeeFilter').addEventListener('change', applyFilters);
+            document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+            document.getElementById('yearFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
 
-        const csvBlob = new Blob([csv.join("\n")], { type: "text/csv" });
-        const url = URL.createObjectURL(csvBlob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "training_history_report.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-    }
+            document.getElementById('exportBtn').addEventListener('click', function () {
+                const csv = [];
+                const headers = ["Employee", "Department", "Course Name", "Category", "Completion Date", "Duration", "Score", "Certificate", "Expiry Date"];
+                csv.push(headers.join(","));
 
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
+                filteredData.forEach(item => {
+                    const row = [
+                        item.employee, item.department, item.course, item.category, item.completionDate,
+                        item.duration, item.score + "%", item.certificate ? 'Available' : 'N/A',
+                        item.expiryDate || 'No Expiry'
+                    ];
+                    csv.push(row.map(v => `"${v}"`).join(","));
+                });
+
+                const csvBlob = new Blob([csv.join("\n")], { type: "text/csv" });
+                const url = URL.createObjectURL(csvBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "training_history_report.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
-
 </html>
-
 {% endblock %}
