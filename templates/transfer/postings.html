@@ -3,12 +3,32 @@
 {% load i18n %}
 
 {% block content %}
-<div class="oh-card">
+<style>
+    .oh-input:focus,
+    select.oh-input:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    select.oh-input {
+        appearance: auto;
+        background-color: #fff;
+        cursor: pointer;
+        border: 1px solid #ced4da;
+    }
+
+    select.oh-input:hover {
+        border-color: #80bdff;
+    }
+</style>
+
+<div class="oh-card bg-transparent">
     <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h4 class="oh-card__title">{% trans "Postings" %}</h4>
+        <h4 class="oh-card__title" style="font-weight: 600;">{% trans "Postings" %}</h4>
         <div class="oh-card__actions">
             <div class="oh-btn-group">
-                <a href="#" class="oh-btn oh-btn--primary" onclick="toggleModal('createPostingModal')">
+                <a href="#" class="oh-btn oh-btn--primary" style="background-color: #ff3b38;" onclick="toggleModal('createPostingModal')">
                     <ion-icon name="add-outline" class="mr-2"></ion-icon>
                     {% trans "Create" %}
                 </a>
@@ -19,10 +39,11 @@
         <table class="oh-table">
             <thead>
                 <tr class="oh-table__row">
-                    <th class="oh-table__cell">{% trans "Job Title" %}</th>
-                    <th class="oh-table__cell">{% trans "Department" %}</th>
-                    <th class="oh-table__cell">{% trans "Location" %}</th>
-                    <th class="oh-table__cell">{% trans "Date Posted" %}</th>
+                    <th class="oh-table__cell" style="font-size: 13px;">{% trans "Job Title" %}</th>
+                    <th class="oh-table__cell" style="font-size: 13px;">{% trans "Department" %}</th>
+                    <th class="oh-table__cell" style="font-size: 13px;">{% trans "Location" %}</th>
+                    <th class="oh-table__cell" style="font-size: 13px;">{% trans "Vacancy" %}</th>
+                    <th class="oh-table__cell" style="font-size: 13px;">{% trans "Date Posted" %}</th>
                 </tr>
             </thead>
             <tbody id="postings-table-body">
@@ -33,46 +54,54 @@
 </div>
 
 <div class="oh-modal" id="createPostingModal">
-    <div class="oh-modal__dialog" style="max-width: 800px;">
-        <div class="oh-modal__dialog-header">
-            <h5 class="oh-modal__dialog-title">{% trans "New Posting" %}</h5>
-            <button class="oh-modal__close" onclick="toggleModal('createPostingModal')">&times;</button>
+    <div class="oh-modal__dialog" style="max-width: 600px; width: 90%; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 85vh; overflow-y: auto;">
+        <div class="oh-modal__dialog-header" style="padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+            <h5 class="oh-modal__dialog-title" style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">{% trans "New Posting" %}</h5>
+            <button class="oh-modal__close" onclick="toggleModal('createPostingModal')" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">&times;</button>
         </div>
-        <div class="oh-modal__dialog-content">
+        <div class="oh-modal__dialog-body" style="padding: 15px 20px;">
             <form id="create-posting-form">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="oh-form-group">
-                            <label for="position-input" class="oh-label">{% trans "Job Title" %} *</label>
-                            <input type="text" id="position-input" class="oh-input" placeholder="Enter job title">
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="position-input" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">{% trans "Job Title" %} *</label>
+                            <input type="text" id="position-input" class="oh-input" placeholder="Enter job title" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="oh-form-group">
-                            <label for="department-input" class="oh-label">{% trans "Department" %} *</label>
-                            <input type="text" id="department-input" class="oh-input" placeholder="Enter department">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="oh-form-group">
-                            <label for="location-input" class="oh-label">{% trans "Location" %} *</label>
-                            <input type="text" id="location-input" class="oh-input" placeholder="Enter location">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="oh-form-group">
-                            <label for="start-date-input" class="oh-label">{% trans "Date Posted" %} *</label>
-                            <input type="date" id="start-date-input" class="oh-input">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="department-input" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">{% trans "Department" %} *</label>
+                            <input type="text" id="department-input" class="oh-input" placeholder="Enter department" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
                 </div>
-                <div class="oh-modal__dialog-footer">
-                    <button type="button" class="oh-btn oh-btn--secondary" onclick="toggleModal('createPostingModal')">{% trans "Cancel" %}</button>
-                    <button type="submit" class="oh-btn oh-btn--primary">{% trans "Create" %}</button>
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="location-input" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">{% trans "Location" %} *</label>
+                            <input type="text" id="location-input" class="oh-input" placeholder="Enter location" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="vacancy-input" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">{% trans "Vacancy" %} *</label>
+                            <input type="number" id="vacancy-input" class="oh-input" placeholder="Enter vacancy count" min="1" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label for="start-date-input" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">{% trans "Date Posted" %} *</label>
+                            <input type="date" id="start-date-input" class="oh-input" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
+                        </div>
+                    </div>
                 </div>
             </form>
+        </div>
+        <div class="oh-modal__dialog-footer" style="padding: 12px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 8px;">
+            <!-- <button type="button" class="oh-btn oh-btn--secondary" onclick="toggleModal('createPostingModal')" style="padding: 6px 12px; font-size: 13px;">{% trans "Cancel" %}</button> -->
+            <button type="submit" form="create-posting-form" class="oh-btn oh-btn--primary" style="padding: 6px 12px; font-size: 13px; background-color: #ff3b38;">{% trans "Create" %}</button>
         </div>
     </div>
 </div>
@@ -90,10 +119,11 @@
         postings.forEach(p => {
             const row = tableBody.insertRow();
             row.innerHTML = `
-                <td>${p.position_name}</td>
-                <td>${p.department}</td>
-                <td>${p.location}</td>
-                <td>${p.start_date}</td>
+                <td style="font-size: 13px;">${p.position_name}</td>
+                <td style="font-size: 13px;">${p.department}</td>
+                <td style="font-size: 13px;">${p.location}</td>
+                <td style="font-size: 13px;">${p.vacancy || ''}</td>
+                <td style="font-size: 13px;">${p.start_date}</td>
             `;
         });
     }
@@ -105,6 +135,7 @@
             department: document.getElementById('department-input').value,
             location: document.getElementById('location-input').value,
             start_date: document.getElementById('start-date-input').value,
+            vacancy: document.getElementById('vacancy-input').value,
         };
 
         if (!newPosting.position_name) return;
