@@ -3,63 +3,139 @@
 {% load i18n %}
 
 {% block content %}
-<div class="oh-card">
-    <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h4 class="oh-card__title">{% trans "Transfer Requests" %}</h4>
-        <div class="oh-card__actions">
-            <div class="oh-btn-group">
-                <a href="#" class="oh-btn oh-btn--primary" onclick="toggleModal('createTransferRequestModal')">
-                    <ion-icon name="add-outline" class="mr-2"></ion-icon>
-                    {% trans "Create" %}
-                </a>
+<style>
+    /* Ensure select and input fields look identical and have the same focus border */
+    .oh-input,
+    select.oh-input {
+        border: 1.5px solid #ced4da !important;
+        border-radius: 4px !important;
+        font-size: 13px !important;
+        padding: 8px 10px !important;
+        background: #fff !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: none !important;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+    .oh-input:focus,
+    select.oh-input:focus {
+        border: 1.5px solid #1976d2 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.10) !important;
+    }
+
+    /* Optional: Add a custom arrow for select to match input style */
+    select.oh-input {
+        background-image: url('data:image/svg+xml;utf8,<svg fill="%23999" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 20px 20px;
+        padding-right: 32px !important;
+    }
+
+    /* Make select and input fields look the same, especially on focus */
+    .oh-input,
+    .oh-input:focus,
+    select.oh-input,
+    select.oh-input:focus {
+        border: 1.5px solid #aeaeae;
+        border-radius: 4px;
+        font-size: 13px;
+        padding: 8px 10px;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .oh-input:focus,
+    select.oh-input:focus {
+        border: 1.5px solid #1976d2 !important; /* Your primary color */
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.10); /* Optional subtle glow */
+    }
+
+    select.oh-input {
+        appearance: auto;
+        background-color: #fff;
+        cursor: pointer;
+        border: 1px solid #ced4da;
+    }
+
+    select.oh-input:hover {
+        border-color: #80bdff;
+    }
+
+    #to-container select.oh-input:focus {
+        border: 1.5px solid #1976d2 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+    }
+</style>
+
+<div class="oh-wrapper m-0" style="max-width: 100%;">
+    <div class="oh-content">
+        <div class="oh-row">
+            <div class="oh-card bg-transparent">
+                <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 class="oh-card__title" style="font-weight: 600;">{% trans "Transfer Requests" %}</h4>
+                    <div class="oh-card__actions">
+                        <div class="oh-btn-group">
+                            <a href="#" class="oh-btn oh-btn--primary" style="background-color: #ff3b38;" onclick="toggleModal('createTransferRequestModal')">
+                                <ion-icon name="add-outline" class="mr-2"></ion-icon>
+                                {% trans "Create" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="oh-card__body">
+                    <table class="oh-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Current Department</th>
+                                <th>Requested Department</th>
+                                <th>Requested Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="request-table-body">
+                            <!-- Table content will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="oh-card__body">
-        <table class="oh-table">
-            <thead>
-                <tr>
-                    <th>{% trans "Employee" %}</th>
-                    <th>{% trans "Current Department" %}</th>
-                    <th>{% trans "Requested Department" %}</th>
-                    <th>{% trans "Requested Date" %}</th>
-                    <th>{% trans "Status" %}</th>
-                </tr>
-            </thead>
-            <tbody id="request-table-body">
-                <!-- Rows will be injected by JavaScript -->
-            </tbody>
-        </table>
     </div>
 </div>
 
 <div class="oh-modal" id="createTransferRequestModal">
-    <div class="oh-modal__dialog" style="max-width: 800px; width: 90%; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;">
-        <div class="oh-modal__dialog-header" style="padding: 20px 24px 16px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
-            <h5 class="oh-modal__dialog-title" style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">New Transfer Request</h5>
-            <button class="oh-modal__close" onclick="toggleModal('createTransferRequestModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+    <div class="oh-modal__dialog" style="max-width: 600px; width: 90%; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 85vh; overflow-y: auto;">
+        <div class="oh-modal__dialog-header" style="padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+            <h5 class="oh-modal__dialog-title" style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">New Transfer Request</h5>
+            <button class="oh-modal__close" onclick="toggleModal('createTransferRequestModal')" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">&times;</button>
         </div>
-        <div class="oh-modal__dialog-body" style="padding: 24px;">
+        <div class="oh-modal__dialog-body" style="padding: 15px 20px;">
             <form id="create-transfer-request-form">
-                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="employee-request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Employee *</label>
-                            <input type="text" id="employee-request" class="oh-input" placeholder="Enter employee name" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                            <label for="employee-request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">Employee *</label>
+                            <input type="text" id="employee-request" class="oh-input" placeholder="Enter employee name" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="email-request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Email *</label>
-                            <input type="email" id="email-request" class="oh-input" placeholder="Enter email address" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                            <label for="email-request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">Email *</label>
+                            <input type="email" id="email-request" class="oh-input" placeholder="Enter email address" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
                 </div>
-                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="transfer_type_request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Transfer Type *</label>
-                            <select id="transfer_type_request" class="oh-input" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: white; transition: border-color 0.15s ease-in-out;">
+                            <label for="transfer_type_request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">Transfer Type *</label>
+                            <select id="transfer_type_request" class="oh-input" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                                 <option value="">Select transfer type</option>
                                 <option value="DEPARTMENT">Department</option>
                                 <option value="POSITION">Position</option>
@@ -67,48 +143,85 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="from-request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">From *</label>
-                            <input type="text" id="from-request" class="oh-input" placeholder="Current department/position" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                            <label for="from-request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">From *</label>
+                            <input type="text" id="from-request" class="oh-input" placeholder="Current department/position/location" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
                 </div>
-                <div class="row" style="display: flex; margin: 0 -12px; margin-bottom: 20px;">
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                <div class="row" style="display: flex; margin: 0 -8px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="to-request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">To *</label>
-                            <input type="text" id="to-request" class="oh-input" placeholder="New department/position" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                            <label for="to-request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">To *</label>
+                            <div id="to-container">
+                                <!-- This will be populated by JavaScript based on transfer type -->
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 12px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
                         <div class="oh-form-group" style="margin-bottom: 0;">
-                            <label for="request_date_request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Request Date *</label>
-                            <input type="date" id="request_date_request" class="oh-input" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; transition: border-color 0.15s ease-in-out;">
+                            <label for="request_date_request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">Request Date *</label>
+                            <input type="date" id="request_date_request" class="oh-input" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px;">
                         </div>
                     </div>
                 </div>
                 <div class="oh-form-group" style="margin-bottom: 0;">
-                    <label for="reason-request" class="oh-label" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Reason for Transfer</label>
-                    <textarea id="reason-request" class="oh-input" rows="3" placeholder="Enter reason for transfer (optional)" style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; resize: vertical; min-height: 80px; transition: border-color 0.15s ease-in-out;"></textarea>
+                    <label for="reason-request" class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 13px;">Reason for Transfer</label>
+                    <textarea id="reason-request" class="oh-input" rows="2" placeholder="Enter reason for transfer (optional)" style="width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; resize: vertical; min-height: 60px;"></textarea>
                 </div>
             </form>
         </div>
-        <div class="oh-modal__dialog-footer" style="padding: 16px 24px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 12px;">
-            <button class="oh-btn oh-btn--secondary" onclick="toggleModal('createTransferRequestModal')" style="padding: 10px 20px; border: 1px solid #6c757d; background-color: transparent; color: #6c757d; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s ease-in-out;">Cancel</button>
-            <button class="oh-btn oh-btn--danger" id="save-transfer-request-btn" style="padding: 10px 20px; border: 1px solid #dc3545; background-color: #dc3545; color: white; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s ease-in-out;">Save Transfer</button>
+        <div class="oh-modal__dialog-footer" style="padding: 12px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 8px;">
+            <!-- <button class="oh-btn oh-btn--secondary" onclick="toggleModal('createTransferRequestModal')" style="padding: 6px 12px; font-size: 13px;">Cancel</button> -->
+            <button class="oh-btn oh-btn--primary" id="save-transfer-request-btn" style="padding: 6px 12px; font-size: 13px; background-color: #ff3b38;">Save Transfer</button>
         </div>
     </div>
 </div>
 
 <script>
-    function toggleModal(modalID) {
-        document.getElementById(modalID).classList.toggle('oh-modal--show');
+    function getTransfers() {
+        return [
+            {
+                employee: "Ritha",
+                email: "ritha.s@tringapps.com",
+                from: "Engineering",
+                to: "Product",
+                request_date: "2025-06-15",
+                status: "PENDING"
+            },
+            {
+                employee: "John Doe",
+                email: "john.doe@example.com",
+                from: "Marketing",
+                to: "Sales",
+                request_date: "2024-07-01",
+                status: "APPROVED"
+            },
+            {
+                employee: "Jane Smith",
+                email: "jane.smith@example.com",
+                from: "Sales",
+                to: "Marketing",
+                request_date: "2024-07-05",
+                status: "REJECTED"
+            },
+            {
+                employee: "Peter Jones",
+                email: "peter.jones@example.com",
+                from: "Engineering",
+                to: "Product",
+                request_date: "2024-07-10",
+                status: "PENDING"
+            }
+        ];
     }
 
     function renderRequestsTable() {
         const transfers = getTransfers();
         const tableBody = document.getElementById('request-table-body');
+        if (!tableBody) return;
+        
         tableBody.innerHTML = '';
 
         transfers.forEach(t => {
@@ -123,10 +236,111 @@
                 <td>${t.from}</td>
                 <td>${t.to}</td>
                 <td>${t.request_date}</td>
-                <td><span class="oh-badge oh-badge--${t.status === 'PENDING' ? 'warning' : t.status === 'APPROVED' ? 'success' : 'danger'}">${t.status}</span></td>
+                <td>
+                    <span class="oh-status oh-status--${t.status.toLowerCase() === 'pending' ? 'warning' : 
+                                                      t.status.toLowerCase() === 'approved' ? 'success' : 'danger'}">
+                        ${t.status}
+                    </span>
+                </td>
             `;
         });
     }
+
+    function initializePostings() {
+        console.log('Initializing postings');
+        if (!localStorage.getItem('horillaPostings')) {
+            const initialPostings = [
+                { id: 1, position_name: 'Frontend Developer', department: 'Engineering', vacancy: 5 },
+                { id: 2, position_name: 'Marketing Manager', department: 'Marketing', vacancy: 3 },
+                { id: 3, position_name: 'Sales Executive', department: 'Sales', vacancy: 2 },
+                { id: 4, position_name: 'Product Manager', department: 'Product', vacancy: 4 }
+            ];
+            localStorage.setItem('horillaPostings', JSON.stringify(initialPostings));
+        }
+    }
+
+    function getPostings() {
+        return JSON.parse(localStorage.getItem('horillaPostings') || '[]');
+    }
+
+    function updateToField() {
+        console.log('Updating To field');
+        const transferType = document.getElementById('transfer_type_request').value;
+        const toContainer = document.getElementById('to-container');
+        
+        console.log('Transfer type:', transferType);
+        console.log('To container found:', !!toContainer);
+
+        if (!toContainer) {
+            console.error('To container not found');
+            return;
+        }
+
+        if (transferType === 'POSITION') {
+            console.log('Showing position dropdown');
+            const postings = getPostings();
+            const selectHtml = `
+                <select id="to-request" name="to-request" class="oh-input w-100" required>
+                    <option value="">Select position</option>
+                    ${postings
+                        .filter(p => p.vacancy > 0)
+                        .map(p => `<option value="${p.id}">${p.position_name} (${p.department}) - ${p.vacancy} vacancies</option>`)
+                        .join('')}
+                </select>
+            `;
+            toContainer.innerHTML = selectHtml;
+        } else {
+            console.log('Showing text input');
+            const placeholder = transferType 
+                ? `New ${transferType.toLowerCase()}` 
+                : 'New department/position/location';
+            toContainer.innerHTML = `
+                <input type="text" 
+                       id="to-request" 
+                       name="to-request"
+                       class="oh-input w-100" 
+                       placeholder="${placeholder}" 
+                       required>
+            `;
+        }
+    }
+
+    function toggleModal(modalID) {
+        const modal = document.getElementById(modalID);
+        if (modal) {
+            modal.classList.toggle('oh-modal--show');
+            if (modalID === 'createTransferRequestModal') {
+                const form = document.getElementById('create-transfer-request-form');
+                if (form) {
+                    form.reset();
+                    updateToField(); // Update fields after reset
+                }
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded');
+        
+        // Initialize the transfer type select element
+        const transferTypeSelect = document.getElementById('transfer_type_request');
+        if (transferTypeSelect) {
+            console.log('Transfer type select found');
+            transferTypeSelect.addEventListener('change', function() {
+                console.log('Transfer type changed to:', this.value);
+                updateToField();
+            });
+        }
+
+        // Initialize postings data
+        initializePostings();
+        
+        // Initial field update
+        updateToField();
+
+        // Render the transfer requests table
+        renderRequestsTable();
+    });
 
     document.getElementById('save-transfer-request-btn').addEventListener('click', function() {
         const newTransfer = {
@@ -137,7 +351,7 @@
             to: document.getElementById('to-request').value,
             request_date: document.getElementById('request_date_request').value,
             status: 'PENDING',
-            reason: document.getElementById('reason-request').value // Placeholder
+            reason: document.getElementById('reason-request').value
         };
 
         if (!newTransfer.employee) return;
@@ -146,7 +360,5 @@
         toggleModal('createTransferRequestModal');
         renderRequestsTable();
     });
-
-    document.addEventListener('DOMContentLoaded', renderRequestsTable);
 </script>
 {% endblock %} 

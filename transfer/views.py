@@ -1,4 +1,5 @@
 from django.views.generic import TemplateView
+from .models import Posting
 
 class DashboardView(TemplateView):
     template_name = "transfer/dashboard.html"
@@ -15,5 +16,13 @@ class DashboardView(TemplateView):
 class TransferRequestsView(TemplateView):
     template_name = "transfer/transfer_requests.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['postings'] = Posting.objects.filter(vacancy__gt=0)
+        return context
+
 class PostingsView(TemplateView):
-    template_name = "transfer/postings.html" 
+    template_name = "transfer/postings.html"
+
+def get_available_postings():
+    return Posting.objects.filter(vacancy__gt=0) 

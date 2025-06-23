@@ -5,105 +5,136 @@
 {% block content %}
 <style>
     .summary-card {
+        background: #fff;
+        border-radius: 4px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        position: relative;
+        border: 1px solid #eee;
+    }
+
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .summary-card.total::before { background-color: #0d6efd; }
+    .summary-card.pending::before { background-color: #ffc107; }
+    .summary-card.approved::before { background-color: #198754; }
+    .summary-card.rejected::before { background-color: #dc3545; }
+
+    .summary-card__title {
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+
+    .summary-card__count {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #333;
+        line-height: 1;
+    }
+
+    .search-filters {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem;
-        border-radius: 8px;
-        background-color: #fff;
-        border: 1px solid #e0e0e0;
-        border-left-width: 5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin: 24px 0;
     }
-    .summary-card.total { border-left-color: #0d6efd; }
-    .summary-card.pending { border-left-color: #ffc107; }
-    .summary-card.approved { border-left-color: #198754; }
-    .summary-card.rejected { border-left-color: #dc3545; }
 
-    .summary-card.total .summary-card__icon { color: #0d6efd; }
-    .summary-card.pending .summary-card__icon { color: #ffc107; }
-    .summary-card.approved .summary-card__icon { color: #198754; }
-    .summary-card.rejected .summary-card__icon { color: #dc3545; }
+    .search-input {
+        width: 300px;
+    }
 
-    .summary-card__count { font-size: 2.5rem; font-weight: bold; color: #333; }
-    .summary-card__title { font-size: 1rem; color: #777; }
-    .summary-card__icon { font-size: 2rem; opacity: 0.8; }
+    .filter-group {
+        display: flex;
+        gap: 1rem;
+    }
 </style>
 
-<div class="oh-card">
-    <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
+<div class="oh-card bg-transparent">
+    <!-- <div class="oh-card__header">
         <h4 class="oh-card__title">{% trans "Transfer & Posting" %}</h4>
-        <!-- <div class="oh-card__actions">
-             <a href="#" class="oh-btn oh-btn--sm oh-btn--primary" onclick="toggleModal('createTransferModal')">
-                 <ion-icon name="add-outline" class="mr-2"></ion-icon>
-                 {% trans "New Transfer" %}
-             </a>
-        </div> -->
-    </div>
+    </div> -->
 
-    <div class="oh-card__body">
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="summary-card total">
-                    <div>
-                        <div id="total-transfers" class="summary-card__count">0</div>
-                        <div class="summary-card__title">{% trans "Total Transfers" %}</div>
+    <div class="oh-card__body mt-4">
+        <div class="oh-dashboard__cards row mb-4">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-3">
+                <div class="oh-card-dashboard oh-card-dashboard--neutral dash-card">
+                    <div class="oh-card-dashboard__header">
+                        <span class="oh-card-dashboard__title">{% trans "Total Transfers" %}</span>
                     </div>
-                    <ion-icon name="swap-horizontal-outline" class="summary-card__icon"></ion-icon>
+                    <div class="oh-card-dashboard__body">
+                        <div class="oh-card-dashboard__counts">
+                            <span class="oh-card-dashboard__count" id="total-transfers">3</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card pending">
-                    <div>
-                        <div id="pending-transfers" class="summary-card__count">0</div>
-                        <div class="summary-card__title">{% trans "Pending" %}</div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-3">
+                <div class="oh-card-dashboard oh-card-dashboard--warning dash-card">
+                    <div class="oh-card-dashboard__header">
+                        <span class="oh-card-dashboard__title">{% trans "Pending" %}</span>
                     </div>
-                    <ion-icon name="time-outline" class="summary-card__icon"></ion-icon>
+                    <div class="oh-card-dashboard__body">
+                        <div class="oh-card-dashboard__counts">
+                            <span class="oh-card-dashboard__count" id="pending-transfers">1</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card approved">
-                    <div>
-                        <div id="approved-transfers" class="summary-card__count">0</div>
-                        <div class="summary-card__title">{% trans "Approved" %}</div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-3">
+                <div class="oh-card-dashboard oh-card-dashboard--success dash-card">
+                    <div class="oh-card-dashboard__header">
+                        <span class="oh-card-dashboard__title">{% trans "Approved" %}</span>
                     </div>
-                    <ion-icon name="checkmark-circle-outline" class="summary-card__icon"></ion-icon>
+                    <div class="oh-card-dashboard__body">
+                        <div class="oh-card-dashboard__counts">
+                            <span class="oh-card-dashboard__count" id="approved-transfers">1</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card rejected">
-                    <div>
-                        <div id="rejected-transfers" class="summary-card__count">0</div>
-                        <div class="summary-card__title">{% trans "Rejected" %}</div>
+            <div class="col-12 col-sm-12 col-md-6 col-lg-3">
+                <div class="oh-card-dashboard oh-card-dashboard--danger dash-card">
+                    <div class="oh-card-dashboard__header">
+                        <span class="oh-card-dashboard__title">{% trans "Rejected" %}</span>
                     </div>
-                    <ion-icon name="close-circle-outline" class="summary-card__icon"></ion-icon>
+                    <div class="oh-card-dashboard__body">
+                        <div class="oh-card-dashboard__counts">
+                            <span class="oh-card-dashboard__count" id="rejected-transfers">1</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="oh-form-group" style="width: 300px;">
+
+        <div class="search-filters">
+            <div class="search-input">
                 <input type="text" id="search-input" class="oh-input" placeholder="{% trans 'Search transfers...' %}">
             </div>
-            <div class="d-flex">
-                <div class="oh-form-group mr-2">
-                    <select id="status-filter" class="oh-input" style="border: 1px solid #ced4da;">
-                        <option value="All">{% trans "All Status" %}</option>
-                        <option value="PENDING">{% trans "Pending" %}</option>
-                        <option value="APPROVED">{% trans "Approved" %}</option>
-                        <option value="REJECTED">{% trans "Rejected" %}</option>
-                    </select>
-                </div>
-                <div class="oh-form-group mr-2">
-                    <select id="type-filter" class="oh-input" style="border: 1px solid #ced4da;">
-                        <option value="All">{% trans "All Types" %}</option>
-                        <option value="DEPARTMENT">{% trans "Department" %}</option>
-                        <option value="POSITION">{% trans "Position" %}</option>
-                        <option value="LOCATION">{% trans "Location" %}</option>
-                    </select>
-                </div>
-                <a href="#" class="oh-btn oh-btn--outline-danger">
-                    <ion-icon name="download-outline" class="mr-2"></ion-icon>
+            <div class="filter-group">
+                <select id="status-filter" class="oh-input">
+                    <option value="All">{% trans "All Status" %}</option>
+                    <option value="PENDING">{% trans "Pending" %}</option>
+                    <option value="APPROVED">{% trans "Approved" %}</option>
+                    <option value="REJECTED">{% trans "Rejected" %}</option>
+                </select>
+                <select id="type-filter" class="oh-input">
+                    <option value="All">{% trans "All Types" %}</option>
+                    <option value="DEPARTMENT">{% trans "Department" %}</option>
+                    <option value="POSITION">{% trans "Position" %}</option>
+                    <option value="LOCATION">{% trans "Location" %}</option>
+                </select>
+                <a href="#" class="oh-btn oh-btn--outline-primary">
+                    <ion-icon name="download-outline" class="me-2"></ion-icon>
                     {% trans "Export" %}
                 </a>
             </div>
@@ -117,7 +148,6 @@
                     <th>{% trans "From" %}</th>
                     <th>{% trans "To" %}</th>
                     <th>{% trans "Request Date" %}</th>
-                    <th>{% trans "Effective Date" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
@@ -269,7 +299,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${t.from}</td>
                 <td>${t.to}</td>
                 <td>${t.request_date}</td>
-                <td>${t.effective_date}</td>
                 <td data-status="${t.status}"><span class="oh-badge oh-badge--${t.status === 'PENDING' ? 'warning' : t.status === 'APPROVED' ? 'success' : 'danger'}">${t.status}</span></td>
                 <td>
                     <div class="oh-btn-group" style="display: flex; gap: 5px;">

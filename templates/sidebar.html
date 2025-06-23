@@ -651,10 +651,10 @@ function initializeSummernote(candId,searchWords,) {
 
       if (!localStorage.getItem('horillaPostings')) {
           const initialPostings = [
-              { id: 1, position_name: 'Frontend Developer', department: 'Engineering', location: 'New York', start_date: '2024-07-20' },
-              { id: 2, position_name: 'Marketing Manager', department: 'Marketing', location: 'San Francisco', start_date: '2024-07-22' },
-              { id: 3, position_name: 'Sales Executive', department: 'Sales', location: 'Mumbai', start_date: '2024-07-25' },
-              { id: 4, position_name: 'Product Manager', department: 'Product', location: 'Remote', start_date: '2024-07-28' },
+              { id: 1, position_name: 'Frontend Developer', department: 'Engineering', location: 'New York', vacancy: 5, start_date: '2024-07-20' },
+              { id: 2, position_name: 'Marketing Manager', department: 'Marketing', location: 'San Francisco', vacancy: 3, start_date: '2024-07-22' },
+              { id: 3, position_name: 'Sales Executive', department: 'Sales', location: 'Mumbai', vacancy: 2, start_date: '2024-07-25' },
+              { id: 4, position_name: 'Product Manager', department: 'Product', location: 'Remote', vacancy: 4, start_date: '2024-07-28' },
           ];
           localStorage.setItem('horillaPostings', JSON.stringify(initialPostings));
       }
@@ -668,9 +668,10 @@ function initializeSummernote(candId,searchWords,) {
           return JSON.parse(postings);
       }
       const initialData = [
-          {'id': 1, 'title': 'Senior Python Developer', 'department': 'Engineering', 'location': 'New York', 'date_posted': '2024-01-15'},
-          {'id': 2, 'title': 'Marketing Manager', 'department': 'Marketing', 'location': 'San Francisco', 'date_posted': '2024-01-20'},
-          {'id': 3, 'title': 'UX/UI Designer', 'department': 'Product', 'location': 'Remote', 'date_posted': '2024-02-01'},
+          {'id': 1, 'position_name': 'Frontend Developer', 'department': 'Engineering', 'location': 'New York', 'vacancy': 5, 'start_date': '2024-07-20'},
+          {'id': 2, 'position_name': 'Marketing Manager', 'department': 'Marketing', 'location': 'San Francisco', 'vacancy': 3, 'start_date': '2024-07-22'},
+          {'id': 3, 'position_name': 'Sales Executive', 'department': 'Sales', 'location': 'Mumbai', 'vacancy': 2, 'start_date': '2024-07-25'},
+          {'id': 4, 'position_name': 'Product Manager', 'department': 'Product', 'location': 'Remote', 'vacancy': 4, 'start_date': '2024-07-28'},
       ];
       localStorage.setItem('horillaPostings', JSON.stringify(initialData));
       return initialData;

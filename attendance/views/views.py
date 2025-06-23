@@ -312,6 +312,9 @@ def attendance_export(request):
         file_name="Attendance_export",
     )
 
+@login_required
+def roster_view(request):
+    return render(request, "attendance/attendance/roster_view.html")
 
 @login_required
 @manager_can_enter("attendance.view_attendance")
