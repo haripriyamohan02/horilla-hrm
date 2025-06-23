@@ -30,7 +30,7 @@
                         {% trans "Approved" %}
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="oh-dot oh-dot--secondary me-2"></span>
+                        <span class="oh-dot oh-dot--secondary me-2 " style="background-color: #000000;"></span>
                         {% trans "Cancelled" %}
                     </div>
                     <div class="d-flex align-items-center">
@@ -56,6 +56,10 @@
                             </div>
                             <div class="oh-sticky-table__th">{% trans "Block Year" %}</div>
                             <div class="oh-sticky-table__th">{% trans "Family Members" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Travel Dates" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Destination" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Purpose" %}</div>
+                            <div class="oh-sticky-table__th">{% trans "Attachment" %}</div>
                             <div class="oh-sticky-table__th">{% trans "Status" %}</div>
                             <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
                         </div>
@@ -67,15 +71,14 @@
                                 <input type="checkbox" class="oh-checkbox">
                             </div>
                             <div class="oh-sticky-table__td">
-                                <div class="oh-profile oh-profile--md d-flex align-items-center gap-2">
-                                    <div class="oh-profile__avatar mr-1">
-                                        <img src="{% static 'images/ui/avatar.png' %}" class="oh-profile__image" alt="" />
-                                    </div>
-                                    <span class="oh-profile__name oh-text--dark">John Doe</span>
-                                </div>
+                                <span class="oh-profile__name oh-text--dark">John Doe</span>
                             </div>
                             <div class="oh-sticky-table__td">2022-2025</div>
-                            <div class="oh-sticky-table__td">3</div>
+                            <div class="oh-sticky-table__td">3 (Jane, Sam, Alex)</div>
+                            <div class="oh-sticky-table__td">2024-07-10 to 2024-07-20</div>
+                            <div class="oh-sticky-table__td">Goa</div>
+                            <div class="oh-sticky-table__td">Family Vacation</div>
+                            <div class="oh-sticky-table__td"><a href="#">lta_doc.pdf</a></div>
                             <div class="oh-sticky-table__td">
                                 <span class="oh-status oh-status--warning">{% trans "Requested" %}</span>
                             </div>
@@ -86,9 +89,6 @@
                                     </button>
                                     <button class="oh-btn oh-btn--danger oh-btn--small" title="Reject">
                                         <ion-icon name="close-outline"></ion-icon>
-                                    </button>
-                                    <button class="oh-btn oh-btn--secondary oh-btn--small" title="View Details">
-                                        <ion-icon name="eye-outline"></ion-icon>
                                     </button>
                                 </div>
                             </div>
@@ -115,7 +115,7 @@
     <div class="oh-modal__dialog">
         <div class="oh-modal__dialog-header">
             <h2 class="oh-modal__dialog-title" id="newLTARequestModalLabel">
-                {% trans "Apply for LTA" %}
+                {% trans "Create" %}
             </h2>
             <button class="oh-modal__close" aria-label="Close">
                 <ion-icon name="close-outline"></ion-icon>
@@ -133,8 +133,44 @@
                     </div>
                     <div class="col-md-6">
                         <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Travel Dates" %} *</label>
+                            <div class="d-flex gap-2">
+                                <input type="date" class="oh-input" name="travel_start" required>
+                                <span class="mx-1">to</span>
+                                <input type="date" class="oh-input" name="travel_end" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Destination" %} *</label>
+                            <input type="text" class="oh-input" name="destination" required>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Purpose" %} *</label>
+                            <input type="text" class="oh-input" name="purpose" required>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="oh-input-group">
                             <label class="oh-label">{% trans "Family Members" %} *</label>
-                            <input type="number" class="oh-input" name="family_members" required>
+                            <div id="family-members-list">
+                                <div class="d-flex gap-2 mb-2 family-member-row">
+                                    <input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required>
+                                    <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>
+                                </div>
+                            </div>
+                            <button type="button" class="oh-btn oh-btn--light mt-2" id="add-family-member">
+                                <ion-icon name="add-outline"></ion-icon> {% trans "Add Family Member" %}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="oh-input-group">
+                            <label class="oh-label">{% trans "Attachment" %}</label>
+                            <input type="file" class="oh-input" name="attachment">
                         </div>
                     </div>
                 </div>
@@ -147,5 +183,26 @@
         </div>
     </div>
 </div>
+
+<script>
+// Add/remove family member fields dynamically
+const addBtn = document.getElementById('add-family-member');
+const familyList = document.getElementById('family-members-list');
+if (addBtn && familyList) {
+    addBtn.onclick = function() {
+        const row = document.createElement('div');
+        row.className = 'd-flex gap-2 mb-2 family-member-row';
+        row.innerHTML = `<input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required>
+            <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>`;
+        familyList.appendChild(row);
+    };
+    familyList.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-family-member')) {
+            const row = e.target.closest('.family-member-row');
+            if (row) row.remove();
+        }
+    });
+}
+</script>
 
 {% endblock %} 
