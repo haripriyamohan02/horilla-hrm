@@ -131,8 +131,8 @@
             background: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 24px;
+            padding: 10px;
+            margin-bottom: 10px;
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
@@ -153,7 +153,7 @@
             font-size: 14px;
             font-weight: 500;
             color: #374151;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
         
         .oh-select, .oh-input {
@@ -193,12 +193,11 @@
         .oh-table thead {
             position: sticky;
             top: 0;
-            z-index: 10;
             background: #f9fafb;
         }
         
         .oh-table th {
-            padding: 12px 16px;
+            padding: 10px 14px;
             text-align: left;
             font-weight: 600;
             color: #374151;
@@ -508,19 +507,19 @@
                 <div class="oh-summary-grid">
                     <div class="oh-summary-item">
                         <span class="oh-summary-item__label">{% trans "Upcoming Sessions" %}</span>
-                        <span class="oh-summary-item__value" id="upcomingSessions">12</span>
+                        <span class="oh-summary-item__value" id="upcomingSessions">8</span>
                     </div>
                     <div class="oh-summary-item">
                         <span class="oh-summary-item__label">{% trans "This Week" %}</span>
-                        <span class="oh-summary-item__value" id="thisWeek">5</span>
+                        <span class="oh-summary-item__value" id="thisWeek">3</span>
                     </div>
                     <div class="oh-summary-item">
                         <span class="oh-summary-item__label">{% trans "Enrolled Trainees" %}</span>
-                        <span class="oh-summary-item__value" id="enrolledTrainees">48</span>
+                        <span class="oh-summary-item__value" id="enrolledTrainees">142</span>
                     </div>
                     <div class="oh-summary-item">
                         <span class="oh-summary-item__label">{% trans "Available Slots" %}</span>
-                        <span class="oh-summary-item__value" id="availableSlots">23</span>
+                        <span class="oh-summary-item__value" id="availableSlots">58</span>
                     </div>
                 </div>
 
@@ -569,16 +568,51 @@
                                     <th>{% trans "Enrolled" %}</th>
                                     <th>{% trans "Capacity" %}</th>
                                     <th>{% trans "Status" %}</th>
-                                    <th>{% trans "Actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody id="trainingTableBody">
-                                <tr data-category="Safety" data-status="Scheduled" data-date="2024-01-25">
+                                <!-- Today's Sessions -->
+                                <tr data-category="Safety" data-status="In Progress" data-date="2025-06-23">
                                     <td class="course-name">Workplace Safety Training</td>
                                     <td class="instructor-name">Dr. Sarah Wilson</td>
                                     <td>
                                         <div class="date-time-info">
-                                            <div class="date-primary">Jan 25, 2024</div>
+                                            <div class="date-primary">Jun 23, 2025</div>
+                                            <div class="time-secondary">09:00 - 17:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">8 hours</td>
+                                    <td class="enrolled-count">14</td>
+                                    <td class="capacity-text">15</td>
+                                    <td>
+                                        <span class="status-badge status-progress">{% trans "In Progress" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <!-- This Week's Sessions -->
+                                <tr data-category="Leadership" data-status="Scheduled" data-date="2025-06-24">
+                                    <td class="course-name">Leadership Development Program</td>
+                                    <td class="instructor-name">Michael Chen</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jun 24, 2025</div>
+                                            <div class="time-secondary">10:00 - 16:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">6 hours</td>
+                                    <td class="enrolled-count">18</td>
+                                    <td class="capacity-text">20</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr data-category="Technical" data-status="Scheduled" data-date="2025-06-26">
+                                    <td class="course-name">Advanced Technical Skills</td>
+                                    <td class="instructor-name">David Kumar</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jun 26, 2025</div>
                                             <div class="time-secondary">09:00 - 17:00</div>
                                         </div>
                                     </td>
@@ -588,89 +622,109 @@
                                     <td>
                                         <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
                                     </td>
-                                    <td>
-                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
-                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
-                                    </td>
                                 </tr>
-                                <tr data-category="Leadership" data-status="In Progress" data-date="2024-01-26">
-                                    <td class="course-name">Leadership Development Program</td>
-                                    <td class="instructor-name">Michael Chen</td>
-                                    <td>
-                                        <div class="date-time-info">
-                                            <div class="date-primary">Jan 26, 2024</div>
-                                            <div class="time-secondary">10:00 - 16:00</div>
-                                        </div>
-                                    </td>
-                                    <td class="duration-text">6 hours</td>
-                                    <td class="enrolled-count">8</td>
-                                    <td class="capacity-text">12</td>
-                                    <td>
-                                        <span class="status-badge status-progress">{% trans "In Progress" %}</span>
-                                    </td>
-                                    <td>
-                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
-                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
-                                    </td>
-                                </tr>
-                                <tr data-category="Compliance" data-status="Scheduled" data-date="2024-01-28">
+                                
+                                <!-- Next Week's Sessions -->
+                                <tr data-category="Compliance" data-status="Scheduled" data-date="2025-06-30">
                                     <td class="course-name">Data Privacy & Security</td>
                                     <td class="instructor-name">Jennifer Adams</td>
                                     <td>
                                         <div class="date-time-info">
-                                            <div class="date-primary">Jan 28, 2024</div>
+                                            <div class="date-primary">Jun 30, 2025</div>
                                             <div class="time-secondary">13:00 - 17:00</div>
                                         </div>
                                     </td>
                                     <td class="duration-text">4 hours</td>
-                                    <td class="enrolled-count">15</td>
-                                    <td class="capacity-text">20</td>
-                                    <td>
-                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
-                                    </td>
-                                    <td>
-                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
-                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
-                                    </td>
-                                </tr>
-                                <tr data-category="Technical" data-status="Completed" data-date="2024-02-15">
-                                    <td class="course-name">Advanced Technical Skills</td>
-                                    <td class="instructor-name">David Kumar</td>
-                                    <td>
-                                        <div class="date-time-info">
-                                            <div class="date-primary">Feb 15, 2024</div>
-                                            <div class="time-secondary">09:00 - 17:00</div>
-                                        </div>
-                                    </td>
-                                    <td class="duration-text">8 hours</td>
-                                    <td class="enrolled-count">10</td>
-                                    <td class="capacity-text">12</td>
-                                    <td>
-                                        <span class="status-badge status-completed">{% trans "Completed" %}</span>
-                                    </td>
-                                    <td>
-                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
-                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
-                                    </td>
-                                </tr>
-                                <tr data-category="Safety" data-status="Scheduled" data-date="2024-03-05">
-                                    <td class="course-name">Emergency Response Training</td>
-                                    <td class="instructor-name">Lisa Rodriguez</td>
-                                    <td>
-                                        <div class="date-time-info">
-                                            <div class="date-primary">Mar 05, 2024</div>
-                                            <div class="time-secondary">08:00 - 12:00</div>
-                                        </div>
-                                    </td>
-                                    <td class="duration-text">4 hours</td>
-                                    <td class="enrolled-count">18</td>
+                                    <td class="enrolled-count">22</td>
                                     <td class="capacity-text">25</td>
                                     <td>
                                         <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
                                     </td>
+                                </tr>
+                                
+                                <tr data-category="Safety" data-status="Scheduled" data-date="2025-07-02">
+                                    <td class="course-name">Emergency Response Training</td>
+                                    <td class="instructor-name">Lisa Rodriguez</td>
                                     <td>
-                                        <button class="action-btn action-btn--edit">{% trans "Edit" %}</button>
-                                        <button class="action-btn action-btn--view">{% trans "View" %}</button>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jul 02, 2025</div>
+                                            <div class="time-secondary">08:00 - 12:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">4 hours</td>
+                                    <td class="enrolled-count">20</td>
+                                    <td class="capacity-text">25</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr data-category="Leadership" data-status="Scheduled" data-date="2025-07-05">
+                                    <td class="course-name">Management Excellence Program</td>
+                                    <td class="instructor-name">Michael Chen</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jul 05, 2025</div>
+                                            <div class="time-secondary">09:30 - 15:30</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">6 hours</td>
+                                    <td class="enrolled-count">16</td>
+                                    <td class="capacity-text">18</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr data-category="Technical" data-status="Scheduled" data-date="2025-07-08">
+                                    <td class="course-name">Software Development Best Practices</td>
+                                    <td class="instructor-name">David Kumar</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jul 08, 2025</div>
+                                            <div class="time-secondary">10:00 - 16:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">6 hours</td>
+                                    <td class="enrolled-count">14</td>
+                                    <td class="capacity-text">16</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr data-category="Compliance" data-status="Scheduled" data-date="2025-07-12">
+                                    <td class="course-name">Regulatory Compliance Workshop</td>
+                                    <td class="instructor-name">Jennifer Adams</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jul 12, 2025</div>
+                                            <div class="time-secondary">14:00 - 18:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">4 hours</td>
+                                    <td class="enrolled-count">18</td>
+                                    <td class="capacity-text">22</td>
+                                    <td>
+                                        <span class="status-badge status-scheduled">{% trans "Scheduled" %}</span>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Past Completed Sessions -->
+                                <tr data-category="Safety" data-status="Completed" data-date="2025-06-20">
+                                    <td class="course-name">Fire Safety Training</td>
+                                    <td class="instructor-name">Lisa Rodriguez</td>
+                                    <td>
+                                        <div class="date-time-info">
+                                            <div class="date-primary">Jun 20, 2025</div>
+                                            <div class="time-secondary">09:00 - 13:00</div>
+                                        </div>
+                                    </td>
+                                    <td class="duration-text">4 hours</td>
+                                    <td class="enrolled-count">8</td>
+                                    <td class="capacity-text">10</td>
+                                    <td>
+                                        <span class="status-badge status-completed">{% trans "Completed" %}</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -813,6 +867,9 @@
         document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
         document.getElementById('categoryFilter').addEventListener('change', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        
+        // Initialize with current data
+        updateSummaryStats(originalTableData);
     });
 
     function applyFilters() {
@@ -821,7 +878,7 @@
         const status = document.getElementById('statusFilter').value;
         
         const tableBody = document.getElementById('trainingTableBody');
-        const currentDate = new Date();
+        const currentDate = new Date('2025-06-23'); // Current date for filtering
         
         // Clear table
         tableBody.innerHTML = '';
@@ -884,20 +941,20 @@
         let totalEnrolled = 0;
         let totalAvailable = 0;
         
-        const currentDate = new Date();
-        const oneWeekFromNow = new Date(currentDate.getTime() + (7 * 24 * 60 * 60 * 1000));
+        const currentDate = new Date('2025-06-23');
+        const oneWeekFromNow = new Date('2025-06-29'); // End of current week
         
         filteredRows.forEach(row => {
             const rowDate = new Date(row.getAttribute('data-date'));
             const enrolled = parseInt(row.querySelector('.enrolled-count').textContent);
             const capacity = parseInt(row.querySelector('.capacity-text').textContent);
             
-            // Count upcoming sessions
+            // Count upcoming sessions (future dates)
             if (rowDate > currentDate) {
                 upcomingSessions++;
             }
             
-            // Count this week sessions
+            // Count this week sessions (June 23-29, 2025)
             if (rowDate >= currentDate && rowDate <= oneWeekFromNow) {
                 thisWeekSessions++;
             }
@@ -1038,7 +1095,7 @@
         
         // Validate date (should be in the future)
         const trainingDate = new Date(trainingData.training_date);
-        const currentDate = new Date();
+        const currentDate = new Date('2025-06-23');
         currentDate.setHours(0, 0, 0, 0);
         
         if (trainingDate < currentDate) {
@@ -1051,10 +1108,7 @@
         
         // Close modal and reset form
         closeModal();
-        
-        // Show success message
-        alert('Training schedule created successfully!');
-    });
+            });
 
     // Auto-calculate duration when start/end times change
     function updateDuration() {
@@ -1068,7 +1122,7 @@
                 durationInput.value = duration;
             }
         }
-    }
+    }   
 
     // Add event listeners for auto-calculation
     document.querySelector('input[name="start_time"]').addEventListener('change', updateDuration);
