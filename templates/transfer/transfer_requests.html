@@ -200,40 +200,52 @@
 
 <script>
     function getTransfers() {
-        return [
-            {
-                employee: "Ritha",
-                email: "ritha.s@tringapps.com",
-                from: "Engineering",
-                to: "Product",
-                request_date: "2025-06-15",
-                status: "PENDING"
-            },
-            {
-                employee: "John Doe",
-                email: "john.doe@example.com",
-                from: "Marketing",
-                to: "Sales",
-                request_date: "2024-07-01",
-                status: "APPROVED"
-            },
-            {
-                employee: "Jane Smith",
-                email: "jane.smith@example.com",
-                from: "Sales",
-                to: "Marketing",
-                request_date: "2024-07-05",
-                status: "REJECTED"
-            },
-            {
-                employee: "Peter Jones",
-                email: "peter.jones@example.com",
-                from: "Engineering",
-                to: "Product",
-                request_date: "2024-07-10",
-                status: "PENDING"
-            }
-        ];
+        // Read from localStorage, or initialize with default if not present
+        let transfers = JSON.parse(localStorage.getItem('horillaTransfers') || 'null');
+        if (!transfers) {
+            transfers = [
+                {
+                    employee: "Ritha",
+                    email: "ritha.s@tringapps.com",
+                    from: "Engineering",
+                    to: "Product",
+                    request_date: "2025-06-15",
+                    status: "PENDING"
+                },
+                {
+                    employee: "John Doe",
+                    email: "john.doe@example.com",
+                    from: "Marketing",
+                    to: "Sales",
+                    request_date: "2024-07-01",
+                    status: "APPROVED"
+                },
+                {
+                    employee: "Jane Smith",
+                    email: "jane.smith@example.com",
+                    from: "Sales",
+                    to: "Marketing",
+                    request_date: "2024-07-05",
+                    status: "REJECTED"
+                },
+                {
+                    employee: "Peter Jones",
+                    email: "peter.jones@example.com",
+                    from: "Engineering",
+                    to: "Product",
+                    request_date: "2024-07-10",
+                    status: "PENDING"
+                }
+            ];
+            localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
+        }
+        return transfers;
+    }
+
+    function addTransfer(newTransfer) {
+        const transfers = getTransfers();
+        transfers.unshift(newTransfer); // Add to top
+        localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
     }
 
     function renderRequestsTable() {
