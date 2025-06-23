@@ -218,7 +218,7 @@ function initializeSummernote(candId,searchWords,) {
               </g>
             </svg>
           </div>
-          <span>{% trans "Transfer and Posting" %}</span>
+          <span>{% trans "Transfer & Posting" %}</span>
         </a>
         <div
           class="oh-sidebar__submenu"
@@ -228,6 +228,9 @@ function initializeSummernote(candId,searchWords,) {
           style="display: none"
           >
           <ul class="oh-sidebar__submenu-items">
+            <li class="oh-sidebar__submenu-item">
+              <a href="{% url 'transfer-dashboard' %}" class="oh-sidebar__submenu-link">{% trans "Dashboard" %}</a>
+            </li>
             <li class="oh-sidebar__submenu-item">
               <a href="{% url 'transfer-requests' %}" class="oh-sidebar__submenu-link">{% trans "Transfer Requests" %}</a>
             </li>
@@ -541,5 +544,87 @@ function initializeSummernote(candId,searchWords,) {
     if (count > 0) {
       $("#filterCount").text(`(${count})`);
     }
+  }
+
+  function getTransfers() {
+    const transfers = localStorage.getItem('horillaTransfers');
+    if (transfers) {
+        return JSON.parse(transfers);
+    }
+    const initialData = [
+        {'id': 1, 'employee': 'John Doe', 'email': 'john.doe@company.com', 'type': 'DEPARTMENT', 'from': 'IT Department', 'to': 'HR Department', 'request_date': '2024-01-15', 'effective_date': '2024-02-01', 'status': 'PENDING', 'reason': 'Career growth'},
+        {'id': 2, 'employee': 'Jane Smith', 'email': 'jane.smith@company.com', 'type': 'POSITION', 'from': 'Software Developer', 'to': 'Senior Developer', 'request_date': '2024-01-10', 'effective_date': '2024-01-25', 'status': 'APPROVED', 'reason': 'Wants to work on product side'},
+        {'id': 3, 'employee': 'Peter Jones', 'email': 'mike.johnson@company.com', 'type': 'LOCATION', 'from': 'New York Office', 'to': 'San Francisco', 'request_date': '2024-02-01', 'effective_date': '2024-02-15', 'status': 'REJECTED', 'reason': 'Has technical background'},
+    ];
+    localStorage.setItem('horillaTransfers', JSON.stringify(initialData));
+    return initialData;
+  }
+
+  function addTransfer(transfer) {
+      const transfers = getTransfers();
+      transfer.id = new Date().getTime(); // Unique ID
+      transfer.status = 'PENDING';
+      transfers.unshift(transfer);
+      localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
+  }
+
+  function updateTransferStatus(transferId, status) {
+      const transfers = getTransfers();
+      const transfer = transfers.find(t => t.id === transferId);
+      if (transfer) {
+          transfer.status = status;
+          if (status === 'APPROVED') {
+              transfer.approved_date = new Date().toISOString().slice(0, 10);
+          }
+          localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
+      }
+  }
+
+  function getTransferById(transferId) {
+      return getTransfers().find(t => t.id === transferId);
+  }
+
+  function initializeData() {
+      if (!localStorage.getItem('horillaTransfers')) {
+          const initialTransfers = [
+              { id: 1, employee: 'John Doe', email: 'john.doe@example.com', type: 'DEPARTMENT', from: 'Sales', to: 'Marketing', request_date: '2024-07-01', effective_date: '2024-08-01', status: 'APPROVED' },
+              { id: 2, employee: 'Jane Smith', email: 'jane.smith@example.com', type: 'LOCATION', from: 'New York', to: 'London', request_date: '2024-07-05', effective_date: '2024-08-15', status: 'PENDING' },
+              { id: 3, employee: 'Peter Jones', email: 'peter.jones@example.com', type: 'DEPARTMENT', from: 'Engineering', to: 'Product', request_date: '2024-07-10', effective_date: '2024-09-01', status: 'REJECTED' },
+          ];
+          localStorage.setItem('horillaTransfers', JSON.stringify(initialTransfers));
+      }
+
+      if (!localStorage.getItem('horillaPostings')) {
+          const initialPostings = [
+              { id: 1, position_name: 'Frontend Developer', department: 'Engineering', location: 'New York', start_date: '2024-07-20' },
+              { id: 2, position_name: 'Marketing Manager', department: 'Marketing', location: 'San Francisco', start_date: '2024-07-22' },
+              { id: 3, position_name: 'Sales Executive', department: 'Sales', location: 'Mumbai', start_date: '2024-07-25' },
+              { id: 4, position_name: 'Product Manager', department: 'Product', location: 'Remote', start_date: '2024-07-28' },
+          ];
+          localStorage.setItem('horillaPostings', JSON.stringify(initialPostings));
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', initializeData);
+
+  function getPostings() {
+      const postings = localStorage.getItem('horillaPostings');
+      if (postings) {
+          return JSON.parse(postings);
+      }
+      const initialData = [
+          {'id': 1, 'title': 'Senior Python Developer', 'department': 'Engineering', 'location': 'New York', 'date_posted': '2024-01-15'},
+          {'id': 2, 'title': 'Marketing Manager', 'department': 'Marketing', 'location': 'San Francisco', 'date_posted': '2024-01-20'},
+          {'id': 3, 'title': 'UX/UI Designer', 'department': 'Product', 'location': 'Remote', 'date_posted': '2024-02-01'},
+      ];
+      localStorage.setItem('horillaPostings', JSON.stringify(initialData));
+      return initialData;
+  }
+
+  function addPosting(posting) {
+      const postings = getPostings();
+      posting.id = new Date().getTime(); // Unique ID
+      postings.unshift(posting);
+      localStorage.setItem('horillaPostings', JSON.stringify(postings));
   }
 </script>

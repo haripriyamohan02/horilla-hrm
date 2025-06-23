@@ -1,0 +1,26 @@
+{% for transfer in transfers %}
+<tr>
+    <td>
+        <div class="oh-profile">
+            <img src="https://ui-avatars.com/api/?name={{ transfer.employee|urlencode }}&background=random" class="oh-profile__image mr-2 ml-2" />
+            <div class="oh-profile__name">{{ transfer.employee }} <br/><small>{{ transfer.email }}</small></div>
+        </div>
+    </td>
+    <td><span class="oh-badge {% if transfer.type == 'DEPARTMENT' %}oh-badge--dark{% else %}oh-badge--secondary{% endif %}">{{ transfer.type }}</span></td>
+    <td>{{ transfer.from }}</td>
+    <td>{{ transfer.to }}</td>
+    <td>{{ transfer.request_date }}</td>
+    <td>{{ transfer.effective_date }}</td>
+    <td><span class="oh-badge oh-badge--{% if transfer.status == 'PENDING' %}warning{% elif transfer.status == 'APPROVED' %}success{% else %}danger{% endif %}">{{ transfer.status }}</span></td>
+    <td>
+        <div class="oh-btn-group" style="display: flex; gap: 5px;">
+            <a href="#" class="oh-btn oh-btn--sm oh-btn--light" title="{% trans 'View' %}"><ion-icon name="eye-outline"></ion-icon></a>
+            <a href="#" class="oh-btn oh-btn--sm oh-btn--light" title="{% trans 'Edit' %}"><ion-icon name="create-outline"></ion-icon></a>
+            {% if transfer.status == 'PENDING' %}
+            <a href="#" class="oh-btn oh-btn--sm oh-btn--success" title="{% trans 'Approve' %}"><ion-icon name="checkmark-outline"></ion-icon></a>
+            <a href="#" class="oh-btn oh-btn--sm oh-btn--danger" title="{% trans 'Reject' %}"><ion-icon name="close-outline"></ion-icon></a>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% endfor %} 
