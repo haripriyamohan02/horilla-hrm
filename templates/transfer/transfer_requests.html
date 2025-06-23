@@ -77,15 +77,34 @@
     <div class="oh-content">
         <div class="oh-row">
             <div class="oh-card bg-transparent">
-                <div class="oh-card__header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 class="oh-card__title" style="font-weight: 600;">{% trans "Transfer Requests" %}</h4>
-                    <div class="oh-card__actions">
-                        <div class="oh-btn-group">
-                            <a href="#" class="oh-btn oh-btn--primary" style="background-color: #ff3b38;" onclick="toggleModal('createTransferRequestModal')">
-                                <ion-icon name="add-outline" class="mr-2"></ion-icon>
-                                {% trans "Create" %}
-                            </a>
+                <!-- Updated header with better alignment matching the second image -->
+                <div class="d-flex align-items-center justify-content-between mb-3" style="gap: 16px;">
+                    <h4 class="oh-card__title mb-0" style="font-weight: 600; white-space: nowrap; min-width: fit-content;">Transfer Requests</h4>
+                    
+                    <div class="d-flex align-items-center" style="gap: 12px; flex: 1; justify-content: flex-end;">
+                        <!-- Search Input -->
+                        <div class="input-group" style="max-width: 280px;">
+                            <!-- <span class="input-group-text bg-white border-end-0" style="border-radius: 4px 0 0 4px; border: 1.5px solid #ced4da; border-right: none; padding: 8px 12px;">
+                                <ion-icon name="search-outline" style="font-size: 16px; color: #666;"></ion-icon>
+                            </span> -->
+                            <input type="text" class="form-control oh-input border-start-0" placeholder="Search" style="border-radius: 0 4px 4px 0; border: 1.5px solid #ced4da; border-left: none;">
                         </div>
+                        
+                        <!-- Filter Button -->
+                        <button class="oh-btn oh-btn--secondary d-flex align-items-center" style="background: #f5f5f5; color: #222; border: 1.5px solid #e0e0e0; font-weight: 500; white-space: nowrap;">
+                            <ion-icon name="filter-outline" style="margin-right: 6px; font-size: 16px;"></ion-icon> Filter
+                        </button>
+                        
+                        <!-- Group By Button -->
+                        <button class="oh-btn oh-btn--secondary d-flex align-items-center" style="background: #f5f5f5; color: #222; border: 1.5px solid #e0e0e0; font-weight: 500; white-space: nowrap;">
+                            <ion-icon name="bar-chart-outline" style="margin-right: 6px; font-size: 16px;"></ion-icon> Group By
+                        </button>
+                        
+                        <!-- Create Button -->
+                        <button class="oh-btn oh-btn--primary" style="background-color: #ff3b38; border-color: #ff3b38; font-weight: 600; white-space: nowrap; min-width: fit-content;" onclick="toggleModal('createTransferRequestModal')">
+                            <ion-icon name="add-outline" style="margin-right: 6px; font-size: 16px;"></ion-icon>
+                            Create
+                        </button>
                     </div>
                 </div>
                 <div class="oh-card__body">
