@@ -40,6 +40,7 @@ urlpatterns = [
         "attendance-info-export", views.attendance_export, name="attendance-info-export"
     ),
     path("attendance-view/", views.attendance_view, name="attendance-view"),
+    path("roster-view/", views.roster_view, name="roster-view"),
     path(
         "attendance-search",
         attendance.views.search.attendance_search,

@@ -20,6 +20,10 @@ SUBMENUS = [
         "redirect": reverse("view-my-attendance"),
     },
     {
+        "menu": _("Roster"),
+        "redirect": reverse("roster-view"),
+    },
+    {
         "menu": _("Dashboard"),
         "redirect": reverse("attendance-dashboard"),
         "accessibility": "attendance.sidebar.dashboard_accessibility",

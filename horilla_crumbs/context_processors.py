@@ -34,6 +34,7 @@ def _split_path(self, path=None):
 
 
 sidebar_urls = [
+    "roster-view",
     "dashboard",
     "pipeline",
     "recruitment-survey-question-template-view",
@@ -332,7 +333,7 @@ urlpatterns.append(
     path("attendance/", lambda request: redirect("attendance-dashboard"))
 )
 urlpatterns.append(
-    path(
+    path(   
         "leave/",
         lambda request: redirect(
             reverse("leave-employee-dashboard") + "?dashboard=true"
