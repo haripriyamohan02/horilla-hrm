@@ -17,6 +17,10 @@ from base.models import Company
 from employee.models import Employee
 from horilla.models import HorillaModel
 
+DEVICE_ROLE_CHOICES = (
+    ('in', 'Check-In Device'),
+    ('out', 'Check-Out Device'),
+)
 
 def validate_schedule_time_format(value):
     """
@@ -35,11 +39,6 @@ def validate_schedule_time_format(value):
     except ValueError as error:
         raise ValidationError(_("Invalid format, it should be HH:MM format")) from error
 
-
-DEVICE_ROLE_CHOICES = (
-    ('in', 'Check-In Device'),
-    ('out', 'Check-Out Device'),
-)
 
 class BiometricDevices(HorillaModel):
     """
