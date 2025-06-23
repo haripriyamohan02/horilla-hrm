@@ -291,11 +291,14 @@
                         <div class="oh-dasboard__event-photo" style="background-color:white">
                             <img src="{% static '/images/ui/sunbed.png' %}" class="oh-dashboard__event-userphoto" />
                         </div>
-                        <div class="oh-dasboard__event-details">
-                            <span class="oh-dashboard__event-title">{% trans "Next Holiday" %}</span>
-                            <span class="oh-dashboard__event-main">{{next_holiday.name}}</span>
-                            <span class="dateformat_changer oh-dashboard__event-date">{{next_holiday.start_date}}</span>
-                        </div>
+                       <!-- This div will be replaced by HTMX -->
+                <div hx-get="{% url 'get-next-holiday' %}" hx-trigger="load">
+                    <div class="oh-dasboard__event-details">
+                        <span class="oh-dashboard__event-title">{% trans "Next Holiday" %}</span>
+                        <span class="oh-dashboard__event-main">Loading...</span>
+                        <span class="">-</span>
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
