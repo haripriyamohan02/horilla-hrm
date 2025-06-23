@@ -72,6 +72,15 @@
       });
 
     });
+
+    // Check for ?tab=work in URL and set localStorage accordingly
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'work') {
+        localStorage.setItem("activeEmpTab", "#work");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    })();
   </script>
 
 {% endblock content %}
