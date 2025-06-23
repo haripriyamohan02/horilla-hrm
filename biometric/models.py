@@ -17,6 +17,10 @@ from base.models import Company
 from employee.models import Employee
 from horilla.models import HorillaModel
 
+DEVICE_ROLE_CHOICES = (
+    ('in', 'Check-In Device'),
+    ('out', 'Check-Out Device'),
+)
 
 def validate_schedule_time_format(value):
     """
@@ -102,6 +106,13 @@ class BiometricDevices(HorillaModel):
         editable=True,
         on_delete=models.PROTECT,
         verbose_name=_("Company"),
+    )
+    role = models.CharField(
+        max_length=3,
+        choices=DEVICE_ROLE_CHOICES,
+        default='in',
+        verbose_name=_('Device Role'),
+        help_text=_('Specify if this device is for check-in or check-out.'),
     )
 
     objects = HorillaCompanyManager()

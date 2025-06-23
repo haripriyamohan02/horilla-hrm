@@ -57,7 +57,6 @@ from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArgumen
 
 logger = logging.getLogger(__name__)
 
-
 def str_time_seconds(time):
     """
     this method is used reconvert time in H:M formate string back to seconds and return it
@@ -176,7 +175,8 @@ class ZKBioAttendance(Thread):
                                     user_id=user_id, device_id=device
                                 ).first()
                                 if bio_id:
-                                    if punch_code in {0, 3, 4}:
+                                    # Use device role field for check-in/out
+                                    if device.role == 'in':
                                         try:
                                             clock_in(
                                                 Request(
@@ -190,9 +190,8 @@ class ZKBioAttendance(Thread):
                                             logger.error(
                                                 "Got an error in clock_in %s", error
                                             )
-
                                             continue
-                                    else:
+                                    elif device.role == 'out':
                                         try:
                                             clock_out(
                                                 Request(
@@ -207,6 +206,9 @@ class ZKBioAttendance(Thread):
                                                 "Got an error in clock_out", error
                                             )
                                             continue
+                                    else:
+                                        logger.warning(f"Unknown device role: {device.role}")
+                                        continue
                             else:
                                 continue
         except ConnectionResetError as error:
