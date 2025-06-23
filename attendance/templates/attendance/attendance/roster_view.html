@@ -496,7 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ];
   const shifts = ["Morning", "Evening", "Night"];
   const departments = ["HR", "Engineering", "Marketing", "Sales"];
-  const assignedByList = ["Admin", "Manager", "Supervisor"];
+  const assignedByList = ["Reporting Manager", "Manager"];
 
   for (let i = 0; i < 60; i++) {
     const date = new Date();
@@ -581,10 +581,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const entry = {
-      employee: "Current User",
+      employee: "Test User",
       date,
       shift,
-      assignedBy: "Admin",
+      assignedBy: "Reporting Manager",
       department: "HR"
     };
 
