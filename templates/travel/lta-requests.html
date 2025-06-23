@@ -112,72 +112,75 @@
 
 <!-- New LTA Request Modal -->
 <div class="oh-modal" id="newLTARequestModal" role="dialog" aria-labelledby="newLTARequestModalLabel" aria-hidden="true">
-    <div class="oh-modal__dialog">
-        <div class="oh-modal__dialog-header">
-            <h2 class="oh-modal__dialog-title" id="newLTARequestModalLabel">
-                {% trans "Create" %}
-            </h2>
-            <button class="oh-modal__close" aria-label="Close">
-                <ion-icon name="close-outline"></ion-icon>
-            </button>
+    <div class="oh-modal__dialog" style="max-width: 600px; width: 92%; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 88vh; overflow-y: auto; padding: 6px 0;">
+        <div class="oh-modal__dialog-header" style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; position: relative;">
+            <h5 class="oh-modal__dialog-title" id="newLTARequestModalLabel" style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">{% trans "Create LTA Request" %}</h5>
+            <button class="oh-modal__close" aria-label="Close" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666; position: absolute; top: 4px; right: 15px;">&times;</button>
         </div>
-        <div class="oh-modal__dialog-body">
+        <div class="oh-modal__dialog-body" style="padding: 15px 20px;">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Block Year" %} *</label>
+                <!-- Row 1: Block Year and Travel Dates -->
+                <div class="row" style="display: flex; gap: 12px; margin-bottom: 15px;">
+                    <div class="col-md-6" style="flex: 0 0 50%;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Block Year" %} *</label>
                             <input type="text" class="oh-input" name="block_year" required>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Travel Dates" %} *</label>
-                            <div class="d-flex gap-2">
+                    <div class="col-md-6" style="flex: 0 0 50%;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Travel Dates" %} *</label>
+                            <div style="display: flex; gap: 8px;">
                                 <input type="date" class="oh-input" name="travel_start" required>
-                                <span class="mx-1">to</span>
+                                <span style="align-self: center;">to</span>
                                 <input type="date" class="oh-input" name="travel_end" required>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Destination" %} *</label>
+                </div>
+                <!-- Row 2: Destination and Purpose -->
+                <div class="row" style="display: flex; margin: 0 -8px 15px -8px;">
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Destination" %} *</label>
                             <input type="text" class="oh-input" name="destination" required>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Purpose" %} *</label>
+                    <div class="col-md-6" style="flex: 0 0 50%; padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Purpose" %} *</label>
                             <input type="text" class="oh-input" name="purpose" required>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Family Members" %} *</label>
-                            <div id="family-members-list">
-                                <div class="d-flex gap-2 mb-2 family-member-row">
-                                    <input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required>
-                                    <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>
-                                </div>
+                </div>
+                <!-- Row 3: Family Members (full width) -->
+                <div class="row" style="margin-bottom: 15px;">
+                    <div class="col-md-12" style="padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Family Members" %} *</label>
+                            <div id="family-members-list" style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" class="oh-input" name="family_members[]" placeholder="{% trans 'Name' %}" required style="flex: 1;">
+                                <button type="button" class="oh-btn oh-btn--danger oh-btn--small remove-family-member" title="Remove"><ion-icon name="remove-outline"></ion-icon></button>
                             </div>
                             <button type="button" class="oh-btn oh-btn--light mt-2" id="add-family-member">
                                 <ion-icon name="add-outline"></ion-icon> {% trans "Add Family Member" %}
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="oh-input-group">
-                            <label class="oh-label">{% trans "Attachment" %}</label>
+                </div>
+                <!-- Row 4: Attachment (full width) -->
+                <div class="row" style="margin-bottom: 15px;">
+                    <div class="col-md-12" style="padding: 0 8px;">
+                        <div class="oh-form-group" style="margin-bottom: 0;">
+                            <label class="oh-label" style="display: block; margin-bottom: 6px; font-weight: 500;">{% trans "Attachment" %}</label>
                             <input type="file" class="oh-input" name="attachment">
                         </div>
                     </div>
                 </div>
-                <div class="oh-modal__dialog-footer">
-                    <button type="submit" class="oh-btn oh-btn--secondary w-100">
-                        {% trans "Submit LTA Request" %}
-                    </button>
+                <!-- Footer -->
+                <div class="oh-modal__dialog-footer" style="padding: 12px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="submit" class="oh-btn oh-btn--secondary" style="min-width: 160px;">{% trans "Submit LTA Request" %}</button>
                 </div>
             </form>
         </div>
