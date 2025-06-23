@@ -15,7 +15,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import ProtectedError, Q
+from django.db.models import ProtectedError, Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -5339,3 +5339,21 @@ def leave_allocation_approve(request):
             # "current_date":date.today(),
         },
     )
+
+
+@login_required
+def total_leaves_count(request):
+    today = date.today()
+    user = request.user
+    employee = getattr(user, 'employee_get', None)
+    total = 0
+    if employee:
+        total = (
+            LeaveRequest.objects.filter(
+                employee_id=employee,
+                status="approved",
+                start_date__year=today.year,
+                start_date__month=today.month,
+            ).aggregate(total=Sum("requested_days"))["total"] or 0
+        )
+    return HttpResponse(int(total) if total == int(total) else round(total, 2))

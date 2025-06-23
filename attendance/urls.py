@@ -194,21 +194,6 @@ urlpatterns = [
         name="validation-condition-delete",
     ),
     path(
-        "validate-bulk-attendance",
-        views.validate_bulk_attendance,
-        name="validate-bulk-attendance",
-    ),
-    path(
-        "validate-this-attendance/<int:obj_id>/",
-        views.validate_this_attendance,
-        name="validate-this-attendance",
-    ),
-    path(
-        "revalidate-this-attendance/<int:obj_id>/",
-        views.revalidate_this_attendance,
-        name="revalidate-this-attendance",
-    ),
-    path(
         "approve-overtime/<int:obj_id>/",
         views.approve_overtime,
         name="approve-overtime",
@@ -235,11 +220,6 @@ urlpatterns = [
         "dashboard-approve-overtimes",
         attendance.views.dashboard.dashboard_approve_overtimes,
         name="dashboard-approve-overtimes",
-    ),
-    path(
-        "dashboard-validate-attendances",
-        attendance.views.dashboard.dashboard_validate_attendances,
-        name="dashboard-validate-attendances",
     ),
     path(
         "department-overtime-chart",

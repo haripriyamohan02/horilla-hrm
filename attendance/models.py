@@ -196,7 +196,7 @@ class Attendance(HorillaModel):
         default=False, verbose_name=_("Overtime Approve")
     )
     attendance_validated = models.BooleanField(
-        default=False, verbose_name=_("Attendance Validate")
+        default=True, verbose_name=_("Attendance Validate")
     )
     at_work_second = models.IntegerField(null=True, blank=True)
     overtime_second = models.IntegerField(
@@ -688,22 +688,6 @@ class AttendanceOverTime(HorillaModel):
         else:
             end_date = date(year, month + 1, 1) - timedelta(days=1)
         return start_date, end_date
-
-    def not_validated_hrs(self):
-        """
-        This method will return not validated hours in a month
-        """
-        hrs_to_vlaidate = sum(
-            list(
-                Attendance.objects.filter(
-                    attendance_date__month=MONTH_MAPPING[self.month],
-                    attendance_date__year=self.year,
-                    employee_id=self.employee_id,
-                    attendance_validated=False,
-                ).values_list("at_work_second", flat=True)
-            )
-        )
-        return format_time(hrs_to_vlaidate)
 
     def not_approved_ot_hrs(self):
         """
