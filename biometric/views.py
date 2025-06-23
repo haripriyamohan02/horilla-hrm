@@ -57,11 +57,6 @@ from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArgumen
 
 logger = logging.getLogger(__name__)
 
-# Define your device IPs
-in_device_ip = "14.194.141.107"  # Replace with your actual IN device IP
-out_device_ip = "14.194.141.106"  # Replace with your actual OUT device IP
-
-
 def str_time_seconds(time):
     """
     this method is used reconvert time in H:M formate string back to seconds and return it
