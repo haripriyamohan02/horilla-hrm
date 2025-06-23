@@ -1,0 +1,90 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+
+<div class="oh-wrapper">
+    <div class="oh-main">
+        <div class="oh-main__content">
+            <div class="oh-main__heading">
+                <h1 class="oh-main__title">{% trans "Apply for Travel" %}</h1>
+            </div>
+            
+            <div class="oh-main__body">
+                <div class="oh-modal__dialog-body">
+                    <form method="post" enctype="multipart/form-data" class="oh-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Travel Type" %}</label>
+                                    <select class="oh-select" name="travel_type" required>
+                                        <option value="domestic">{% trans "Domestic" %}</option>
+                                        <option value="international">{% trans "International" %}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Destination" %}</label>
+                                    <input type="text" class="oh-input" name="destination" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Purpose" %}</label>
+                                    <input type="text" class="oh-input" name="purpose" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Start Date" %}</label>
+                                    <input type="date" class="oh-input" name="start_date" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "End Date" %}</label>
+                                    <input type="date" class="oh-input" name="end_date" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-12 col-md-6 col-lg-4">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Expected Budget" %}</label>
+                                    <input type="number" class="oh-input" name="expected_budget" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Description" %}</label>
+                                    <textarea class="oh-input" name="description" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="oh-input-group">
+                                    <label class="oh-label">{% trans "Attachments" %}</label>
+                                    <input type="file" class="oh-input" name="attachments" multiple>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="oh-modal__dialog-footer mt-4">
+                            <button type="submit" class="oh-btn oh-btn--secondary w-100">
+                                {% trans "Submit Application" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 
