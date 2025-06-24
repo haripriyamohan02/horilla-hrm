@@ -11,6 +11,8 @@ import logging
 from datetime import datetime, timedelta
 from threading import Event, Thread
 from urllib.parse import parse_qs, unquote
+import threading
+import time
 
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -23,6 +25,7 @@ from django.utils.translation import gettext as __
 from django.utils.translation import gettext_lazy as _
 from zk import ZK
 from zk import exception as zk_exception
+from django.core.exceptions import ObjectDoesNotExist
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
@@ -56,6 +59,53 @@ from .forms import (
 from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArguments
 
 logger = logging.getLogger(__name__)
+
+# Ensure BIO_DEVICE_THREADS is globally available
+if 'BIO_DEVICE_THREADS' not in globals():
+    BIO_DEVICE_THREADS = {}
+
+# Monitor thread to keep live capture running
+
+def monitor_live_threads():
+    from django.db import close_old_connections
+    import logging
+    logger = logging.getLogger(__name__)
+    while True:
+        close_old_connections()  # Prevent DB connection leaks in threads
+        for device in BiometricDevices.objects.filter(is_live=True):
+            thread = BIO_DEVICE_THREADS.get(device.id)
+            if not thread or not thread.is_alive():
+                logger.warning(f"Live thread for device {device.id} not running. Restarting...")
+                if device.machine_type == 'zk':
+                    new_thread = ZKBioAttendance(device.machine_ip, device.port, device.zk_password)
+                    new_thread.start()
+                    BIO_DEVICE_THREADS[device.id] = new_thread
+                    logger.info(f"Started ZKBioAttendance live thread for device {device.id}")
+                elif device.machine_type == 'cosec':
+                    new_thread = COSECBioAttendanceThread(device.id)
+                    new_thread.start()
+                    BIO_DEVICE_THREADS[device.id] = new_thread
+                    logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
+                # Add more device types if needed
+        # Remove threads for devices that are no longer live
+        for device_id in list(BIO_DEVICE_THREADS.keys()):
+            try:
+                device = BiometricDevices.objects.get(id=device_id)
+                if not device.is_live:
+                    thread = BIO_DEVICE_THREADS[device_id]
+                    if thread.is_alive():
+                        logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                        if hasattr(thread, 'stop'):
+                            thread.stop()
+                    del BIO_DEVICE_THREADS[device_id]
+            except ObjectDoesNotExist:
+                del BIO_DEVICE_THREADS[device_id]
+        time.sleep(60)  # Check every 60 seconds
+
+# Start the monitor thread at module load (only if not already started)
+if 'LIVE_MONITOR_THREAD' not in globals():
+    LIVE_MONITOR_THREAD = threading.Thread(target=monitor_live_threads, daemon=True)
+    LIVE_MONITOR_THREAD.start()
 
 def str_time_seconds(time):
     """
