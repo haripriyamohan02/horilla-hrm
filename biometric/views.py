@@ -28,6 +28,7 @@ from zk import exception as zk_exception
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
+from django.db import OperationalError
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
@@ -212,55 +213,48 @@ class ZKBioAttendance(Thread):
                         attendances = conn.live_capture()
                         for attendance in attendances:
                             try:
-                                if not attendance:
-                                    continue
+                                if attendance:
+                                    user_id = attendance.user_id
+                                    date_time = django_timezone.make_aware(
+                                        attendance.timestamp
+                                    )
+                                    date = date_time.date()
+                                    time = date_time.time()
+                                    bio_id = BiometricEmployees.objects.filter(
+                                        user_id=user_id, device_id=device
+                                    ).first()
+                                    if bio_id:
+                                        # Use device role field for check-in/out
+                                        if device.role == 'in':
+                                            clock_in(
+                                                Request(
+                                                    user=bio_id.employee_id.employee_user_id,
+                                                    date=date,
+                                                    time=time,
+                                                    datetime=date_time,
+                                                )
+                                            )
+                                        elif device.role == 'out':
+                                            clock_out(
+                                                Request(
+                                                    user=bio_id.employee_id.employee_user_id,
+                                                    date=date,
+                                                    time=time,
+                                                    datetime=date_time,
+                                                )
+                                            )
+                                        else:
+                                            logger.warning(f"Unknown device role: {device.role}")
+                                    
+                                    device.last_fetch_date = date
+                                    device.last_fetch_time = time
+                                    device.save()
 
-                                user_id = attendance.user_id
-                                date_time = django_timezone.make_aware(
-                                    attendance.timestamp
-                                )
-                                date = date_time.date()
-                                time = date_time.time()
-                                bio_id = BiometricEmployees.objects.filter(
-                                    user_id=user_id, device_id=device
-                                ).first()
-                                if bio_id:
-                                    # Use device role field for check-in/out
-                                    if device.role == 'in':
-                                        clock_in(
-                                            Request(
-                                                user=bio_id.employee_id.employee_user_id,
-                                                date=date,
-                                                time=time,
-                                                datetime=date_time,
-                                            )
-                                        )
-                                    elif device.role == 'out':
-                                        clock_out(
-                                            Request(
-                                                user=bio_id.employee_id.employee_user_id,
-                                                date=date,
-                                                time=time,
-                                                datetime=date_time,
-                                            )
-                                        )
-                                    else:
-                                        logger.warning(f"Unknown device role: {device.role}")
-                                        continue
-                                
-                                device.last_fetch_date = date
-                                device.last_fetch_time = time
-                                device.save()
                             except Exception as error:
-                                logger.error(f"Failed to process attendance punch for user {attendance.user_id if attendance else 'Unknown'}. Error: {error}")
-                                continue
+                                logger.error(f"Failed to process a punch. User: {attendance.user_id if attendance else 'Unknown'}. Error: {error}")
+                                continue # Continue to the next punch
         except Exception as e:
-            logger.error(f"Unhandled exception in ZKBioAttendance thread for {self.machine_ip}. Restarting thread. Error: {e}")
-            # Restart the thread on any major failure
-            time.sleep(10) # wait 10 seconds before restarting
-            new_thread = ZKBioAttendance(self.machine_ip, self.port_no, self.password)
-            new_thread.start()
-            BIO_DEVICE_THREADS[device.id] = new_thread
+            logger.error(f"Biometric thread for {self.machine_ip} has failed and stopped. It will be restarted by the monitor. Error: {e}")
 
     def stop(self):
         """To stop the ZK live capture mode"""
