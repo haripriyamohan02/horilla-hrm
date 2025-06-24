@@ -67,21 +67,14 @@
             </div>
 
             <div class="row">
+
               <div class="col-12 col-sm-12 col-md-12 col-lg-6">
                 <label class="oh-label" for="firstname">{% trans "Biometric ID" %}
                   <div hx-get="{% url 'get-first-last-badge-id' %}" hx-target="#badgeModalBody" data-target="#badgeModal" data-toggle="oh-modal-toggle" class="oh-checkpoint-badge text-success mb-2" id="selectAllInstances" style="cursor: pointer">
                     {% trans "Show" %}
+
                   </div>
-                </label>
-                {{form.badge_id}}
-                {{form.badge_id.errors}}
               </div>
-              <div class="col-12 col-sm-12 col-md-12 col-lg-6">
-                <label class="oh-label" for="employee_trl_id" style="margin-top:35px;">{% trans "Employee TRL ID" %}</label>
-                {{form.employee_trl_id}}
-                {{form.employee_trl_id.errors}}
-              </div>
-            </div>
               {{form.as_p}}
               <hr class="mt-5 mb-3 d-flex flex-row-reverse">
               <div class="col-lg-12 d-flex flex-row-reverse">
@@ -96,17 +89,30 @@
 <script>
   $(document).ready(function () {
     $('#id_employee_profile').change(function (e) {
-
       const file = this.files[0];
       const reader = new FileReader();
-
       reader.addEventListener("load", function() {
         const imageUrl = reader.result;
         $(".preview").attr("src", imageUrl);
       });
-
       reader.readAsDataURL(file);
     });
-  });
 
+    const form = $("form[action$='employee-create-personal-info']");
+    form.on('submit', function(e) {
+      const lastNameInput = $('#id_employee_last_name');
+      let errorElem = $('#last-name-error');
+      if (errorElem.length === 0) {
+        lastNameInput.after('<div id="last-name-error" class="text-danger mt-1" style="font-size: 0.9em;"></div>');
+        errorElem = $('#last-name-error');
+      }
+      errorElem.text('');
+      if ($.trim(lastNameInput.val()) === '') {
+        errorElem.text('Last Name is required.');
+        lastNameInput.focus();
+        e.preventDefault();
+        return false;
+      }
+    });
+  });
 </script>
