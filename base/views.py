@@ -6900,6 +6900,19 @@ def get_upcoming_holidays(request):
         holiday.background_color = colors[i]
     return render(request, "holiday/upcoming_holidays.html", {"holidays": holidays})
 
+@login_required
+@hx_request_required
+def get_next_holiday(request):
+    """
+    Retrieve and display the next upcoming holiday.
+    """
+    today = timezone.localdate()
+    current_year = today.year
+    next_holiday = Holidays.objects.filter(
+        start_date__year=current_year, start_date__gte=today
+    ).first()
+    
+    return render(request, "holiday/next_holiday.html", {"next_holiday": next_holiday})
 
 @login_required
 @hx_request_required

@@ -176,6 +176,8 @@ class EmployeeForm(ModelForm):
         self.fields["email"].widget.attrs["autocomplete"] = "email"
         self.fields["phone"].widget.attrs["autocomplete"] = "phone"
         self.fields["address"].widget.attrs["autocomplete"] = "address"
+        if "badge_id" in self.fields:
+            self.fields["badge_id"].widget.attrs["placeholder"] = _("Biometric ID")
         if instance := kwargs.get("instance"):
             # ----
             # django forms not showing value inside the date, time html element.
@@ -186,7 +188,7 @@ class EmployeeForm(ModelForm):
                 initial["dob"] = instance.dob.strftime("%H:%M")
             kwargs["initial"] = initial
         else:
-            self.initial = {"badge_id": self.get_next_badge_id()}
+            pass  # Do not set initial badge_id
 
     def as_p(self, *args, **kwargs):
         context = {"form": self}

@@ -1629,7 +1629,7 @@ def employee_create_update_personal_info(request, obj_id=None):
                 ).first()
             )
             return redirect(
-                f"employee-view-update/{form.instance.id}/",
+                f"/employee/employee-view-update/{form.instance.id}/?tab=work",
                 data={"form": form, "work_form": work_form, "bank_form": bank_form},
             )
         return HttpResponse(
@@ -2492,7 +2492,6 @@ def work_info_import_file(request):
     data_frame = pd.DataFrame(
         columns=[
             "Badge ID",
-            "Employee TRL ID",
             "First Name",
             "Last Name",
             "Email",
