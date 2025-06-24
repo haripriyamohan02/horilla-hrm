@@ -616,39 +616,38 @@
         <div class="modal-container">
             <!-- Modal Header -->
             <div class="modal-header">
-                <h3 class="modal-title">{% trans "Create Training Schedule" %}</h3>
+                <h3 class="modal-title">Create Training Schedule</h3>
                 <button onclick="closeModal()" class="modal-close">×</button>
             </div>
 
             <!-- Modal Body -->
             <div class="modal-body">
-                <form id="trainingScheduleForm" method="post" action="{% url 'create-training-schedule' %}">
-                    {% csrf_token %}
+                <form id="trainingScheduleForm" method="post">
                     
                     <!-- Course Information Section -->
                     <div class="form-section">
-                        <h4 class="section-title">{% trans "Course Information" %}</h4>
+                        <h4 class="section-title">Course Information</h4>
                         
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Course Name" %} <span class="required">*</span>
+                                    Course Name <span class="required">*</span>
                                 </label>
-                                <input type="text" name="course_name" required class="form-input" placeholder="{% trans 'Enter course name' %}">
+                                <input type="text" name="course_name" required class="form-input" placeholder="Enter course name">
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Course Category" %} <span class="required">*</span>
+                                    Course Category <span class="required">*</span>
                                 </label>
                                 <select name="course_category" required class="form-select">
-                                    <option value="">{% trans "Select Category" %}</option>
-                                    <option value="Safety">{% trans "Safety" %}</option>
-                                    <option value="Leadership">{% trans "Leadership" %}</option>
-                                    <option value="Technical">{% trans "Technical" %}</option>
-                                    <option value="Compliance">{% trans "Compliance" %}</option>
-                                    <option value="Soft Skills">{% trans "Soft Skills" %}</option>
-                                    <option value="Management">{% trans "Management" %}</option>
+                                    <option value="">Select Category</option>
+                                    <option value="Safety">Safety</option>
+                                    <option value="Leadership">Leadership</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Compliance">Compliance</option>
+                                    <option value="Soft Skills">Soft Skills</option>
+                                    <option value="Management">Management</option>
                                 </select>
                             </div>
                         </div>
@@ -656,15 +655,15 @@
 
                     <!-- Instructor & Capacity Section -->
                     <div class="form-section">
-                        <h4 class="section-title">{% trans "Instructor & Capacity" %}</h4>
+                        <h4 class="section-title">Instructor & Capacity</h4>
                         
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Instructor" %} <span class="required">*</span>
+                                    Instructor <span class="required">*</span>
                                 </label>
                                 <select name="instructor" required class="form-select">
-                                    <option value="">{% trans "Select Instructor" %}</option>
+                                    <option value="">Select Instructor</option>
                                     <option value="Dr. Sarah Wilson">Dr. Sarah Wilson</option>
                                     <option value="Michael Chen">Michael Chen</option>
                                     <option value="Jennifer Adams">Jennifer Adams</option>
@@ -675,23 +674,23 @@
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Maximum Capacity" %} <span class="required">*</span>
+                                    Maximum Capacity <span class="required">*</span>
                                 </label>
-                                <input type="number" name="max_capacity" required min="1" max="100" class="form-input" placeholder="{% trans 'Maximum number of trainees' %}">
+                                <input type="number" name="max_capacity" required min="1" max="100" class="form-input" placeholder="Maximum number of trainees">
                             </div>
                         </div>
 
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Training Date" %} <span class="required">*</span>
+                                    Training Date <span class="required">*</span>
                                 </label>
                                 <input type="date" name="training_date" required class="form-input">
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Start Time" %} <span class="required">*</span>
+                                    Start Time <span class="required">*</span>
                                 </label>
                                 <input type="time" name="start_time" required class="form-input">
                             </div>
@@ -700,14 +699,14 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "End Time" %} <span class="required">*</span>
+                                    End Time <span class="required">*</span>
                                 </label>
                                 <input type="time" name="end_time" required class="form-input">
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label">
-                                    {% trans "Duration (hours)" %} <span class="required">*</span>
+                                    Duration (hours) <span class="required">*</span>
                                 </label>
                                 <input type="number" name="duration" required min="0.5" max="24" step="0.5" class="form-input" placeholder="Hours">
                             </div>
@@ -716,10 +715,10 @@
                     <!-- Form Actions -->
                     <div class="form-actions">
                         <button type="button" onclick="closeModal()" class="btn-cancel">
-                            {% trans "Cancel" %}
+                            Cancel
                         </button>
                         <button type="submit" class="btn-submit">
-                            {% trans "Create Training Schedule" %}
+                            Create Training Schedule
                         </button>
                     </div>
                 </form>
@@ -974,11 +973,136 @@
             updateSummaryStats(filteredData);
         }
 
+        // Handle form submission
+        function handleFormSubmission(event) {
+            event.preventDefault();
+            
+            // Run enhanced validation
+            if (!validateForm()) {
+                return;
+            }
+            
+            const form = document.getElementById('trainingScheduleForm');
+            const formData = new FormData(form);
+            
+            const courseName = formData.get('course_name').trim();
+            const courseCategory = formData.get('course_category');
+            const instructor = formData.get('instructor');
+            const maxCapacity = parseInt(formData.get('max_capacity'));
+            const trainingDate = formData.get('training_date');
+            const startTime = formData.get('start_time');
+            const endTime = formData.get('end_time');
+            const duration = parseFloat(formData.get('duration'));
+            
+            if (!courseName || !courseCategory || !instructor || !maxCapacity || 
+                !trainingDate || !startTime || !endTime || !duration) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            const selectedDate = new Date(trainingDate);
+            const currentDate = new Date('2025-06-23');
+            if (selectedDate < currentDate) {
+                alert('Training date cannot be in the past.');
+                return;
+            }
+            
+            if (endTime <= startTime) {
+                alert('End time must be after start time.');
+                return;
+            }
+            
+            const newTraining = {
+                courseName: courseName,
+                instructor: instructor,
+                date: trainingDate,
+                startTime: startTime,
+                endTime: endTime,
+                duration: `${duration} hour${duration !== 1 ? 's' : ''}`,
+                enrolled: 0,
+                capacity: maxCapacity,
+                status: 'Scheduled',
+                category: courseCategory
+            };
+            
+            scheduleData.push(newTraining);
+            scheduleData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            applyFilters();
+            closeModal();
+        }
+
+        // Enhanced validation function
+        function validateForm() {
+            const form = document.getElementById('trainingScheduleForm');
+            const courseName = form.course_name.value.trim();
+            const instructor = form.instructor.value;
+            const trainingDate = form.training_date.value;
+            const startTime = form.start_time.value;
+            const endTime = form.end_time.value;
+            const maxCapacity = parseInt(form.max_capacity.value);
+            
+            // Check for duplicate course names on the same date
+            const isDuplicate = scheduleData.some(item => 
+                item.courseName.toLowerCase() === courseName.toLowerCase() && 
+                item.date === trainingDate
+            );
+            
+            if (isDuplicate) {
+                alert('A course with this name already exists on the selected date.');
+                return false;
+            }
+            
+            // Check instructor availability
+            const instructorConflict = scheduleData.some(item => {
+                if (item.instructor === instructor && item.date === trainingDate) {
+                    const existingStart = item.startTime;
+                    const existingEnd = item.endTime;
+                    
+                    // Check for time overlap
+                    return (startTime < existingEnd && endTime > existingStart);
+                }
+                return false;
+            });
+            
+            if (instructorConflict) {
+                alert('The selected instructor has a conflicting schedule on this date and time.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Auto-calculate duration when times are entered
+        function calculateDuration() {
+            const startTime = document.querySelector('input[name="start_time"]').value;
+            const endTime = document.querySelector('input[name="end_time"]').value;
+            const durationInput = document.querySelector('input[name="duration"]');
+            
+            if (startTime && endTime) {
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+                
+                if (end > start) {
+                    const diffMs = end - start;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+                    durationInput.value = diffHours;
+                }
+            }
+        }
+
         function setupEventListeners() {
             document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
             document.getElementById('categoryFilter').addEventListener('change', applyFilters);
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
             document.getElementById('searchFilter').addEventListener('input', applyFilters);
+            
+            // Add form submission event listener
+            document.getElementById('trainingScheduleForm').addEventListener('submit', handleFormSubmission);
+            
+            // Auto-calculate duration when times change
+            document.querySelector('input[name="start_time"]').addEventListener('change', calculateDuration);
+            document.querySelector('input[name="end_time"]').addEventListener('change', calculateDuration);
         }
 
         // Modal Functions
@@ -992,9 +1116,9 @@
             const modal = document.getElementById('trainingScheduleModal');
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
-            
-            // Reset form
-            document.getElementById('trainingScheduleForm').reset();
+            setTimeout(() => {
+                document.getElementById('trainingScheduleForm').reset();
+            }, 100);
         }
 
         // Close modal when clicking outside
