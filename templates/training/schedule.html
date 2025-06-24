@@ -284,6 +284,51 @@
             color: #6b7280;
             font-size: 16px;
         }
+        .tms-actions-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .tms-action-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tms-action-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .tms-edit-btn {
+            color: #3b82f6;
+        }
+        
+        .tms-edit-btn:hover {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .tms-delete-btn {
+            color: #dc2626;
+        }
+        
+        .tms-delete-btn:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .tms-action-icon {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2;
+        }
         
         /* Modal Styles */
         .modal-overlay {
@@ -487,7 +532,7 @@
             }
             
             .tms-data-table {
-                min-width: 800px;
+                min-width: 900px;
             }
             
             .form-grid {
@@ -604,29 +649,29 @@
                                 <th>Duration</th>
                                 <th>Capacity</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="trainingTableBody">
-                            <tr><td colspan="7" class="tms-loading">Loading training schedules...</td></tr>
+                            <tr><td colspan="8" class="tms-loading">Loading training schedules...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Create Training Modal -->
     <div id="trainingScheduleModal" class="modal-overlay">
         <div class="modal-container">
             <!-- Modal Header -->
             <div class="modal-header">
-                <h3 class="modal-title">Create Training Schedule</h3>
+                <h3 id="modalTitle" class="modal-title">Create Training Schedule</h3>
                 <button onclick="closeModal()" class="modal-close">×</button>
             </div>
 
             <!-- Modal Body -->
             <div class="modal-body">
                 <form id="trainingScheduleForm" method="post">
+                    <input type="hidden" id="scheduleId" name="schedule_id" value="">
                     
                     <!-- Course Information Section -->
                     <div class="form-section">
@@ -721,7 +766,7 @@
                         <button type="button" onclick="closeModal()" class="btn-cancel">
                             Cancel
                         </button>
-                        <button type="submit" class="btn-submit">
+                        <button type="submit" class="btn-submit" id="submitBtn">
                             Create Training Schedule
                         </button>
                     </div>
@@ -733,6 +778,9 @@
     <script>
         let scheduleData = [];
         let filteredData = [];
+        let isEditMode = false;
+        let currentEditId = null;
+
         async function init() {
             try {
                 await loadTrainingSchedules();
@@ -742,6 +790,7 @@
                 showError('Failed to load training schedules. Please refresh the page.');
             }
         }
+
         async function loadTrainingSchedules() {
             try {
                 showLoading(true);
@@ -752,7 +801,7 @@
                 }
                 
                 const data = await response.json();
-                    scheduleData = data.map(item => ({
+                scheduleData = data.map(item => ({
                     id: item.id,
                     courseName: item.course_name,
                     instructor: item.instructor,
@@ -776,6 +825,7 @@
                 showLoading(false);
             }
         }
+
         function showLoading(show) {
             const loadingIndicator = document.getElementById('loading-indicator');
             if (loadingIndicator) {
@@ -783,14 +833,14 @@
             }
         }
 
-        // Refresh data from backend
         async function refreshData() {
             await loadTrainingSchedules();
         }
+
         function renderTable(data) {
             const tbody = document.getElementById('trainingTableBody');
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="tms-no-results">No training sessions found matching your criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="tms-no-results">No training sessions found matching your criteria.</td></tr>`;
                 return;
             }
 
@@ -810,9 +860,24 @@
                     <td>
                         <span class="tms-status-badge ${getStatusClass(item.status)}">${item.status}</span>
                     </td>
+                    <td>
+                        <div class="tms-actions-cell">
+                            <button onclick="editTraining(${item.id})" class="tms-action-btn tms-edit-btn" title="Edit">
+                                <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="deleteTraining(${item.id})" class="tms-action-btn tms-delete-btn" title="Delete">
+                                <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
+
         function getStatusClass(status) {
             const classes = {
                 'Scheduled': 'tms-status-scheduled',
@@ -821,6 +886,7 @@
             };
             return classes[status] || 'tms-status-scheduled';
         }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', { 
@@ -857,6 +923,7 @@
             document.getElementById('totalSchedules').textContent = data.length;
             document.getElementById('totalCapacity').textContent = totalCapacity;
         }
+
         function applyFilters() {
             const dateRange = document.getElementById('dateRangeFilter').value;
             const category = document.getElementById('categoryFilter').value;
@@ -994,7 +1061,7 @@
                 }
                 
             } catch (error) {
-                console.error('Error creating training schedule:', error);
+                console.error('Error saving training schedule:', error);
                 alert('Network error. Please check your connection and try again.');
                 
             } finally {
@@ -1013,10 +1080,11 @@
             const startTime = form.start_time.value;
             const endTime = form.end_time.value;
             
-            // Check for duplicate course names on the same date
+            // Check for duplicate course names on the same date (exclude current item in edit mode)
             const isDuplicate = scheduleData.some(item => 
                 item.courseName.toLowerCase() === courseName.toLowerCase() && 
-                item.date === trainingDate
+                item.date === trainingDate &&
+                (!isEditMode || item.id !== currentEditId)
             );
             
             if (isDuplicate) {
@@ -1079,6 +1147,14 @@
 
         // Modal Functions
         function openCreateTrainingModal() {
+            // Reset form if not in edit mode
+            if (!isEditMode) {
+                document.getElementById('modalTitle').textContent = 'Create Training Schedule';
+                document.getElementById('submitBtn').textContent = 'Create Training Schedule';
+                document.getElementById('trainingScheduleForm').reset();
+                document.getElementById('scheduleId').value = '';
+            }
+
             const modal = document.getElementById('trainingScheduleModal');
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
