@@ -3,6 +3,11 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import TrainingSchedule
+from .serializers import TrainingScheduleSerializer
 
 
 class TrainingDashboardView(TemplateView):
@@ -83,3 +88,12 @@ class CreateTrainingScheduleView(TemplateView):
 
         messages.success(request, _("Training schedule created successfully!"))
         return HttpResponseRedirect(reverse("training-schedule"))
+
+
+@api_view(["POST"])
+def create_training_schedule(request):
+    serializer = TrainingScheduleSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

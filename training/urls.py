@@ -1,5 +1,6 @@
 from django.urls import path
 
+from training import views
 from training.views import (
     CreateTrainingScheduleView,
     TrainingDashboardView,
@@ -16,4 +17,9 @@ urlpatterns = [
         name="create-training-schedule",
     ),
     path("history/", TrainingHistoryView.as_view(), name="training-history"),
+    path(
+        "api/create-schedule/",
+        views.create_training_schedule,
+        name="create_training_schedule",
+    ),
 ]
