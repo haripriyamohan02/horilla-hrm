@@ -319,11 +319,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function approveTransfer(transferId) {
         updateTransferStatus(transferId, 'APPROVED');
+        allTransfers = getTransfers();
         filterTable();
     }
 
     function rejectTransfer(transferId) {
         updateTransferStatus(transferId, 'REJECTED');
+        allTransfers = getTransfers();
         filterTable();
     }
 
@@ -432,5 +434,12 @@ document.addEventListener('DOMContentLoaded', function() {
         allTransfers = getTransfers();
         filterTable();
     });
+
+    function updateStatus(index, newStatus) {
+        let transfers = getTransfers();
+        transfers[index].status = newStatus;
+        localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
+        renderTable(transfers);
+    }
 </script>
 {% endblock %} 

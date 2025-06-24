@@ -248,8 +248,8 @@
         localStorage.setItem('horillaTransfers', JSON.stringify(transfers));
     }
 
-    function renderRequestsTable() {
-        const transfers = getTransfers();
+    function renderRequestsTable(filteredTransfers) {
+        const transfers = filteredTransfers || getTransfers();
         const tableBody = document.getElementById('request-table-body');
         if (!tableBody) return;
         
@@ -315,7 +315,7 @@
                     <option value="">Select position</option>
                     ${postings
                         .filter(p => p.vacancy > 0)
-                        .map(p => `<option value="${p.id}">${p.position_name} (${p.department}) - ${p.vacancy} vacancies</option>`)
+                        .map(p => `<option value="${p.id}">${p.position_name} (${p.department})</option>`)
                         .join('')}
                 </select>
             `;
@@ -350,6 +350,18 @@
         }
     }
 
+    function filterRequestsTable() {
+        const searchValue = document.querySelector('.input-group input[type="text"]').value.toLowerCase();
+        const transfers = getTransfers();
+        const filtered = transfers.filter(t =>
+            t.employee.toLowerCase().includes(searchValue) ||
+            t.from.toLowerCase().includes(searchValue) ||
+            t.to.toLowerCase().includes(searchValue) ||
+            t.status.toLowerCase().includes(searchValue)
+        );
+        renderRequestsTable(filtered);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded');
         
@@ -371,15 +383,26 @@
 
         // Render the transfer requests table
         renderRequestsTable();
+
+        // Add filter event listener
+        document.querySelector('.input-group input[type="text"]').addEventListener('keyup', filterRequestsTable);
     });
 
     document.getElementById('save-transfer-request-btn').addEventListener('click', function() {
+        let toValue = document.getElementById('to-request').value;
+        const transferType = document.getElementById('transfer_type_request').value;
+        if (transferType === 'POSITION') {
+            const toSelect = document.getElementById('to-request');
+            if (toSelect && toSelect.options && toSelect.selectedIndex > 0) {
+                toValue = toSelect.options[toSelect.selectedIndex].text;
+            }
+        }
         const newTransfer = {
             employee: document.getElementById('employee-request').value,
             email: document.getElementById('email-request').value,
-            type: document.getElementById('transfer_type_request').value,
+            type: transferType,
             from: document.getElementById('from-request').value,
-            to: document.getElementById('to-request').value,
+            to: toValue,
             request_date: document.getElementById('request_date_request').value,
             status: 'PENDING',
             reason: document.getElementById('reason-request').value

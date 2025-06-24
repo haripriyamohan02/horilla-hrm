@@ -133,8 +133,12 @@
         document.getElementById(modalID).classList.toggle('oh-modal--show');
     }
 
-    function renderPostingsTable() {
-        const postings = getPostings();
+    function getPostings() {
+        return JSON.parse(localStorage.getItem('horillaPostings') || '[]');
+    }
+
+    function renderPostingsTable(filteredPostings) {
+        const postings = filteredPostings || getPostings();
         const tableBody = document.getElementById('postings-table-body');
         tableBody.innerHTML = '';
 
@@ -148,6 +152,17 @@
                 <td style="font-size: 13px;">${p.start_date}</td>
             `;
         });
+    }
+
+    function filterPostingsTable() {
+        const searchValue = document.querySelector('.input-group input[type="text"]').value.toLowerCase();
+        const postings = getPostings();
+        const filtered = postings.filter(p =>
+            p.position_name.toLowerCase().includes(searchValue) ||
+            p.department.toLowerCase().includes(searchValue) ||
+            p.location.toLowerCase().includes(searchValue)
+        );
+        renderPostingsTable(filtered);
     }
 
     document.getElementById('create-posting-form').addEventListener('submit', function (e) {
@@ -168,6 +183,10 @@
         renderPostingsTable();
     });
 
-    document.addEventListener('DOMContentLoaded', renderPostingsTable);
+    document.addEventListener('DOMContentLoaded', function() {
+        renderPostingsTable();
+        document.querySelector('.input-group input[type="text"]').addEventListener('keyup', filterPostingsTable);
+    });
 </script>
+
 {% endblock %} 
