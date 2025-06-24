@@ -38,7 +38,7 @@ SUBMENUS = [
         "accessibility": "leave.sidebar.assign_accessibility",
     },
     {
-        "menu": trans("Special leave request"),
+        "menu": trans("Special Leave Request"),
         "redirect": reverse("leave-allocation-request-view"),
     },
     {
