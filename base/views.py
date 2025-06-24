@@ -1496,7 +1496,7 @@ def mail_server_conf(request):
 def mail_server_test_email(request):
     instance_id = request.GET.get("instance_id")
     white_labelling = getattr(horilla_apps, "WHITE_LABELLING", False)
-    image_path = path.join(settings.STATIC_ROOT, "images/ui/horilla-logo.png")
+    image_path = path.join(settings.STATIC_ROOT, "images/tringapps.png")
     company_name = "tringapps"
 
     if white_labelling:
