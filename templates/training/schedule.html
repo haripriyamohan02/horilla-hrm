@@ -662,18 +662,15 @@
     </div>
     <div id="trainingScheduleModal" class="modal-overlay">
         <div class="modal-container">
-            <!-- Modal Header -->
             <div class="modal-header">
                 <h3 id="modalTitle" class="modal-title">Create Training Schedule</h3>
                 <button onclick="closeModal()" class="modal-close">×</button>
             </div>
 
-            <!-- Modal Body -->
             <div class="modal-body">
                 <form id="trainingScheduleForm" method="post">
                     <input type="hidden" id="scheduleId" name="schedule_id" value="">
                     
-                    <!-- Course Information Section -->
                     <div class="form-section">
                         <h4 class="section-title">Course Information</h4>
                         
@@ -702,7 +699,6 @@
                         </div>
                     </div>
 
-                    <!-- Instructor & Capacity Section -->
                     <div class="form-section">
                         <h4 class="section-title">Instructor & Capacity</h4>
                         
@@ -761,7 +757,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Form Actions -->
+
                     <div class="form-actions">
                         <button type="button" onclick="closeModal()" class="btn-cancel">
                             Cancel
@@ -774,400 +770,531 @@
             </div>
         </div>
     </div>
+    <div id="deleteConfirmModal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Delete</h3>
+                <button onclick="closeDeleteModal()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px; font-size: 16px; color: #374151;">
+                    Are you sure you want to delete the training schedule for 
+                    <strong id="deleteCourseName"></strong>?
+                </p>
+                <p style="margin-bottom: 30px; font-size: 14px; color: #6b7280;">
+                    This action cannot be undone.
+                </p>
+                <div class="form-actions">
+                    <button type="button" onclick="closeDeleteModal()" class="btn-cancel">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmDelete()" class="btn-submit" id="confirmDeleteBtn" style="background: #dc2626;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let scheduleData = [];
-        let filteredData = [];
-        let isEditMode = false;
-        let currentEditId = null;
+var scheduleData, filteredData, isEditMode, currentEditId, deleteScheduleId;
+function initializeVariables() {
+    scheduleData = [];
+    filteredData = [];
+    isEditMode = false;
+    currentEditId = null;
+    deleteScheduleId = null;
+}
 
-        async function init() {
-            try {
-                await loadTrainingSchedules();
-                setupEventListeners();
-            } catch (error) {
-                console.error('Error initializing application:', error);
-                showError('Failed to load training schedules. Please refresh the page.');
-            }
+async function init() {
+    try {
+        initializeVariables();
+        await loadTrainingSchedules();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error initializing application:', error);
+        showError('Failed to load training schedules. Please refresh the page.');
+    }
+}
+
+async function loadTrainingSchedules() {
+    try {
+        showLoading(true);
+        const response = await fetch('/training/api/get-all-schedules/');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const data = await response.json();
+        scheduleData = data.map(item => ({
+            id: item.id,
+            courseName: item.course_name,
+            instructor: item.instructor,
+            date: item.training_date,
+            startTime: item.start_time,
+            endTime: item.end_time,
+            duration: `${item.duration} hour${item.duration !== 1 ? 's' : ''}`,
+            capacity: item.max_capacity,
+            status: item.status,
+            category: item.course_category
+        }));
 
-        async function loadTrainingSchedules() {
-            try {
-                showLoading(true);
-                const response = await fetch('/training/api/get-all-schedules/');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                scheduleData = data.map(item => ({
-                    id: item.id,
-                    courseName: item.course_name,
-                    instructor: item.instructor,
-                    date: item.training_date,
-                    startTime: item.start_time,
-                    endTime: item.end_time,
-                    duration: `${item.duration} hour${item.duration !== 1 ? 's' : ''}`,
-                    capacity: item.max_capacity,
-                    status: item.status,
-                    category: item.course_category
-                }));
+        filteredData = [...scheduleData];
+        renderTable(filteredData);
+        updateSummaryStats(filteredData);
+        
+    } catch (error) {
+        console.error('Error loading training schedules:', error);
+        showError('Failed to load training schedules from server.');
+    } finally {
+        showLoading(false);
+    }
+}
 
-                filteredData = [...scheduleData];
-                renderTable(filteredData);
-                updateSummaryStats(filteredData);
-                
-            } catch (error) {
-                console.error('Error loading training schedules:', error);
-                showError('Failed to load training schedules from server.');
-            } finally {
-                showLoading(false);
+function showLoading(show) {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = show ? 'block' : 'none';
+    }
+}
+
+function showError(message) {
+    alert(message);
+}
+
+async function refreshData() {
+    await loadTrainingSchedules();
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('trainingTableBody');
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="tms-no-results">No training sessions found matching your criteria.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.map(item => `
+        <tr>
+            <td><span class="tms-course-name">${item.courseName}</span></td>
+            <td><span class="tms-category-badge">${item.category}</span></td>
+            <td><span class="tms-instructor-name">${item.instructor}</span></td>
+            <td>
+                <div class="tms-date-time-info">
+                    <div class="tms-date-primary">${formatDate(item.date)}</div>
+                    <div class="tms-time-secondary">${item.startTime} - ${item.endTime}</div>
+                </div>
+            </td>
+            <td><span class="tms-duration-text">${item.duration}</span></td>
+            <td><span class="tms-capacity-text">${item.capacity}</span></td>
+            <td>
+                <span class="tms-status-badge ${getStatusClass(item.status)}">${item.status}</span>
+            </td>
+            <td>
+                <div class="tms-actions-cell">
+                    <button onclick="editTraining(${item.id})" class="tms-action-btn tms-edit-btn" title="Edit">
+                        <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </button>
+                    <button onclick="deleteTraining(${item.id})" class="tms-action-btn tms-delete-btn" title="Delete">
+                        <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function deleteTraining(scheduleId) {
+    const schedule = scheduleData.find(item => item.id === scheduleId);
+    if (!schedule) {
+        alert('Training schedule not found.');
+        return;
+    }
+    
+    deleteScheduleId = scheduleId;
+    document.getElementById('deleteCourseName').textContent = schedule.courseName;
+    
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    deleteScheduleId = null;
+}
+
+async function confirmDelete() {
+    if (!deleteScheduleId) {
+        alert('No schedule selected for deletion.');
+        return;
+    }
+    
+    try {
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const originalText = confirmBtn.textContent;
+        confirmBtn.textContent = 'Deleting...';
+        confirmBtn.disabled = true;
+        
+        const response = await fetch(`/training/api/delete-schedule/${deleteScheduleId}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
             }
-        }
-
-        function showLoading(show) {
-            const loadingIndicator = document.getElementById('loading-indicator');
-            if (loadingIndicator) {
-                loadingIndicator.style.display = show ? 'block' : 'none';
-            }
-        }
-
-        async function refreshData() {
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            closeDeleteModal();
+            alert(result.message || 'Training schedule deleted successfully!');
             await loadTrainingSchedules();
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('trainingTableBody');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="tms-no-results">No training sessions found matching your criteria.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = data.map(item => `
-                <tr>
-                    <td><span class="tms-course-name">${item.courseName}</span></td>
-                    <td><span class="tms-category-badge">${item.category}</span></td>
-                    <td><span class="tms-instructor-name">${item.instructor}</span></td>
-                    <td>
-                        <div class="tms-date-time-info">
-                            <div class="tms-date-primary">${formatDate(item.date)}</div>
-                            <div class="tms-time-secondary">${item.startTime} - ${item.endTime}</div>
-                        </div>
-                    </td>
-                    <td><span class="tms-duration-text">${item.duration}</span></td>
-                    <td><span class="tms-capacity-text">${item.capacity}</span></td>
-                    <td>
-                        <span class="tms-status-badge ${getStatusClass(item.status)}">${item.status}</span>
-                    </td>
-                    <td>
-                        <div class="tms-actions-cell">
-                            <button onclick="editTraining(${item.id})" class="tms-action-btn tms-edit-btn" title="Edit">
-                                <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
-                            <button onclick="deleteTraining(${item.id})" class="tms-action-btn tms-delete-btn" title="Delete">
-                                <svg class="tms-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function getStatusClass(status) {
-            const classes = {
-                'Scheduled': 'tms-status-scheduled',
-                'In Progress': 'tms-status-progress',
-                'Completed': 'tms-status-completed'
-            };
-            return classes[status] || 'tms-status-scheduled';
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        }
-
-        function updateSummaryStats(data) {
-            const currentDate = new Date();
-            const oneWeekFromNow = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
             
-            let upcomingSessions = 0;
-            let thisWeekSessions = 0;
-            let totalCapacity = 0;
-            
-            data.forEach(item => {
-                const itemDate = new Date(item.date);
-                
-                if (itemDate > currentDate) {
-                    upcomingSessions++;
-                }
-                
-                if (itemDate >= currentDate && itemDate <= oneWeekFromNow) {
-                    thisWeekSessions++;
-                }
-                
-                totalCapacity += item.capacity;
-            });
-
-            document.getElementById('upcomingSessions').textContent = upcomingSessions;
-            document.getElementById('thisWeek').textContent = thisWeekSessions;
-            document.getElementById('totalSchedules').textContent = data.length;
-            document.getElementById('totalCapacity').textContent = totalCapacity;
+        } else {
+            const errorData = await response.json();
+            alert(errorData.error || 'Failed to delete training schedule.');
         }
+        
+    } catch (error) {
+        console.error('Error deleting training schedule:', error);
+        alert('Network error. Please check your connection and try again.');
+        
+    } finally {
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        confirmBtn.textContent = 'Delete';
+        confirmBtn.disabled = false;
+    }
+}
 
-        function applyFilters() {
-            const dateRange = document.getElementById('dateRangeFilter').value;
-            const category = document.getElementById('categoryFilter').value;
-            const status = document.getElementById('statusFilter').value;
-            const search = document.getElementById('searchFilter').value.toLowerCase();
+// Edit Training Function
+function editTraining(scheduleId) {
+    const schedule = scheduleData.find(item => item.id === scheduleId);
+    if (!schedule) {
+        alert('Training schedule not found.');
+        return;
+    }
+    
+    isEditMode = true;
+    currentEditId = scheduleId;
+    
+    const form = document.getElementById('trainingScheduleForm');
+    form.course_name.value = schedule.courseName;
+    form.course_category.value = schedule.category;
+    form.instructor.value = schedule.instructor;
+    form.max_capacity.value = schedule.capacity;
+    form.training_date.value = schedule.date;
+    form.start_time.value = schedule.startTime;
+    form.end_time.value = schedule.endTime;
+    form.duration.value = schedule.duration.replace(/[^\d.]/g, ''); 
+    
+    document.getElementById('scheduleId').value = scheduleId;
+    document.getElementById('modalTitle').textContent = 'Edit Training Schedule';
+    document.getElementById('submitBtn').textContent = 'Update Training Schedule';
+    
+    openCreateTrainingModal();
+}
 
-            const currentDate = new Date();
+function getStatusClass(status) {
+    const classes = {
+        'Scheduled': 'tms-status-scheduled',
+        'In Progress': 'tms-status-progress',
+        'Completed': 'tms-status-completed'
+    };
+    return classes[status] || 'tms-status-scheduled';
+}
 
-            filteredData = scheduleData.filter(item => {
-                const itemDate = new Date(item.date);
-                const daysDiff = Math.ceil((itemDate - currentDate) / (1000 * 60 * 60 * 24));
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
 
-                // Date range filter
-                if (dateRange) {
-                    switch(dateRange) {
-                        case '7':
-                            if (daysDiff < 0 || daysDiff > 7) return false;
-                            break;
-                        case '30':
-                            if (daysDiff < 0 || daysDiff > 30) return false;
-                            break;
-                        case 'month':
-                            if (itemDate.getMonth() !== currentDate.getMonth() || 
-                                itemDate.getFullYear() !== currentDate.getFullYear()) return false;
-                            break;
-                        case 'next_month':
-                            const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
-                            if (itemDate.getMonth() !== nextMonth.getMonth() || 
-                                itemDate.getFullYear() !== nextMonth.getFullYear()) return false;
-                            break;
-                    }
-                }
-
-                // Category filter
-                if (category && item.category !== category) return false;
-
-                // Status filter
-                if (status && item.status !== status) return false;
-
-                // Search filter
-                if (search && 
-                    !item.courseName.toLowerCase().includes(search) &&
-                    !item.instructor.toLowerCase().includes(search) &&
-                    !item.category.toLowerCase().includes(search)) return false;
-
-                return true;
-            });
-
-            renderTable(filteredData);
-            updateSummaryStats(filteredData);
+function updateSummaryStats(data) {
+    const currentDate = new Date();
+    const oneWeekFromNow = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    let upcomingSessions = 0;
+    let thisWeekSessions = 0;
+    let totalCapacity = 0;
+    
+    data.forEach(item => {
+        const itemDate = new Date(item.date);
+        
+        if (itemDate > currentDate) {
+            upcomingSessions++;
         }
+        
+        if (itemDate >= currentDate && itemDate <= oneWeekFromNow) {
+            thisWeekSessions++;
+        }
+        
+        totalCapacity += item.capacity;
+    });
 
-        // Handle form submission
-        async function handleFormSubmission(event) {
-            event.preventDefault();
-            
-            // Run enhanced validation
-            if (!validateForm()) {
-                return;
-            }
-            
-            const form = document.getElementById('trainingScheduleForm');
-            const formData = new FormData(form);
-            
-            const trainingData = {
-                course_name: formData.get('course_name').trim(),
-                course_category: formData.get('course_category'),
-                instructor: formData.get('instructor'),
-                max_capacity: parseInt(formData.get('max_capacity')),
-                training_date: formData.get('training_date'),
-                start_time: formData.get('start_time'),
-                end_time: formData.get('end_time'),
-                duration: parseFloat(formData.get('duration')),
-                status: 'Scheduled' 
-            };
+    document.getElementById('upcomingSessions').textContent = upcomingSessions;
+    document.getElementById('thisWeek').textContent = thisWeekSessions;
+    document.getElementById('totalSchedules').textContent = data.length;
+    document.getElementById('totalCapacity').textContent = totalCapacity;
+}
 
-            // Basic validation
-            if (!trainingData.course_name || !trainingData.course_category || 
-                !trainingData.instructor || !trainingData.max_capacity || 
-                !trainingData.training_date || !trainingData.start_time || 
-                !trainingData.end_time || !trainingData.duration) {
-                alert('Please fill in all required fields.');
-                return;
-            }
+function applyFilters() {
+    const dateRange = document.getElementById('dateRangeFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const search = document.getElementById('searchFilter').value.toLowerCase();
 
-            const selectedDate = new Date(trainingData.training_date);
-            const currentDate = new Date();
-            if (selectedDate < currentDate) {
-                alert('Training date cannot be in the past.');
-                return;
-            }
+    const currentDate = new Date();
 
-            if (trainingData.end_time <= trainingData.start_time) {
-                alert('End time must be after start time.');
-                return;
-            }
-            
-            try {
-                const submitButton = document.querySelector('.btn-submit');
-                const originalText = submitButton.textContent;
-                submitButton.textContent = 'Creating...';
-                submitButton.disabled = true;
+    filteredData = scheduleData.filter(item => {
+        const itemDate = new Date(item.date);
+        const daysDiff = Math.ceil((itemDate - currentDate) / (1000 * 60 * 60 * 24));
 
-                const response = await fetch('/training/api/create-schedule/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(trainingData)
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    closeModal();
-                    alert('Training schedule created successfully!');
-                    
-                    // Refresh data from backend
-                    await loadTrainingSchedules();
-                    
-                } else {
-                    // Handle API errors
-                    const errorData = await response.json();
-                    let errorMessage = 'Failed to create training schedule. ';
-                    
-                    if (errorData.errors) {
-                        const errors = Object.entries(errorData.errors)
-                            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-                            .join('\n');
-                        errorMessage += `\n${errors}`;
-                    } else if (errorData.error) {
-                        errorMessage += errorData.error;
-                    }
-                    
-                    alert(errorMessage);
-                }
-                
-            } catch (error) {
-                console.error('Error saving training schedule:', error);
-                alert('Network error. Please check your connection and try again.');
-                
-            } finally {
-                const submitButton = document.querySelector('.btn-submit');
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
+        // Date range filter
+        if (dateRange) {
+            switch(dateRange) {
+                case '7':
+                    if (daysDiff < 0 || daysDiff > 7) return false;
+                    break;
+                case '30':
+                    if (daysDiff < 0 || daysDiff > 30) return false;
+                    break;
+                case 'month':
+                    if (itemDate.getMonth() !== currentDate.getMonth() || 
+                        itemDate.getFullYear() !== currentDate.getFullYear()) return false;
+                    break;
+                case 'next_month':
+                    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+                    if (itemDate.getMonth() !== nextMonth.getMonth() || 
+                        itemDate.getFullYear() !== nextMonth.getFullYear()) return false;
+                    break;
             }
         }
 
-        // Enhanced validation function
-        function validateForm() {
-            const form = document.getElementById('trainingScheduleForm');
-            const courseName = form.course_name.value.trim();
-            const instructor = form.instructor.value;
-            const trainingDate = form.training_date.value;
-            const startTime = form.start_time.value;
-            const endTime = form.end_time.value;
+        // Category filter
+        if (category && item.category !== category) return false;
+
+        // Status filter
+        if (status && item.status !== status) return false;
+
+        // Search filter
+        if (search && 
+            !item.courseName.toLowerCase().includes(search) &&
+            !item.instructor.toLowerCase().includes(search) &&
+            !item.category.toLowerCase().includes(search)) return false;
+
+        return true;
+    });
+
+    renderTable(filteredData);
+    updateSummaryStats(filteredData);
+}
+
+// Handle form submission
+async function handleFormSubmission(event) {
+    event.preventDefault();
+    
+    if (!validateForm()) {
+        return;
+    }
+    
+    const form = document.getElementById('trainingScheduleForm');
+    const formData = new FormData(form);
+    
+    const trainingData = {
+        course_name: formData.get('course_name').trim(),
+        course_category: formData.get('course_category'),
+        instructor: formData.get('instructor'),
+        max_capacity: parseInt(formData.get('max_capacity')),
+        training_date: formData.get('training_date'),
+        start_time: formData.get('start_time'),
+        end_time: formData.get('end_time'),
+        duration: parseFloat(formData.get('duration')),
+        status: 'Scheduled' 
+    };
+
+    // Basic validation
+    if (!trainingData.course_name || !trainingData.course_category || 
+        !trainingData.instructor || !trainingData.max_capacity || 
+        !trainingData.training_date || !trainingData.start_time || 
+        !trainingData.end_time || !trainingData.duration) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    const selectedDate = new Date(trainingData.training_date);
+    const currentDate = new Date();
+    if (selectedDate < currentDate) {
+        alert('Training date cannot be in the past.');
+        return;
+    }
+
+    if (trainingData.end_time <= trainingData.start_time) {
+        alert('End time must be after start time.');
+        return;
+    }
+    
+    try {
+        const submitButton = document.querySelector('.btn-submit');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = isEditMode ? 'Updating...' : 'Creating...';
+        submitButton.disabled = true;
+
+        const response = await fetch('/training/api/create-schedule/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(trainingData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            closeModal();
+            alert(isEditMode ? 'Training schedule updated successfully!' : 'Training schedule created successfully!');
+            resetEditMode();
             
-            // Check for duplicate course names on the same date (exclude current item in edit mode)
-            const isDuplicate = scheduleData.some(item => 
-                item.courseName.toLowerCase() === courseName.toLowerCase() && 
-                item.date === trainingDate &&
-                (!isEditMode || item.id !== currentEditId)
-            );
+            // Refresh data from backend
+            await loadTrainingSchedules();
             
-            if (isDuplicate) {
-                alert('A course with this name already exists on the selected date.');
-                return false;
+        } else {
+            const errorData = await response.json();
+            let errorMessage = isEditMode ? 'Failed to update training schedule. ' : 'Failed to create training schedule. ';
+            
+            if (errorData.errors) {
+                const errors = Object.entries(errorData.errors)
+                    .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+                    .join('\n');
+                errorMessage += `\n${errors}`;
+            } else if (errorData.error) {
+                errorMessage += errorData.error;
             }
             
-            // Check instructor availability
-            const instructorConflict = scheduleData.some(item => {
-                if (item.instructor === instructor && item.date === trainingDate) {
-                    const existingStart = item.startTime;
-                    const existingEnd = item.endTime;
-                    
-                    // Check for time overlap
-                    return (startTime < existingEnd && endTime > existingStart);
-                }
-                return false;
-            });
-            
-            if (instructorConflict) {
-                alert('The selected instructor has a conflicting schedule on this date and time.');
-                return false;
-            }
-            
-            return true;
+            alert(errorMessage);
         }
+        
+    } catch (error) {
+        console.error('Error saving training schedule:', error);
+        alert('Network error. Please check your connection and try again.');
+        
+    } finally {
+        const submitButton = document.querySelector('.btn-submit');
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    }
+}
 
-        // Auto-calculate duration when times are entered
-        function calculateDuration() {
-            const startTime = document.querySelector('input[name="start_time"]').value;
-            const endTime = document.querySelector('input[name="end_time"]').value;
-            const durationInput = document.querySelector('input[name="duration"]');
+function resetEditMode() {
+    isEditMode = false;
+    currentEditId = null;
+}
+
+// Enhanced validation function
+function validateForm() {
+    const form = document.getElementById('trainingScheduleForm');
+    const courseName = form.course_name.value.trim();
+    const instructor = form.instructor.value;
+    const trainingDate = form.training_date.value;
+    const startTime = form.start_time.value;
+    const endTime = form.end_time.value;
+    
+    // Check for duplicate course names on the same date (exclude current item in edit mode)
+    const isDuplicate = scheduleData.some(item => 
+        item.courseName.toLowerCase() === courseName.toLowerCase() && 
+        item.date === trainingDate &&
+        (!isEditMode || item.id !== currentEditId)
+    );
+    
+    if (isDuplicate) {
+        alert('A course with this name already exists on the selected date.');
+        return false;
+    }
+    
+    // Check instructor availability
+    const instructorConflict = scheduleData.some(item => {
+        if (isEditMode && item.id === currentEditId) return false;
+        
+        if (item.instructor === instructor && item.date === trainingDate) {
+            const existingStart = item.startTime;
+            const existingEnd = item.endTime;
             
-            if (startTime && endTime) {
-                const start = new Date(`2000-01-01T${startTime}`);
-                const end = new Date(`2000-01-01T${endTime}`);
-                
-                if (end > start) {
-                    const diffMs = end - start;
-                    const diffHours = diffMs / (1000 * 60 * 60);
-                    durationInput.value = diffHours;
-                }
-            }
+            // Check for time overlap
+            return (startTime < existingEnd && endTime > existingStart);
         }
+        return false;
+    });
+    
+    if (instructorConflict) {
+        alert('The selected instructor has a conflicting schedule on this date and time.');
+        return false;
+    }
+    
+    return true;
+}
 
-        // Setup event listeners
-        function setupEventListeners() {
-            document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
-            document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-            document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            document.getElementById('searchFilter').addEventListener('input', applyFilters);
-            
-            // Add form submission event listener
-            document.getElementById('trainingScheduleForm').addEventListener('submit', handleFormSubmission);
-            
-            // Auto-calculate duration when times change
-            document.querySelector('input[name="start_time"]').addEventListener('change', calculateDuration);
-            document.querySelector('input[name="end_time"]').addEventListener('change', calculateDuration);
+// Auto-calculate duration when times are entered
+function calculateDuration() {
+    const startTime = document.querySelector('input[name="start_time"]').value;
+    const endTime = document.querySelector('input[name="end_time"]').value;
+    const durationInput = document.querySelector('input[name="duration"]');
+    
+    if (startTime && endTime) {
+        const start = new Date(`2000-01-01T${startTime}`);
+        const end = new Date(`2000-01-01T${endTime}`);
+        
+        if (end > start) {
+            const diffMs = end - start;
+            const diffHours = diffMs / (1000 * 60 * 60);
+            durationInput.value = diffHours;
         }
+    }
+}
 
-        // Modal Functions
-        function openCreateTrainingModal() {
-            // Reset form if not in edit mode
-            if (!isEditMode) {
-                document.getElementById('modalTitle').textContent = 'Create Training Schedule';
-                document.getElementById('submitBtn').textContent = 'Create Training Schedule';
-                document.getElementById('trainingScheduleForm').reset();
-                document.getElementById('scheduleId').value = '';
-            }
+// Setup event listeners
+function setupEventListeners() {
+    document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchFilter').addEventListener('input', applyFilters);
+    
+    // Add form submission event listener
+    document.getElementById('trainingScheduleForm').addEventListener('submit', handleFormSubmission);
+    
+    // Auto-calculate duration when times change
+    document.querySelector('input[name="start_time"]').addEventListener('change', calculateDuration);
+    document.querySelector('input[name="end_time"]').addEventListener('change', calculateDuration);
+}
 
-            const modal = document.getElementById('trainingScheduleModal');
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+// Modal Functions
+function openCreateTrainingModal() {
+    if (!isEditMode) {
+        document.getElementById('modalTitle').textContent = 'Create Training Schedule';
+        document.getElementById('submitBtn').textContent = 'Create Training Schedule';
+        document.getElementById('trainingScheduleForm').reset();
+        document.getElementById('scheduleId').value = '';
+    }
 
-        function closeModal() {
-            const modal = document.getElementById('trainingScheduleModal');
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            setTimeout(() => {
-                document.getElementById('trainingScheduleForm').reset();
-            }, 100);
-        }
+    const modal = document.getElementById('trainingScheduleModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('trainingScheduleModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetEditMode();
+    setTimeout(() => {
+        document.getElementById('trainingScheduleForm').reset();
+    }, 100);
+}
 
         // Close modal when clicking outside
         document.getElementById('trainingScheduleModal').addEventListener('click', function(e) {

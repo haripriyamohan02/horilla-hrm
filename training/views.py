@@ -5,9 +5,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models.query import QuerySet
+from django.shortcuts import get_object_or_404
 import json
 from training.models import TrainingSchedule
 from .serializers import TrainingScheduleSerializer
+from django.http import JsonResponse
 
 
 class TrainingDashboardView(TemplateView):
@@ -23,7 +25,7 @@ class TrainingHistoryView(TemplateView):
 
 
 @api_view(["POST"])
-@csrf_exempt  # Exempt CSRF for API endpoint
+@csrf_exempt
 def create_training_schedule(request):
     try:
         # Handle JSON data
@@ -61,3 +63,24 @@ def get_all_training_schedules(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@csrf_exempt
+def delete_training_schedule(request, schedule_id):
+    if request.method in ["DELETE", "POST"]:
+        try:
+            schedule = get_object_or_404(TrainingSchedule, id=schedule_id)
+            course_name = schedule.course_name
+            schedule.delete()
+            return JsonResponse(
+                {
+                    "message": f"Training schedule '{course_name}' has been deleted successfully"
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)

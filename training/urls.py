@@ -20,4 +20,9 @@ urlpatterns = [
         views.get_all_training_schedules,
         name="get_all_training_schedules",
     ),
+    path(
+        "api/delete-schedule/<int:schedule_id>/",
+        views.delete_training_schedule,
+        name="delete_training_schedule",
+    ),
 ]
