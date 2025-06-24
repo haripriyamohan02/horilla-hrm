@@ -1878,8 +1878,9 @@ def assign_leave_type_import(request):
                 except:
                     pass
                 available_leave.assigned_date = datetime.today()
+                
                 available_leave.total_leave_days = (
-                    available_leave.carryforward_days + available_leave.available_days
+                    int(available_leave.carryforward_days) + int(available_leave.available_days)
                 )
             assign_leave_list.append(available_leave)
 
