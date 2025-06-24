@@ -1,14 +1,12 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse
-from django.contrib import messages
 from django.utils.translation import gettext as _
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models.query import QuerySet
 import json
-from .models import TrainingSchedule
+from training.models import TrainingSchedule
 from .serializers import TrainingScheduleSerializer
 
 
@@ -46,5 +44,20 @@ def create_training_schedule(request):
         return Response(
             {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
         )
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+def get_all_training_schedules(request):
+    """
+    Retrieve all training schedules from the database
+    """
+    try:
+        schedules: QuerySet[TrainingSchedule] = TrainingSchedule.objects.all().order_by(
+            "training_date", "start_time"
+        )
+        serializer = TrainingScheduleSerializer(schedules, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

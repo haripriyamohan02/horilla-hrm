@@ -15,4 +15,9 @@ urlpatterns = [
         views.create_training_schedule,
         name="create_training_schedule",
     ),
+    path(
+        "api/get-all-schedules/",
+        views.get_all_training_schedules,
+        name="get_all_training_schedules",
+    ),
 ]

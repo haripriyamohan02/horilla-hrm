@@ -514,7 +514,7 @@
                         <span class="tms-metric-label">Upcoming Sessions</span>
                     </div>
                     <div class="tms-metric-content">
-                        <span id="upcomingSessions" class="tms-metric-value">8</span>
+                        <span id="upcomingSessions" class="tms-metric-value">Loading...</span>
                     </div>
                 </div>
                 
@@ -523,25 +523,25 @@
                         <span class="tms-metric-label">This Week</span>
                     </div>
                     <div class="tms-metric-content">
-                        <span id="thisWeek" class="tms-metric-value">3</span>
+                        <span id="thisWeek" class="tms-metric-value">Loading...</span>
                     </div>
                 </div>
                 
                 <div class="tms-metric-box tms-metric-box--blue">
                     <div class="tms-metric-header">
-                        <span class="tms-metric-label">Enrolled Trainees</span>
+                        <span class="tms-metric-label">Total Schedules</span>
                     </div>
                     <div class="tms-metric-content">
-                        <span id="enrolledTrainees" class="tms-metric-value">142</span>
+                        <span id="totalSchedules" class="tms-metric-value">Loading...</span>
                     </div>
                 </div>
                 
                 <div class="tms-metric-box tms-metric-box--purple">
                     <div class="tms-metric-header">
-                        <span class="tms-metric-label">Available Slots</span>
+                        <span class="tms-metric-label">Total Capacity</span>
                     </div>
                     <div class="tms-metric-content">
-                        <span id="availableSlots" class="tms-metric-value">58</span>
+                        <span id="totalCapacity" class="tms-metric-value">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -552,7 +552,8 @@
                     <div class="tms-filter-group">
                         <label class="tms-filter-label">Date Range</label>
                         <select id="dateRangeFilter" class="tms-filter-select">
-                            <option value="">Next 7 Days</option>
+                            <option value="">All Dates</option>
+                            <option value="7">Next 7 Days</option>
                             <option value="30">Next 30 Days</option>
                             <option value="month">This Month</option>
                             <option value="next_month">Next Month</option>
@@ -566,6 +567,8 @@
                             <option value="Leadership">Leadership</option>
                             <option value="Technical">Technical</option>
                             <option value="Compliance">Compliance</option>
+                            <option value="Soft Skills">Soft Skills</option>
+                            <option value="Management">Management</option>
                         </select>
                     </div>
                     <div class="tms-filter-group">
@@ -588,22 +591,23 @@
             <div class="tms-data-wrapper">
                 <div class="tms-data-top">
                     <h3 class="tms-data-heading">Training Schedule</h3>
+                    <div id="loading-indicator" class="loading-indicator" style="display: none;">Loading...</div>
                 </div>
                 <div class="tms-table-container">
                     <table id="trainingTable" class="tms-data-table">
                         <thead>
                             <tr>
                                 <th>Course Name</th>
+                                <th>Category</th>
                                 <th>Instructor</th>
                                 <th>Date & Time</th>
                                 <th>Duration</th>
-                                <th>Enrolled</th>
                                 <th>Capacity</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="trainingTableBody">
-                            <!-- Data will be populated by JavaScript -->
+                            <tr><td colspan="7" class="tms-loading">Loading training schedules...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -727,125 +731,62 @@
     </div>
 
     <script>
-        const scheduleData = [
-            {
-                courseName: "Workplace Safety Training",
-                instructor: "Dr. Sarah Wilson",
-                date: "2025-06-23",
-                startTime: "09:00",
-                endTime: "17:00",
-                duration: "8 hours",
-                enrolled: 14,
-                capacity: 15,
-                status: "In Progress",
-                category: "Safety"
-            },
-            {
-                courseName: "Leadership Development Program",
-                instructor: "Michael Chen",
-                date: "2025-06-24",
-                startTime: "10:00",
-                endTime: "16:00",
-                duration: "6 hours",
-                enrolled: 18,
-                capacity: 20,
-                status: "Scheduled",
-                category: "Leadership"
-            },
-            {
-                courseName: "Advanced Technical Skills",
-                instructor: "David Kumar",
-                date: "2025-06-26",
-                startTime: "09:00",
-                endTime: "17:00",
-                duration: "8 hours",
-                enrolled: 12,
-                capacity: 15,
-                status: "Scheduled",
-                category: "Technical"
-            },
-            {
-                courseName: "Data Privacy & Security",
-                instructor: "Jennifer Adams",
-                date: "2025-06-30",
-                startTime: "13:00",
-                endTime: "17:00",
-                duration: "4 hours",
-                enrolled: 22,
-                capacity: 25,
-                status: "Scheduled",
-                category: "Compliance"
-            },
-            {
-                courseName: "Emergency Response Training",
-                instructor: "Lisa Rodriguez",
-                date: "2025-07-02",
-                startTime: "08:00",
-                endTime: "12:00",
-                duration: "4 hours",
-                enrolled: 20,
-                capacity: 25,
-                status: "Scheduled",
-                category: "Safety"
-            },
-            {
-                courseName: "Management Excellence Program",
-                instructor: "Michael Chen",
-                date: "2025-07-05",
-                startTime: "09:30",
-                endTime: "15:30",
-                duration: "6 hours",
-                enrolled: 16,
-                capacity: 18,
-                status: "Scheduled",
-                category: "Leadership"
-            },
-            {
-                courseName: "Software Development Best Practices",
-                instructor: "David Kumar",
-                date: "2025-07-08",
-                startTime: "10:00",
-                endTime: "16:00",
-                duration: "6 hours",
-                enrolled: 14,
-                capacity: 16,
-                status: "Scheduled",
-                category: "Technical"
-            },
-            {
-                courseName: "Regulatory Compliance Workshop",
-                instructor: "Jennifer Adams",
-                date: "2025-07-12",
-                startTime: "14:00",
-                endTime: "18:00",
-                duration: "4 hours",
-                enrolled: 18,
-                capacity: 22,
-                status: "Scheduled",
-                category: "Compliance"
-            },
-            {
-                courseName: "Fire Safety Training",
-                instructor: "Lisa Rodriguez",
-                date: "2025-06-20",
-                startTime: "09:00",
-                endTime: "13:00",
-                duration: "4 hours",
-                enrolled: 8,
-                capacity: 10,
-                status: "Completed",
-                category: "Safety"
+        let scheduleData = [];
+        let filteredData = [];
+        async function init() {
+            try {
+                await loadTrainingSchedules();
+                setupEventListeners();
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                showError('Failed to load training schedules. Please refresh the page.');
             }
-        ];
+        }
+        async function loadTrainingSchedules() {
+            try {
+                showLoading(true);
+                const response = await fetch('/training/api/get-all-schedules/');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                    scheduleData = data.map(item => ({
+                    id: item.id,
+                    courseName: item.course_name,
+                    instructor: item.instructor,
+                    date: item.training_date,
+                    startTime: item.start_time,
+                    endTime: item.end_time,
+                    duration: `${item.duration} hour${item.duration !== 1 ? 's' : ''}`,
+                    capacity: item.max_capacity,
+                    status: item.status,
+                    category: item.course_category
+                }));
 
-        let filteredData = [...scheduleData];
-
-        function init() {
-            renderTable(filteredData);
-            updateSummaryStats(filteredData);
-            setupEventListeners();
+                filteredData = [...scheduleData];
+                renderTable(filteredData);
+                updateSummaryStats(filteredData);
+                
+            } catch (error) {
+                console.error('Error loading training schedules:', error);
+                showError('Failed to load training schedules from server.');
+            } finally {
+                showLoading(false);
+            }
+        }
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = show ? 'block' : 'none';
+            }
         }
 
+        // Refresh data from backend
+        async function refreshData() {
+            await loadTrainingSchedules();
+        }
         function renderTable(data) {
             const tbody = document.getElementById('trainingTableBody');
             if (data.length === 0) {
@@ -856,6 +797,7 @@
             tbody.innerHTML = data.map(item => `
                 <tr>
                     <td><span class="tms-course-name">${item.courseName}</span></td>
+                    <td><span class="tms-category-badge">${item.category}</span></td>
                     <td><span class="tms-instructor-name">${item.instructor}</span></td>
                     <td>
                         <div class="tms-date-time-info">
@@ -864,7 +806,6 @@
                         </div>
                     </td>
                     <td><span class="tms-duration-text">${item.duration}</span></td>
-                    <td><span class="tms-enrolled-count">${item.enrolled}</span></td>
                     <td><span class="tms-capacity-text">${item.capacity}</span></td>
                     <td>
                         <span class="tms-status-badge ${getStatusClass(item.status)}">${item.status}</span>
@@ -872,7 +813,6 @@
                 </tr>
             `).join('');
         }
-
         function getStatusClass(status) {
             const classes = {
                 'Scheduled': 'tms-status-scheduled',
@@ -881,7 +821,6 @@
             };
             return classes[status] || 'tms-status-scheduled';
         }
-
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', { 
@@ -892,13 +831,12 @@
         }
 
         function updateSummaryStats(data) {
-            const currentDate = new Date('2025-06-23');
-            const oneWeekFromNow = new Date('2025-06-29');
+            const currentDate = new Date();
+            const oneWeekFromNow = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
             
             let upcomingSessions = 0;
             let thisWeekSessions = 0;
-            let totalEnrolled = 0;
-            let totalAvailable = 0;
+            let totalCapacity = 0;
             
             data.forEach(item => {
                 const itemDate = new Date(item.date);
@@ -911,23 +849,21 @@
                     thisWeekSessions++;
                 }
                 
-                totalEnrolled += item.enrolled;
-                totalAvailable += (item.capacity - item.enrolled);
+                totalCapacity += item.capacity;
             });
 
             document.getElementById('upcomingSessions').textContent = upcomingSessions;
             document.getElementById('thisWeek').textContent = thisWeekSessions;
-            document.getElementById('enrolledTrainees').textContent = totalEnrolled;
-            document.getElementById('availableSlots').textContent = totalAvailable;
+            document.getElementById('totalSchedules').textContent = data.length;
+            document.getElementById('totalCapacity').textContent = totalCapacity;
         }
-
         function applyFilters() {
             const dateRange = document.getElementById('dateRangeFilter').value;
             const category = document.getElementById('categoryFilter').value;
             const status = document.getElementById('statusFilter').value;
             const search = document.getElementById('searchFilter').value.toLowerCase();
 
-            const currentDate = new Date('2025-06-23');
+            const currentDate = new Date();
 
             filteredData = scheduleData.filter(item => {
                 const itemDate = new Date(item.date);
@@ -936,6 +872,9 @@
                 // Date range filter
                 if (dateRange) {
                     switch(dateRange) {
+                        case '7':
+                            if (daysDiff < 0 || daysDiff > 7) return false;
+                            break;
                         case '30':
                             if (daysDiff < 0 || daysDiff > 30) return false;
                             break;
@@ -947,9 +886,6 @@
                             const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
                             if (itemDate.getMonth() !== nextMonth.getMonth() || 
                                 itemDate.getFullYear() !== nextMonth.getFullYear()) return false;
-                            break;
-                        default: // Next 7 days
-                            if (daysDiff < 0 || daysDiff > 7) return false;
                             break;
                     }
                 }
@@ -973,106 +909,100 @@
             updateSummaryStats(filteredData);
         }
 
-async function handleFormSubmission(event) {
-    event.preventDefault();
-    
-    // Run enhanced validation
-    if (!validateForm()) {
-        return;
-    }
-    
-    const form = document.getElementById('trainingScheduleForm');
-    const formData = new FormData(form);
-    
-    const trainingData = {
-        course_name: formData.get('course_name').trim(),
-        course_category: formData.get('course_category'),
-        instructor: formData.get('instructor'),
-        max_capacity: parseInt(formData.get('max_capacity')),
-        training_date: formData.get('training_date'),
-        start_time: formData.get('start_time'),
-        end_time: formData.get('end_time'),
-        duration: parseFloat(formData.get('duration')),
-        status: 'Scheduled' 
-    };
-        if (!trainingData.course_name || !trainingData.course_category || 
-        !trainingData.instructor || !trainingData.max_capacity || 
-        !trainingData.training_date || !trainingData.start_time || 
-        !trainingData.end_time || !trainingData.duration) {
-        alert('Please fill in all required fields.');
-        return;
-    }
-    const selectedDate = new Date(trainingData.training_date);
-    const currentDate = new Date();
-    if (selectedDate < currentDate) {
-        alert('Training date cannot be in the past.');
-        return;
-    }
-    if (trainingData.end_time <= trainingData.start_time) {
-        alert('End time must be after start time.');
-        return;
-    }
-    
-    try {
-        const submitButton = document.querySelector('.btn-submit');
-        const originalText = submitButton.textContent;
-        submitButton.textContent = 'Creating...';
-        submitButton.disabled = true;
-            const response = await fetch('/training/api/create-schedule/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(trainingData)
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-                const newTraining = {
-                courseName: result.course_name,
-                instructor: result.instructor,
-                date: result.training_date,
-                startTime: result.start_time,
-                endTime: result.end_time,
-                duration: `${result.duration} hour${result.duration !== 1 ? 's' : ''}`,
-                enrolled: 0,
-                capacity: result.max_capacity,
-                status: result.status,
-                category: result.course_category
-            };
-                        scheduleData.push(newTraining);
-                        scheduleData.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        applyFilters();
-                        closeModal();
-            alert('Training schedule created successfully!');
+        // Handle form submission
+        async function handleFormSubmission(event) {
+            event.preventDefault();
             
-        } else {
-            // Handle API errors
-            const errorData = await response.json();
-            let errorMessage = 'Failed to create training schedule. ';
-            
-            if (errorData.errors) {
-                const errors = Object.entries(errorData.errors)
-                    .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-                    .join('\n');
-                errorMessage += `\n${errors}`;
-            } else if (errorData.error) {
-                errorMessage += errorData.error;
+            // Run enhanced validation
+            if (!validateForm()) {
+                return;
             }
             
-            alert(errorMessage);
+            const form = document.getElementById('trainingScheduleForm');
+            const formData = new FormData(form);
+            
+            const trainingData = {
+                course_name: formData.get('course_name').trim(),
+                course_category: formData.get('course_category'),
+                instructor: formData.get('instructor'),
+                max_capacity: parseInt(formData.get('max_capacity')),
+                training_date: formData.get('training_date'),
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time'),
+                duration: parseFloat(formData.get('duration')),
+                status: 'Scheduled' 
+            };
+
+            // Basic validation
+            if (!trainingData.course_name || !trainingData.course_category || 
+                !trainingData.instructor || !trainingData.max_capacity || 
+                !trainingData.training_date || !trainingData.start_time || 
+                !trainingData.end_time || !trainingData.duration) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            const selectedDate = new Date(trainingData.training_date);
+            const currentDate = new Date();
+            if (selectedDate < currentDate) {
+                alert('Training date cannot be in the past.');
+                return;
+            }
+
+            if (trainingData.end_time <= trainingData.start_time) {
+                alert('End time must be after start time.');
+                return;
+            }
+            
+            try {
+                const submitButton = document.querySelector('.btn-submit');
+                const originalText = submitButton.textContent;
+                submitButton.textContent = 'Creating...';
+                submitButton.disabled = true;
+
+                const response = await fetch('/training/api/create-schedule/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(trainingData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    closeModal();
+                    alert('Training schedule created successfully!');
+                    
+                    // Refresh data from backend
+                    await loadTrainingSchedules();
+                    
+                } else {
+                    // Handle API errors
+                    const errorData = await response.json();
+                    let errorMessage = 'Failed to create training schedule. ';
+                    
+                    if (errorData.errors) {
+                        const errors = Object.entries(errorData.errors)
+                            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+                            .join('\n');
+                        errorMessage += `\n${errors}`;
+                    } else if (errorData.error) {
+                        errorMessage += errorData.error;
+                    }
+                    
+                    alert(errorMessage);
+                }
+                
+            } catch (error) {
+                console.error('Error creating training schedule:', error);
+                alert('Network error. Please check your connection and try again.');
+                
+            } finally {
+                const submitButton = document.querySelector('.btn-submit');
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
         }
-        
-    } catch (error) {
-        console.error('Error creating training schedule:', error);
-        alert('Network error. Please check your connection and try again.');
-        
-    } finally {
-        const submitButton = document.querySelector('.btn-submit');
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-    }
-}
 
         // Enhanced validation function
         function validateForm() {
@@ -1082,7 +1012,6 @@ async function handleFormSubmission(event) {
             const trainingDate = form.training_date.value;
             const startTime = form.start_time.value;
             const endTime = form.end_time.value;
-            const maxCapacity = parseInt(form.max_capacity.value);
             
             // Check for duplicate course names on the same date
             const isDuplicate = scheduleData.some(item => 
@@ -1133,6 +1062,7 @@ async function handleFormSubmission(event) {
             }
         }
 
+        // Setup event listeners
         function setupEventListeners() {
             document.getElementById('dateRangeFilter').addEventListener('change', applyFilters);
             document.getElementById('categoryFilter').addEventListener('change', applyFilters);
@@ -1176,7 +1106,6 @@ async function handleFormSubmission(event) {
                 closeModal();
             }
         });
-
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
