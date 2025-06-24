@@ -51,6 +51,7 @@ from base.methods import (
     filtersubordinatesemployeemodel,
     get_key_instances,
     get_pagination,
+    is_reportingmanager,
     sortby,
 )
 from base.models import (
@@ -2824,6 +2825,7 @@ def joining_today_count(request):
         ).count()
     return HttpResponse(newbies_today)
 
+
 @login_required
 def get_monthly_attendance_summary(request):
     total_counted = 0
@@ -2834,13 +2836,14 @@ def get_monthly_attendance_summary(request):
 
     # Step 1: Get all dates in the month
     _, num_days_in_month = calendar.monthrange(current_year, current_month)
-    all_days = [date(current_year, current_month, d) for d in range(1, num_days_in_month + 1)]
+    all_days = [
+        date(current_year, current_month, d) for d in range(1, num_days_in_month + 1)
+    ]
 
     # Step 2: Count Saturdays and Sundays
     # All days from 1st of the month up to today's date
     days_upto_today = [
-        date(current_year, current_month, d)
-        for d in range(1, today.day + 1)
+        date(current_year, current_month, d) for d in range(1, today.day + 1)
     ]
 
     # Filter Saturdays (5) and Sundays (6)
@@ -2850,8 +2853,7 @@ def get_monthly_attendance_summary(request):
     # Step 3: Get holidays (for current month)
     Holidays = apps.get_model("base", "holidays")  # adjust if model name differs
     holidays = Holidays.objects.filter(
-        start_date__year=current_year,
-        start_date__month=current_month
+        start_date__year=current_year, start_date__month=current_month
     ).values_list("start_date", flat=True)
     holidays_set = set(holidays)
     holidays_count = len(holidays_set)
@@ -2869,7 +2871,8 @@ def get_monthly_attendance_summary(request):
     # Step 5: Final check - total days used
     total_counted = present_days_count
     return HttpResponse(total_counted)
-    
+
+
 def days_left_in_payroll_cycle(request):
     today = date.today()
 
@@ -2885,6 +2888,7 @@ def days_left_in_payroll_cycle(request):
 
     days_left = (end_of_cycle - today).days
     return HttpResponse(days_left)
+
 
 @login_required
 def joining_week_count(request):
@@ -3363,6 +3367,14 @@ def organisation_chart(request):
     This method is used to view oganisation chart
     """
     selected_company = request.session.get("selected_company")
+    user = request.user
+    employee = user.employee_get
+    is_admin = (
+        user.is_superuser or user.is_staff or user.has_perm("employee.view_employee")
+    )
+    is_manager = is_reportingmanager(user)
+
+    # Default: all reporting managers
     if (
         request.GET.get("employee_work_info__company_id") == None
         and selected_company != "all"
@@ -3380,75 +3392,68 @@ def organisation_chart(request):
 
     # Iterate through the queryset and add reporting manager id and name to the dictionary
     result_dict = {item.id: item.get_full_name() for item in reporting_managers}
-
     entered_req_managers = []
 
     # Helper function to recursively create the hierarchy structure
-    def create_hierarchy(manager):
-        """
-        Hierarchy generator method
-        """
+    def create_hierarchy(manager, limit_to_employee=None):
         nodes = []
-        # check the manager is a reporting manager if yes, store it into entered_req_managers
         if manager.id in result_dict.keys():
             entered_req_managers.append(manager)
-        # filter the subordinates
+
+        # Get direct subordinates
         subordinates = Employee.objects.filter(
             is_active=True, employee_work_info__reporting_manager_id=manager
         ).exclude(id=manager.id)
 
-        # itrating through subordinates
-        for employee in subordinates:
-            if employee in entered_req_managers:
+        for emp in subordinates:
+            if emp in entered_req_managers:
                 continue
-            # check the employee is a reporting manager if yes,remove className store
-            # it into entered_req_managers
-            if employee.id in result_dict.keys():
-                nodes.append(
-                    {
-                        "name": employee.get_full_name(),
-                        "title": getattr(
-                            employee.get_job_position(), "job_position", _("Not set")
-                        ),
-                        "children": create_hierarchy(employee),
-                    }
-                )
-                entered_req_managers.append(employee)
 
-            else:
-                nodes.append(
-                    {
-                        "name": employee.get_full_name(),
-                        "title": getattr(
-                            employee.get_job_position(), "job_position", _("Not set")
-                        ),
-                        "className": "middle-level",
-                        "children": create_hierarchy(employee),
-                    }
-                )
+            # If a specific employee is to be shown (employee view), skip others
+            if limit_to_employee and emp.id != limit_to_employee.id:
+                continue
+
+            child_node = {
+                "name": emp.get_full_name(),
+                "title": getattr(emp.get_job_position(), "job_position", _("Not set")),
+                "className": "middle-level",
+                "children": create_hierarchy(emp, limit_to_employee),
+            }
+
+            entered_req_managers.append(emp)
+            nodes.append(child_node)
+
         return nodes
 
-    selected_company = request.session.get("selected_company")
-    if (
-        request.GET.get("employee_work_info__company_id") == None
-        and selected_company != "all"
-    ):
-        reporting_managers = Employee.objects.filter(
-            is_active=True,
-            reporting_manager__isnull=False,
-            employee_work_info__company_id=selected_company,
-        ).distinct()
+    # Role-based filtering
+    if is_admin:
+        # Admin: show all as before
+        manager = employee
+        dropdown_dict = (
+            {reporting_managers[0].id: _("My view"), **result_dict}
+            if reporting_managers
+            else {}
+        )
+    elif is_manager:
+        # Reporting manager: show their manager and their subordinates
+        manager = employee
+        # Find their reporting manager (if any)
+        rep_manager = getattr(employee.employee_work_info, "reporting_manager_id", None)
+        dropdown_dict = {}
+        if rep_manager:
+            dropdown_dict[rep_manager.id] = rep_manager.get_full_name()
+        # Optionally, include self in dropdown (if needed):
+        # dropdown_dict[employee.id] = employee.get_full_name()
     else:
-        reporting_managers = Employee.objects.filter(
-            is_active=True, reporting_manager__isnull=False
-        ).distinct()
+        # Employee: show only their reporting manager and themselves (not all subordinates)
+        rep_manager = getattr(employee.employee_work_info, "reporting_manager_id", None)
+        dropdown_dict = {}
+        if rep_manager:
+            dropdown_dict[rep_manager.id] = rep_manager.get_full_name()
+            manager = rep_manager
+        else:
+            manager = employee  # fallback if no manager assigned
 
-    manager = request.user.employee_get
-
-    if len(reporting_managers) == 0:
-        new_dict = {}
-    else:
-        new_dict = {reporting_managers[0].id: _("My view"), **result_dict}
     # POST method is used to change the reporting manager
     if request.method == "POST":
         if request.POST.get("manager_id"):
@@ -3470,7 +3475,7 @@ def organisation_chart(request):
 
     context = {
         "act_datasource": node,
-        "reporting_manager_dict": new_dict,
+        "reporting_manager_dict": dropdown_dict,
         "act_manager_id": manager.id,
     }
     return render(request, "organisation_chart/org_chart.html", context=context)
