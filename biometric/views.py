@@ -26,6 +26,8 @@ from django.utils.translation import gettext_lazy as _
 from zk import ZK
 from zk import exception as zk_exception
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models import Q
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
@@ -209,59 +211,77 @@ class ZKBioAttendance(Thread):
                     while not self._stop_event.is_set():
                         attendances = conn.live_capture()
                         for attendance in attendances:
-                            if attendance:
-                                user_id = attendance.user_id
-                                date_time = django_timezone.make_aware(
-                                    attendance.timestamp
-                                )
-                                date = date_time.date()
-                                time = date_time.time()
-                                device.last_fetch_date = date
-                                device.last_fetch_time = time
-                                device.save()
-                                bio_id = BiometricEmployees.objects.filter(
+                            if not attendance:
+                                continue
+
+                            user_id = attendance.user_id
+                            date_time = django_timezone.make_aware(
+                                attendance.timestamp
+                            )
+                            date = date_time.date()
+                            time = date_time.time()
+
+                            try:
+                                bio_id = BiometricEmployees.objects.select_related('employee_id').get(
                                     user_id=user_id, device_id=device
-                                ).first()
-                                if bio_id:
-                                    # Use device role field for check-in/out
-                                    if device.role == 'in':
-                                        try:
-                                            clock_in(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
-                                            )
-                                        except Exception as error:
-                                            logger.error(
-                                                "Got an error in clock_in %s", error
-                                            )
-                                            continue
-                                    elif device.role == 'out':
-                                        try:
-                                            clock_out(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
-                                            )
-                                        except Exception as error:
-                                            logger.error(
-                                                "Got an error in clock_out", error
-                                            )
-                                            continue
-                                    else:
-                                        logger.warning(f"Unknown device role: {device.role}")
-                                        continue
+                                )
+                                employee = bio_id.employee_id
+                            except BiometricEmployees.DoesNotExist:
+                                logger.warning(f"Biometric ID {user_id} on device {device.id} not mapped to any employee.")
+                                continue
+                            
+                            if AttendanceActivity.objects.filter(
+                                Q(in_datetime=date_time) | Q(out_datetime=date_time),
+                                employee_id=employee
+                            ).exists():
+                                logger.info(f"Skipping duplicate attendance record for employee {employee.id} at {date_time}")
+                                continue
+
+                            device.last_fetch_date = date
+                            device.last_fetch_time = time
+                            device.save()
+                            
+                            # Use device role field for check-in/out
+                            if device.role == 'in':
+                                try:
+                                    clock_in(
+                                        Request(
+                                            user=bio_id.employee_id.employee_user_id,
+                                            date=date,
+                                            time=time,
+                                            datetime=date_time,
+                                        )
+                                    )
+                                except Exception as error:
+                                    logger.error(
+                                        "Got an error in clock_in %s", error
+                                    )
+                                    continue
+                            elif device.role == 'out':
+                                try:
+                                    clock_out(
+                                        Request(
+                                            user=bio_id.employee_id.employee_user_id,
+                                            date=date,
+                                            time=time,
+                                            datetime=date_time,
+                                        )
+                                    )
+                                except Exception as error:
+                                    logger.error(
+                                        "Got an error in clock_out", error
+                                    )
+                                    continue
                             else:
+                                logger.warning(f"Unknown device role: {device.role}")
                                 continue
         except ConnectionResetError as error:
+            logger.error(f"Connection reset for device {self.machine_ip}. Restarting thread. Error: {error}")
             ZKBioAttendance(self.machine_ip, self.port_no, self.password).start()
-
+        except Exception as e:
+            logger.error(f"Unhandled exception in ZKBioAttendance thread for {self.machine_ip}: {e}")
+            # Optionally, handle device state update here
+            
     def stop(self):
         """To stop the ZK live capture mode"""
         self.conn.end_live_capture = True
