@@ -31,7 +31,7 @@ from django.db import models
 from django.db.models import F, ProtectedError
 from django.db.models.query import QuerySet
 from django.forms import DateInput, Select
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -3366,8 +3366,12 @@ def organisation_chart(request):
     """
     This method is used to view oganisation chart
     """
-    selected_company = request.session.get("selected_company")
     user = request.user
+    from django.http import HttpResponseForbidden
+    from base.templatetags.basefilters import is_reportingmanager
+    if not (user.is_superuser or user.is_staff or user.has_perm("employee.view_employee") or is_reportingmanager(user)):
+        return HttpResponseForbidden("You do not have permission to view the organisation chart.")
+    selected_company = request.session.get("selected_company")
     employee = user.employee_get
     is_admin = (
         user.is_superuser or user.is_staff or user.has_perm("employee.view_employee")
