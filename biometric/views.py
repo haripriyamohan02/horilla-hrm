@@ -11,6 +11,8 @@ import logging
 from datetime import datetime, timedelta
 from threading import Event, Thread
 from urllib.parse import parse_qs, unquote
+import threading
+import time
 
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -23,6 +25,7 @@ from django.utils.translation import gettext as __
 from django.utils.translation import gettext_lazy as _
 from zk import ZK
 from zk import exception as zk_exception
+from django.core.exceptions import ObjectDoesNotExist
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
@@ -56,6 +59,53 @@ from .forms import (
 from .models import BiometricDevices, BiometricEmployees, COSECAttendanceArguments
 
 logger = logging.getLogger(__name__)
+
+# Ensure BIO_DEVICE_THREADS is globally available
+if 'BIO_DEVICE_THREADS' not in globals():
+    BIO_DEVICE_THREADS = {}
+
+# Monitor thread to keep live capture running
+
+def monitor_live_threads():
+    from django.db import close_old_connections
+    import logging
+    logger = logging.getLogger(__name__)
+    while True:
+        close_old_connections()  # Prevent DB connection leaks in threads
+        for device in BiometricDevices.objects.filter(is_live=True):
+            thread = BIO_DEVICE_THREADS.get(device.id)
+            if not thread or not thread.is_alive():
+                logger.warning(f"Live thread for device {device.id} not running. Restarting...")
+                if device.machine_type == 'zk':
+                    new_thread = ZKBioAttendance(device.machine_ip, device.port, device.zk_password)
+                    new_thread.start()
+                    BIO_DEVICE_THREADS[device.id] = new_thread
+                    logger.info(f"Started ZKBioAttendance live thread for device {device.id}")
+                elif device.machine_type == 'cosec':
+                    new_thread = COSECBioAttendanceThread(device.id)
+                    new_thread.start()
+                    BIO_DEVICE_THREADS[device.id] = new_thread
+                    logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
+                # Add more device types if needed
+        # Remove threads for devices that are no longer live
+        for device_id in list(BIO_DEVICE_THREADS.keys()):
+            try:
+                device = BiometricDevices.objects.get(id=device_id)
+                if not device.is_live:
+                    thread = BIO_DEVICE_THREADS[device_id]
+                    if thread.is_alive():
+                        logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                        if hasattr(thread, 'stop'):
+                            thread.stop()
+                    del BIO_DEVICE_THREADS[device_id]
+            except ObjectDoesNotExist:
+                del BIO_DEVICE_THREADS[device_id]
+        time.sleep(60)  # Check every 60 seconds
+
+# Start the monitor thread at module load (only if not already started)
+if 'LIVE_MONITOR_THREAD' not in globals():
+    LIVE_MONITOR_THREAD = threading.Thread(target=monitor_live_threads, daemon=True)
+    LIVE_MONITOR_THREAD.start()
 
 def str_time_seconds(time):
     """
@@ -161,11 +211,9 @@ class ZKBioAttendance(Thread):
                         for attendance in attendances:
                             if attendance:
                                 user_id = attendance.user_id
-                                punch_code = attendance.punch
                                 date_time = django_timezone.make_aware(
                                     attendance.timestamp
                                 )
-                                # date_time = attendance.timestamp
                                 date = date_time.date()
                                 time = date_time.time()
                                 device.last_fetch_date = date
@@ -2164,7 +2212,6 @@ def zk_biometric_attendance_logs(device):
         }
         for attendance in filtered_attendances:
             user_id = attendance.user_id
-            punch_code = attendance.punch
             date_time = django_timezone.make_aware(attendance.timestamp)
             date = date_time.date()
             time = date_time.time()
@@ -2176,19 +2223,19 @@ def zk_biometric_attendance_logs(device):
                     time=time,
                     datetime=date_time,
                 )
-
-                if punch_code in {0, 3, 4}:
+                if device.role == 'in':
                     try:
                         clock_in(request_data)
                     except Exception as error:
                         logger.error("Got an error : ", error)
-                elif punch_code in {1, 2, 5}:
+                elif device.role == 'out':
                     try:
                         clock_out(request_data)
                     except Exception as error:
                         logger.error("Got an error : ", error)
                 else:
-                    pass
+                    logger.warning(f"Unknown device role: {device.role}")
+                    continue
         return len(filtered_attendances), None
     except zk_exception.ZKErrorResponse as e:
         return "error", str(e)
@@ -2237,7 +2284,6 @@ def anviz_biometric_attendance_logs(device):
     device.save()
     for attendance in attendance_records["list"]:
         badge_id = attendance["employee"]["workno"]
-        punch_code = attendance["checktype"]
         date_time_utc = datetime.strptime(
             attendance["checktime"], "%Y-%m-%dT%H:%M:%S%z"
         )
@@ -2250,17 +2296,24 @@ def anviz_biometric_attendance_logs(device):
                 time=date_time_obj.time(),
                 datetime=date_time_obj,
             )
-            if punch_code in {0, 128}:
+            last_none_activity = (
+                AttendanceActivity.objects.filter(
+                    employee_id=employee.id,
+                    clock_out=None,
+                )
+                .order_by("in_datetime")
+                .last()
+            )
+            if last_none_activity:
+                try:
+                    clock_out(request_data)
+                except Exception as error:
+                    logger.error("Error in clock out ", error)
+            else:
                 try:
                     clock_in(request_data)
                 except Exception as error:
                     logger.error("Error in clock in ", error)
-            else:
-                try:
-                    # // 1 , 129 check type check out and door close
-                    clock_out(request_data)
-                except Exception as error:
-                    logger.error("Error in clock out ", error)
     return len(attendance_records["list"])
 
 
@@ -2308,7 +2361,6 @@ def cosec_biometric_attendance_logs(device):
         attendance_date = datetime.strptime(date_str, "%d/%m/%Y").date()
         attendance_time = datetime.strptime(time_str, "%H:%M:%S").time()
         attendance_datetime = datetime.combine(attendance_date, attendance_time)
-        punch_code = attendance["detail-2"]
 
         request_data = Request(
             user=employee.employee_id.employee_user_id,
@@ -2317,15 +2369,24 @@ def cosec_biometric_attendance_logs(device):
             datetime=django_timezone.make_aware(attendance_datetime),
         )
 
-        try:
-            if punch_code in ["1", "3", "5", "7", "9", "0"]:
-                clock_in(request_data)
-            elif punch_code in ["2", "4", "6", "8", "10"]:
+        last_none_activity = (
+            AttendanceActivity.objects.filter(
+                employee_id=employee.employee_id,
+                clock_out=None,
+            )
+            .order_by("in_datetime")
+            .last()
+        )
+        if last_none_activity:
+            try:
                 clock_out(request_data)
-            else:
-                pass
-        except Exception as error:
-            logger.error("Error processing attendance: ", error)
+            except Exception as error:
+                logger.error("Error processing attendance: ", error)
+        else:
+            try:
+                clock_in(request_data)
+            except Exception as error:
+                logger.error("Error processing attendance: ", error)
 
     if attendances:
         last_attendance = attendances[-1]

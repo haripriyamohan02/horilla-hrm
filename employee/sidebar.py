@@ -54,6 +54,7 @@ SUBMENUS = [
     {
         "menu": trans("Organization Chart"),
         "redirect": reverse("organisation-chart"),
+        "accessibility": "employee.sidebar.organisation_chart_accessibility",
     },
 ]
 
@@ -96,4 +97,15 @@ def employee_accessibility(request, submenu, user_perms, *args, **kwargs):
         is_reportingmanager(request.user)
         or request.user.has_perm("employee.view_employee")
         or check_is_accessible("employee_view", cache_key, employee)
+    )
+
+
+def organisation_chart_accessibility(request, submenu, user_perms, *args, **kwargs):
+    """
+    Only allow access to the Organisation Chart menu for non-employee users (admins, managers).
+    """
+    user = request.user
+    # is_superuser, is_staff, or has permission to view employees, or is reporting manager
+    return (
+        user.is_superuser or user.is_staff or user.has_perm("employee.view_employee") or is_reportingmanager(user)
     )
