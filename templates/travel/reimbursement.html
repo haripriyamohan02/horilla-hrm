@@ -11,6 +11,9 @@
                     <h1 class="oh-main__title mb-0" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -1px;">{% trans "Travel Reimbursements" %}</h1>
                 </div>
                 <div class="d-flex align-items-center" style="gap: 0.75rem;">
+                    <div class="oh-input-group">
+                        <input type="search" class="oh-input" placeholder="{% trans 'Search' %}" style="min-width: 220px;" id="reimbursement-search-input">
+                    </div>
                     <button class="oh-btn oh-btn--danger" onclick="openReimbursementModal()">
                         <ion-icon name="add-outline" class="me-1"></ion-icon>
                         {% trans "Create" %}
@@ -40,6 +43,9 @@
                     <div class="oh-sticky-table__table">
                         <div class="oh-sticky-table__thead">
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__th" style="width: 40px;">
+                                    <input type="checkbox" class="oh-checkbox" id="select-all-reimbursements">
+                                </div>
                                 <div class="oh-sticky-table__th">{% trans "Employee" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Travel Request" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Amount" %}</div>
@@ -51,6 +57,7 @@
                         <div class="oh-sticky-table__tbody">
                             <!-- Example row 1 -->
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td"><input type="checkbox" class="oh-checkbox row-checkbox-reimbursement"></div>
                                 <div class="oh-sticky-table__td">Alice Smith</div>
                                 <div class="oh-sticky-table__td">Goa Trip</div>
                                 <div class="oh-sticky-table__td">8,000</div>
@@ -67,6 +74,7 @@
                             </div>
                             <!-- Example row 2 -->
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td"><input type="checkbox" class="oh-checkbox row-checkbox-reimbursement"></div>
                                 <div class="oh-sticky-table__td">John Doe</div>
                                 <div class="oh-sticky-table__td">Mumbai Trip</div>
                                 <div class="oh-sticky-table__td">5,500</div>
@@ -83,6 +91,7 @@
                             </div>
                             <!-- Example row 3 -->
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td"><input type="checkbox" class="oh-checkbox row-checkbox-reimbursement"></div>
                                 <div class="oh-sticky-table__td">Suresh Patel</div>
                                 <div class="oh-sticky-table__td">Delhi Trip</div>
                                 <div class="oh-sticky-table__td">12,000</div>
@@ -99,6 +108,7 @@
                             </div>
                             <!-- Example row 4 -->
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td"><input type="checkbox" class="oh-checkbox row-checkbox-reimbursement"></div>
                                 <div class="oh-sticky-table__td">Meera Nair</div>
                                 <div class="oh-sticky-table__td">Chennai Trip</div>
                                 <div class="oh-sticky-table__td">4,200</div>
@@ -115,6 +125,7 @@
                             </div>
                             <!-- Example row 5 -->
                             <div class="oh-sticky-table__tr">
+                                <div class="oh-sticky-table__td"><input type="checkbox" class="oh-checkbox row-checkbox-reimbursement"></div>
                                 <div class="oh-sticky-table__td">David Lee</div>
                                 <div class="oh-sticky-table__td">Bangalore Trip</div>
                                 <div class="oh-sticky-table__td">9,800</div>
@@ -271,6 +282,30 @@
     }
     function closeReimbursementModal() {
         document.getElementById('newReimbursementModal').style.display = 'none';
+    }
+
+    // Live search for reimbursement table
+    const reimbursementSearchInput = document.getElementById('reimbursement-search-input');
+    if (reimbursementSearchInput) {
+        reimbursementSearchInput.addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.oh-sticky-table__tbody .oh-sticky-table__tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    }
+
+    // Select all checkboxes functionality for reimbursement table
+    const selectAllReimbursements = document.getElementById('select-all-reimbursements');
+    if (selectAllReimbursements) {
+        selectAllReimbursements.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox-reimbursement');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAllReimbursements.checked;
+            });
+        });
     }
 </script>
 
