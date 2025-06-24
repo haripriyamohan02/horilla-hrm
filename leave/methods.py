@@ -15,15 +15,15 @@ def calculate_requested_days(
         return (
             1
             if start_date_breakdown == "full_day" and end_date_breakdown == "full_day"
-            else 0.5
+            else 0.25
         )
 
     # Count full days between the two dates, excluding start and end
     middle_days = (end_date - start_date).days - 1
 
     # Count start and end days
-    start_day_value = 1 if start_date_breakdown == "full_day" else 0.5
-    end_day_value = 1 if end_date_breakdown == "full_day" else 0.5
+    start_day_value = 1 if start_date_breakdown == "full_day" else 0.25
+    end_day_value = 1 if end_date_breakdown == "full_day" else 0.25
 
     return middle_days + start_day_value + end_day_value
 
