@@ -62,9 +62,6 @@
                     {% trans "Available Days" %}
                   </div>
                   <div class="oh-sticky-table__th">
-                    {% trans "Carryforward Days" %}
-                  </div>
-                  <div class="oh-sticky-table__th">
                     {% trans "Total Leave Days" %}
                   </div>
                   <div class="oh-sticky-table__th">
@@ -122,9 +119,6 @@
                     {% else %}
                       {% trans "No Limit" %}
                     {% endif %}
-                  </div>
-                  <div class="oh-sticky-table__td">
-                    {{available_leave.carryforward_days}}
                   </div>
                   <div class="oh-sticky-table__td">
                     {% if available_leave.leave_type_id.limit_leave %}
