@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 from datetime import date, datetime, timedelta
 
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -136,53 +137,54 @@ def clock_in_attendance_and_activity(
         start_time      : start time in shift schedule
         end_time        : end time in shift schedule
     """
-
-    # attendance activity create
-    open_activity = AttendanceActivity.objects.filter(
-        employee_id=employee,
-        attendance_date=attendance_date,
-        clock_out=None,
-    ).first()
-
-    if not open_activity:
-        AttendanceActivity.objects.create(
+    with transaction.atomic():
+        Employee.objects.select_for_update().get(pk=employee.id)
+        # attendance activity create
+        open_activity = AttendanceActivity.objects.filter(
             employee_id=employee,
             attendance_date=attendance_date,
-            clock_in_date=date_today,
-            shift_day=day,
-            clock_in=in_datetime,
-            in_datetime=in_datetime,
-        )
-    # create attendance if not exist
-    attendance = Attendance.objects.filter(
-        employee_id=employee, attendance_date=attendance_date
-    )
-    if not attendance.exists():
-        attendance = Attendance()
-        attendance.employee_id = employee
-        attendance.shift_id = shift
-        attendance.work_type_id = attendance.employee_id.employee_work_info.work_type_id
-        attendance.attendance_date = attendance_date
-        attendance.attendance_day = day
-        attendance.attendance_clock_in = now
-        attendance.attendance_clock_in_date = date_today
-        attendance.minimum_hour = minimum_hour
-        attendance.save()
-        # check here late come or not
+            clock_out=None,
+        ).first()
 
-        attendance = Attendance.find(attendance.id)
-        late_come(
-            attendance=attendance, start_time=start_time, end_time=end_time, shift=shift
+        if not open_activity:
+            AttendanceActivity.objects.create(
+                employee_id=employee,
+                attendance_date=attendance_date,
+                clock_in_date=date_today,
+                shift_day=day,
+                clock_in=in_datetime,
+                in_datetime=in_datetime,
+            )
+        # create attendance if not exist
+        attendance = Attendance.objects.filter(
+            employee_id=employee, attendance_date=attendance_date
         )
-    else:
-        attendance = attendance[0]
-        attendance.attendance_clock_out = None
-        attendance.attendance_clock_out_date = None
-        attendance.save()
-        # delete if the attendance marked the early out
-        early_out_instance = attendance.late_come_early_out.filter(type="early_out")
-        if early_out_instance.exists():
-            early_out_instance[0].delete()
+        if not attendance.exists():
+            attendance = Attendance()
+            attendance.employee_id = employee
+            attendance.shift_id = shift
+            attendance.work_type_id = attendance.employee_id.employee_work_info.work_type_id
+            attendance.attendance_date = attendance_date
+            attendance.attendance_day = day
+            attendance.attendance_clock_in = now
+            attendance.attendance_clock_in_date = date_today
+            attendance.minimum_hour = minimum_hour
+            attendance.save()
+            # check here late come or not
+
+            attendance = Attendance.find(attendance.id)
+            late_come(
+                attendance=attendance, start_time=start_time, end_time=end_time, shift=shift
+            )
+        else:
+            attendance = attendance[0]
+            attendance.attendance_clock_out = None
+            attendance.attendance_clock_out_date = None
+            attendance.save()
+            # delete if the attendance marked the early out
+            early_out_instance = attendance.late_come_early_out.filter(type="early_out")
+            if early_out_instance.exists():
+                early_out_instance[0].delete()
     return attendance
 
 
@@ -239,55 +241,59 @@ def clock_in(request):
         # --- Begin fix for biometric punch-in always creating attendance ---
         is_biometric = request.__dict__.get("datetime") is not None
         if is_biometric:
-            # For biometric, employee is always resolved from request.user
-            employee, work_info = employee_exists(request)
-            datetime_now = request.datetime
-            if not employee or not work_info:
-                return HttpResponse(_("Biometric punch could not resolve employee or work info."))
-            shift = work_info.shift_id
-            date_today = request.date if hasattr(request, "date") else datetime_now.date()
-            attendance_date = date_today
-            day = date_today.strftime("%A").lower()
-            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
-            now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
-            minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
-                day=day, shift=shift
-            )
-            # Always create attendance if not exists
-            attendance = Attendance.objects.filter(
-                employee_id=employee, attendance_date=attendance_date
-            ).first()
-            if not attendance:
-                attendance = Attendance()
-                attendance.employee_id = employee
-                attendance.shift_id = shift
-                attendance.work_type_id = work_info.work_type_id
-                attendance.attendance_date = attendance_date
-                attendance.attendance_day = day
-                attendance.attendance_clock_in = now
-                attendance.attendance_clock_in_date = date_today
-                attendance.minimum_hour = minimum_hour
-                attendance.save()
-                attendance = Attendance.find(attendance.id)
-                late_come(
-                    attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
+            with transaction.atomic():
+                # For biometric, employee is always resolved from request.user
+                employee, work_info = employee_exists(request)
+                if not employee or not work_info:
+                    return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+                
+                Employee.objects.select_for_update().get(pk=employee.id)
+                datetime_now = request.datetime
+                
+                shift = work_info.shift_id
+                date_today = request.date if hasattr(request, "date") else datetime_now.date()
+                attendance_date = date_today
+                day = date_today.strftime("%A").lower()
+                day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+                now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
+                minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+                    day=day, shift=shift
                 )
-            # Only create a new AttendanceActivity for biometric punch-in if none is open
-            open_activity = AttendanceActivity.objects.filter(
-                employee_id=employee,
-                attendance_date=attendance_date,
-                clock_out=None
-            ).first()
-
-            if not open_activity:
-                AttendanceActivity.objects.create(
+                # Always create attendance if not exists
+                attendance = Attendance.objects.filter(
+                    employee_id=employee, attendance_date=attendance_date
+                ).first()
+                if not attendance:
+                    attendance = Attendance()
+                    attendance.employee_id = employee
+                    attendance.shift_id = shift
+                    attendance.work_type_id = work_info.work_type_id
+                    attendance.attendance_date = attendance_date
+                    attendance.attendance_day = day
+                    attendance.attendance_clock_in = now
+                    attendance.attendance_clock_in_date = date_today
+                    attendance.minimum_hour = minimum_hour
+                    attendance.save()
+                    attendance = Attendance.find(attendance.id)
+                    late_come(
+                        attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
+                    )
+                # Only create a new AttendanceActivity for biometric punch-in if none is open
+                open_activity = AttendanceActivity.objects.filter(
                     employee_id=employee,
                     attendance_date=attendance_date,
-                    clock_in_date=date_today,
-                    shift_day=day,
-                    clock_in=datetime_now,
-                    in_datetime=datetime_now,
-                )
+                    clock_out=None
+                ).first()
+
+                if not open_activity:
+                    AttendanceActivity.objects.create(
+                        employee_id=employee,
+                        attendance_date=attendance_date,
+                        clock_in_date=date_today,
+                        shift_day=day,
+                        clock_in=datetime_now,
+                        in_datetime=datetime_now,
+                    )
             # If an open activity exists, do not create a new one
             return render(request, "attendance/components/in_out_component.html")
         # --- End fix for biometric punch-in always creating attendance ---
