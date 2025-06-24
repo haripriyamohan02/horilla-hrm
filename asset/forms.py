@@ -290,7 +290,7 @@ class AssetAllocationForm(ModelForm):
         self.fields["assign_images"] = MultipleFileField(
             label=_("Assign Condition Images")
         )
-        self.fields["assign_images"].required = True
+        self.fields["assign_images"].required = False
 
     class Meta:
         """
