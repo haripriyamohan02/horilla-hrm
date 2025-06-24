@@ -161,11 +161,9 @@ class ZKBioAttendance(Thread):
                         for attendance in attendances:
                             if attendance:
                                 user_id = attendance.user_id
-                                punch_code = attendance.punch
                                 date_time = django_timezone.make_aware(
                                     attendance.timestamp
                                 )
-                                # date_time = attendance.timestamp
                                 date = date_time.date()
                                 time = date_time.time()
                                 device.last_fetch_date = date
@@ -2164,7 +2162,6 @@ def zk_biometric_attendance_logs(device):
         }
         for attendance in filtered_attendances:
             user_id = attendance.user_id
-            punch_code = attendance.punch
             date_time = django_timezone.make_aware(attendance.timestamp)
             date = date_time.date()
             time = date_time.time()
@@ -2176,19 +2173,19 @@ def zk_biometric_attendance_logs(device):
                     time=time,
                     datetime=date_time,
                 )
-
-                if punch_code in {0, 3, 4}:
+                if device.role == 'in':
                     try:
                         clock_in(request_data)
                     except Exception as error:
                         logger.error("Got an error : ", error)
-                elif punch_code in {1, 2, 5}:
+                elif device.role == 'out':
                     try:
                         clock_out(request_data)
                     except Exception as error:
                         logger.error("Got an error : ", error)
                 else:
-                    pass
+                    logger.warning(f"Unknown device role: {device.role}")
+                    continue
         return len(filtered_attendances), None
     except zk_exception.ZKErrorResponse as e:
         return "error", str(e)
@@ -2237,7 +2234,6 @@ def anviz_biometric_attendance_logs(device):
     device.save()
     for attendance in attendance_records["list"]:
         badge_id = attendance["employee"]["workno"]
-        punch_code = attendance["checktype"]
         date_time_utc = datetime.strptime(
             attendance["checktime"], "%Y-%m-%dT%H:%M:%S%z"
         )
@@ -2250,17 +2246,24 @@ def anviz_biometric_attendance_logs(device):
                 time=date_time_obj.time(),
                 datetime=date_time_obj,
             )
-            if punch_code in {0, 128}:
+            last_none_activity = (
+                AttendanceActivity.objects.filter(
+                    employee_id=employee.id,
+                    clock_out=None,
+                )
+                .order_by("in_datetime")
+                .last()
+            )
+            if last_none_activity:
+                try:
+                    clock_out(request_data)
+                except Exception as error:
+                    logger.error("Error in clock out ", error)
+            else:
                 try:
                     clock_in(request_data)
                 except Exception as error:
                     logger.error("Error in clock in ", error)
-            else:
-                try:
-                    # // 1 , 129 check type check out and door close
-                    clock_out(request_data)
-                except Exception as error:
-                    logger.error("Error in clock out ", error)
     return len(attendance_records["list"])
 
 
@@ -2308,7 +2311,6 @@ def cosec_biometric_attendance_logs(device):
         attendance_date = datetime.strptime(date_str, "%d/%m/%Y").date()
         attendance_time = datetime.strptime(time_str, "%H:%M:%S").time()
         attendance_datetime = datetime.combine(attendance_date, attendance_time)
-        punch_code = attendance["detail-2"]
 
         request_data = Request(
             user=employee.employee_id.employee_user_id,
@@ -2317,15 +2319,24 @@ def cosec_biometric_attendance_logs(device):
             datetime=django_timezone.make_aware(attendance_datetime),
         )
 
-        try:
-            if punch_code in ["1", "3", "5", "7", "9", "0"]:
-                clock_in(request_data)
-            elif punch_code in ["2", "4", "6", "8", "10"]:
+        last_none_activity = (
+            AttendanceActivity.objects.filter(
+                employee_id=employee.employee_id,
+                clock_out=None,
+            )
+            .order_by("in_datetime")
+            .last()
+        )
+        if last_none_activity:
+            try:
                 clock_out(request_data)
-            else:
-                pass
-        except Exception as error:
-            logger.error("Error processing attendance: ", error)
+            except Exception as error:
+                logger.error("Error processing attendance: ", error)
+        else:
+            try:
+                clock_in(request_data)
+            except Exception as error:
+                logger.error("Error processing attendance: ", error)
 
     if attendances:
         last_attendance = attendances[-1]
