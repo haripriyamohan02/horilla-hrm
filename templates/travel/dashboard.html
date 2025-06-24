@@ -23,6 +23,16 @@
     .status-approved { color: #388e3c; font-weight: bold; }
     .status-pending { color: #fbc02d; font-weight: bold; }
     .status-rejected { color: #d32f2f; font-weight: bold; }
+    .oh-sticky-table__th.sticky-col,
+    .oh-sticky-table__td.sticky-col {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        z-index: 2;
+    }
+    .oh-sticky-table__td.sticky-col {
+        z-index: 1;
+    }
 </style>
 
 <div class="oh-wrapper mb-4">
@@ -78,19 +88,19 @@
                     <div class="oh-sticky-table__table">
                         <div class="oh-sticky-table__thead">
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__th">{% trans "Employee" %}</div>
+                                <div class="oh-sticky-table__th sticky-col">{% trans "Employee" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Travel Type" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Start Date" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "End Date" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Requested Days" %}</div>
                                 <div class="oh-sticky-table__th">{% trans "Travel Clash" %}</div>
-                                <div class="oh-sticky-table__th">{% trans "Confirmation" %}</div>
+                                <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
                             </div>
                         </div>
                         <div class="oh-sticky-table__tbody">
                             <!-- Example row 1 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">John Doe</div>
+                                <div class="oh-sticky-table__td sticky-col">John Doe</div>
                                 <div class="oh-sticky-table__td">Domestic</div>
                                 <div class="oh-sticky-table__td">Jun. 23, 2024</div>
                                 <div class="oh-sticky-table__td">Jun. 25, 2024</div>
@@ -103,10 +113,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -114,7 +124,7 @@
                             </div>
                             <!-- Example row 2 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Alice Smith</div>
+                                <div class="oh-sticky-table__td sticky-col">Alice Smith</div>
                                 <div class="oh-sticky-table__td">International</div>
                                 <div class="oh-sticky-table__td">Jul. 2, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 8, 2024</div>
@@ -127,10 +137,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -138,7 +148,7 @@
                             </div>
                             <!-- Example row 3 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Ravi Kumar</div>
+                                <div class="oh-sticky-table__td sticky-col">Ravi Kumar</div>
                                 <div class="oh-sticky-table__td">Domestic</div>
                                 <div class="oh-sticky-table__td">Jul. 10, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 12, 2024</div>
@@ -151,10 +161,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -162,7 +172,7 @@
                             </div>
                             <!-- Example row 4 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Fatima Noor</div>
+                                <div class="oh-sticky-table__td sticky-col">Fatima Noor</div>
                                 <div class="oh-sticky-table__td">International</div>
                                 <div class="oh-sticky-table__td">Jul. 15, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 20, 2024</div>
@@ -175,10 +185,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -186,7 +196,7 @@
                             </div>
                             <!-- Example row 5 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Priya Singh</div>
+                                <div class="oh-sticky-table__td sticky-col">Priya Singh</div>
                                 <div class="oh-sticky-table__td">Domestic</div>
                                 <div class="oh-sticky-table__td">Jul. 18, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 19, 2024</div>
@@ -199,10 +209,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -210,7 +220,7 @@
                             </div>
                             <!-- Example row 6 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Suresh Patel</div>
+                                <div class="oh-sticky-table__td sticky-col">Suresh Patel</div>
                                 <div class="oh-sticky-table__td">International</div>
                                 <div class="oh-sticky-table__td">Jul. 22, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 28, 2024</div>
@@ -223,10 +233,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -234,7 +244,7 @@
                             </div>
                             <!-- Example row 7 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">Meera Nair</div>
+                                <div class="oh-sticky-table__td sticky-col">Meera Nair</div>
                                 <div class="oh-sticky-table__td">Domestic</div>
                                 <div class="oh-sticky-table__td">Jul. 25, 2024</div>
                                 <div class="oh-sticky-table__td">Jul. 27, 2024</div>
@@ -247,10 +257,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
@@ -258,7 +268,7 @@
                             </div>
                             <!-- Example row 8 -->
                             <div class="oh-sticky-table__tr">
-                                <div class="oh-sticky-table__td">David Lee</div>
+                                <div class="oh-sticky-table__td sticky-col">David Lee</div>
                                 <div class="oh-sticky-table__td">International</div>
                                 <div class="oh-sticky-table__td">Jul. 29, 2024</div>
                                 <div class="oh-sticky-table__td">Aug. 2, 2024</div>
@@ -271,10 +281,10 @@
                                 </div>
                                 <div class="oh-sticky-table__td">
                                     <div class="d-flex gap-2">
-                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #22c55e; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Approve">
                                             <ion-icon name="checkmark-outline"></ion-icon>
                                         </button>
-                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;">
+                                        <button class="oh-btn" style="background: #ef4444; color: #fff; border-radius: 8px; padding: 0.3rem 1.2rem; border: none; font-size: 1rem;" title="Reject">
                                             <ion-icon name="close-outline"></ion-icon>
                                         </button>
                                     </div>
