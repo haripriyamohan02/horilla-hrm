@@ -100,6 +100,23 @@ class AttendanceActivity(HorillaModel):
     def __str__(self):
         return f"{self.employee_id} - {self.attendance_date} - {self.clock_in} - {self.clock_out}"
 
+    def save(self, *args, **kwargs):
+        """
+        overriding save method to prevent duplicate clock in
+        """
+        if (
+            not self.pk
+            and self.clock_in
+            and not self.clock_out
+            and AttendanceActivity.objects.filter(
+                employee_id=self.employee_id,
+                attendance_date=self.attendance_date,
+                clock_out__isnull=True,
+            ).exists()
+        ):
+            return  # returning without saving
+        super().save(*args, **kwargs)
+
 
 class BatchAttendance(HorillaModel):
     """
