@@ -165,7 +165,7 @@
                 				  </li>
                 				{% endif %}
               				{% endif %}
-
+<!-- 
 							{% if "payroll"|app_installed %}
 								<li data-cell-index="16" data-cell-title="{% trans 'Payroll' %}" class="oh-general__tab">
 									<a
@@ -176,9 +176,9 @@
 									>{% trans "Payroll" %}</a
 									>
 								</li>
-							{% endif %}
+							{% endif %} -->
 
-							{% if "payroll"|app_installed %}
+							<!-- {% if "payroll"|app_installed %}
 								<li data-cell-index="15" data-cell-title="{% trans 'Allowance & Deduction' %}" class="oh-general__tab">
 									<a
 									hx-get="{% url 'allowances-deductions-tab' employee.id %}"
@@ -190,7 +190,7 @@
 									>{% trans "Allowance & Deduction" %}</a
 									>
 								</li>
-							{% endif %}
+							{% endif %} -->
 
 							{% if "attendance"|app_installed %}
 							<li data-cell-index="14" data-cell-title="{% trans "Penalty Account" %}" class="oh-general__tab">
@@ -247,7 +247,7 @@
 								>
 							</li>
 
-							{% if "payroll"|app_installed %}
+							<!-- {% if "payroll"|app_installed %}
 							<li data-cell-index="10" data-cell-title="{% trans 'Bonus Points' %}" class="oh-general__tab">
 								<a
 								hx-get="{% url 'bonus-points-tab' employee.id %}"
@@ -259,7 +259,7 @@
 								>{% trans "Bonus Points" %}</a
 								>
 							</li>
-							{% endif %}
+							{% endif %} -->
 
 							{% if "recruitment"|app_installed %}
 								<li data-cell-index="20" data-cell-title="{% trans "Interview" %}" class="oh-general__tab">
@@ -299,31 +299,31 @@
 							</div>
 						{% endif %}
 
-						{% if "payroll"|app_installed %}
+						<!-- {% if "payroll"|app_installed %}
 							<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="payroll">
 								{% include 'tabs/payroll-tab.html' %}
 							</div>
-						{% endif %}
+						{% endif %} -->
 
 						{% if "recruitment"|app_installed %}
 							<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="interview">
 							</div>
 						{% endif %}
 
-						{% if "payroll"|app_installed %}
+						<!-- {% if "payroll"|app_installed %}
 						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="bonus_points_target">
 							{% include "tabs/bonus_points.html" %}
 						</div>
-						{% endif %}
+						{% endif %} -->
 
 						<div class="oh-general__tab-target oh-profile__info-tab mt-3 mb-4 d-none" id="resignation_target">
 							{% include "tabs/resignation.html" %}
 							<div id="resignation_hx_target" class="mt-2"></div>
 						</div>
 
-						{% if "payroll"|app_installed %}
+						<!-- {% if "payroll"|app_installed %}
 							<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="allowance_deduction"></div>
-						{% endif %}
+						{% endif %} -->
 
 						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="shift_target"></div>
 
