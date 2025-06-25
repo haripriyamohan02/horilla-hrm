@@ -49,8 +49,10 @@ operator_mapping = {
 # Create your models here.
 BREAKDOWN = [
     ("full_day", _("Full Day")),
-    ("first_half", _("First Half")),
-    ("second_half", _("Second Half")),
+    ("first_quarter", _("First Quarter")),
+    ("second_quarter", _("Second Quarter")),
+    ("third_quarter", _("Third Quarter")),
+    ("fourth_quarter", _("Fourth Quarter")),
 ]
 CHOICES = [("yes", "Yes"), ("no", "No")]
 
