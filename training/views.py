@@ -84,3 +84,16 @@ def delete_training_schedule(request, schedule_id):
             )
     else:
         return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@api_view(["PATCH"])
+def update_training_schedule(request, schedule_id):
+    schedule = get_object_or_404(TrainingSchedule, id=schedule_id)
+    serializer = TrainingScheduleSerializer(schedule, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(
+            {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
+        )

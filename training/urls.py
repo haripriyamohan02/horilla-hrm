@@ -25,4 +25,9 @@ urlpatterns = [
         views.delete_training_schedule,
         name="delete_training_schedule",
     ),
+    path(
+        "api/update-schedule/<int:schedule_id>/",
+        views.update_training_schedule,
+        name="update_training_schedule",
+    ),
 ]

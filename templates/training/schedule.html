@@ -1120,7 +1120,6 @@ async function handleFormSubmission(event) {
         status: 'Scheduled' 
     };
 
-    // Basic validation
     if (!trainingData.course_name || !trainingData.course_category || 
         !trainingData.instructor || !trainingData.max_capacity || 
         !trainingData.training_date || !trainingData.start_time || 
@@ -1147,21 +1146,30 @@ async function handleFormSubmission(event) {
         submitButton.textContent = isEditMode ? 'Updating...' : 'Creating...';
         submitButton.disabled = true;
 
-        const response = await fetch('/training/api/create-schedule/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(trainingData)
-        });
+        let response;
+        if (isEditMode && currentEditId) {
+            response = await fetch(`/training/api/update-schedule/${currentEditId}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(trainingData)
+            });
+        } else {
+            response = await fetch('/training/api/create-schedule/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(trainingData)
+            });
+        }
         
         if (response.ok) {
             const result = await response.json();
             closeModal();
             alert(isEditMode ? 'Training schedule updated successfully!' : 'Training schedule created successfully!');
             resetEditMode();
-            
-            // Refresh data from backend
             await loadTrainingSchedules();
             
         } else {
