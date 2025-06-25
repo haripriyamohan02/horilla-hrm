@@ -136,29 +136,22 @@ def clock_in_attendance_and_activity(
         start_time      : start time in shift schedule
         end_time        : end time in shift schedule
     """
-
     # attendance activity create
-    activity = AttendanceActivity.objects.filter(
+    open_activity = AttendanceActivity.objects.filter(
         employee_id=employee,
         attendance_date=attendance_date,
-        clock_in_date=date_today,
-        shift_day=day,
         clock_out=None,
     ).first()
 
-    if activity and not activity.clock_out:
-        activity.clock_out = in_datetime
-        activity.clock_out_date = date_today
-        activity.save()
-
-    new_activity = AttendanceActivity.objects.create(
-        employee_id=employee,
-        attendance_date=attendance_date,
-        clock_in_date=date_today,
-        shift_day=day,
-        clock_in=in_datetime,
-        in_datetime=in_datetime,
-    )
+    if not open_activity:
+        AttendanceActivity.objects.create(
+            employee_id=employee,
+            attendance_date=attendance_date,
+            clock_in_date=date_today,
+            shift_day=day,
+            clock_in=in_datetime,
+            in_datetime=in_datetime,
+        )
     # create attendance if not exist
     attendance = Attendance.objects.filter(
         employee_id=employee, attendance_date=attendance_date
@@ -247,9 +240,11 @@ def clock_in(request):
         if is_biometric:
             # For biometric, employee is always resolved from request.user
             employee, work_info = employee_exists(request)
-            datetime_now = request.datetime
             if not employee or not work_info:
                 return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+            
+            datetime_now = request.datetime
+            
             shift = work_info.shift_id
             date_today = request.date if hasattr(request, "date") else datetime_now.date()
             attendance_date = date_today
@@ -344,7 +339,6 @@ def clock_out_attendance_and_activity(
         date_today  : today date
         now         : now
     """
-
     attendance_activities = (
         AttendanceActivity.objects.filter(
             employee_id=employee,
