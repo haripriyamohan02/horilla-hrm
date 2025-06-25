@@ -42,9 +42,9 @@ def find_on_time(request, today, week_day, department=None):
     """
     This method is used to find count for on time attendances
     """
-
     on_time = 0
     attendances = Attendance.objects.filter(attendance_date=today)
+    attendances = filtersubordinates(request, attendances, perm="attendance.view_attendance")
     if department is not None:
         attendances = attendances.filter(
             employee_id__employee_work_info__department_id=department
@@ -52,18 +52,21 @@ def find_on_time(request, today, week_day, department=None):
     late_come = AttendanceLateComeEarlyOut.objects.filter(
         attendance_id__attendance_date=today, type="late_come"
     )
+    late_come = filtersubordinates(request, late_come, perm="attendance.view_attendance", field="attendance_id__employee_id")
     on_time = len(attendances) - len(late_come)
     return on_time
 
 
-def find_expected_attendances(week_day):
+def find_expected_attendances(request, week_day):
     """
     This method is used to find count of expected attendances for the week day
     """
     employees = Employee.objects.filter(is_active=True)
+    employees = filtersubordinates(request, employees, perm="employee.view_employee")
     if apps.is_installed("leave"):
         LeaveRequest = get_horilla_model_class(app_label="leave", model="leaverequest")
         on_leave = LeaveRequest.objects.filter(status="Approved")
+        on_leave = on_leave.filter(employee_id__in=employees)
     else:
         on_leave = []
     expected_attendances = len(employees) - len(on_leave)
@@ -75,17 +78,14 @@ def dashboard(request):
     """
     This method is used to render individual dashboard for attendance module
     """
-
     today = datetime.today()
     week_day = today.strftime("%A").lower()
-
     on_time = find_on_time(request, today=today, week_day=week_day)
     late_come = find_late_come(start_date=today)
+    late_come = filtersubordinates(request, late_come, perm="attendance.view_attendance", field="attendance_id__employee_id")
     late_come_obj = len(late_come)
-
     marked_attendances = late_come_obj + on_time
-
-    expected_attendances = find_expected_attendances(week_day=week_day)
+    expected_attendances = find_expected_attendances(request, week_day=week_day)
     on_time_ratio = 0
     late_come_ratio = 0
     marked_attendances_ratio = 0
@@ -95,7 +95,6 @@ def dashboard(request):
         marked_attendances_ratio = (
             f"{(marked_attendances / expected_attendances) * 100:.2f}"
         )
-
     return render(
         request,
         "attendance/dashboard/dashboard.html",
@@ -266,32 +265,25 @@ def generate_data_set(request, start_date, type, end_date, dept):
     if type == "date_range":
         start_date = start_date
         end_date = end_date
-    # below method will find all the on-time attendance corresponding to the
-    # employee shift and shift schedule.
     attendance = total_attendance(
         start_date=start_date, department=dept, end_date=end_date
     )
-
-    # below method will find all the late-come attendance corresponding to the
-    # employee shift and schedule.
+    attendance = filtersubordinates(request, attendance, perm="attendance.view_attendance")
     late_come_obj = find_late_come(
         start_date=start_date, department=dept, end_date=end_date
     )
-
-    # below method will find all the early-out attendance corresponding to the
-    # employee shift and shift schedule
+    late_come_obj = filtersubordinates(request, late_come_obj, perm="attendance.view_attendance", field="attendance_id__employee_id")
     early_out_obj = find_early_out(
         department=dept, start_date=start_date, end_date=end_date
     )
+    early_out_obj = filtersubordinates(request, early_out_obj, perm="attendance.view_attendance", field="attendance_id__employee_id")
     on_time = len(attendance) - len(late_come_obj)
-
     data = {}
     if on_time or late_come_obj or early_out_obj:
         data = {
             "label": dept.department,
             "data": [on_time, len(late_come_obj), len(early_out_obj)],
         }
-
     return data if data else None
 
 
