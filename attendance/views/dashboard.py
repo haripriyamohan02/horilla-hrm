@@ -27,6 +27,7 @@ from attendance.models import (
     Attendance,
     AttendanceLateComeEarlyOut,
     AttendanceValidationCondition,
+    AttendanceActivity,
 )
 from attendance.views.views import strtime_seconds
 from base.methods import filtersubordinates, paginator_qry
@@ -115,17 +116,26 @@ def dashboard(request):
 def on_break_employees(request):
     """
     Fetches and displays employees who left early (early outs) for the current day.
-
-    This view retrieves all records from the `AttendanceLateComeEarlyOut` model
-    where the type is "early_out" and the associated attendance date matches the current date.
-    The results are passed to the template `on_break_employees.html` for rendering
+    Excludes employees who have checked in again after their early out on the same day.
     """
-    today = datetime.today()
+    today = datetime.today().date()
     early_outs = AttendanceLateComeEarlyOut.objects.filter(
         type="early_out", attendance_id__attendance_date=today
     )
+    filtered_early_outs = []
+    for eo in early_outs:
+        # Find any check-in after the early out's created_at for the same employee and date
+        has_checkin = AttendanceActivity.objects.filter(
+            employee_id=eo.employee_id,
+            attendance_date=today,
+            clock_in__isnull=False,
+            clock_in_date=today,
+            in_datetime__gt=eo.created_at
+        ).exists()
+        if not has_checkin:
+            filtered_early_outs.append(eo)
     context = {
-        "on_break": early_outs,
+        "on_break": filtered_early_outs,
     }
     return render(request, "attendance/dashboard/on_break_employees.html", context)
 

@@ -16,13 +16,13 @@ IMG_SRC = "images/ui/attendances.svg"
 
 SUBMENUS = [
     {
-        "menu": _("My Attendances"),
-        "redirect": reverse("view-my-attendance"),
-    },
-    {
         "menu": _("Dashboard"),
         "redirect": reverse("attendance-dashboard"),
         "accessibility": "attendance.sidebar.dashboard_accessibility",
+    },
+    {
+        "menu": _("My Attendances"),
+        "redirect": reverse("view-my-attendance"),
     },
     {
         "menu": _("Attendances"),
