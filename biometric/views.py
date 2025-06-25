@@ -242,6 +242,7 @@ class ZKBioAttendance(Thread):
                         attendances = conn.live_capture()
 
                         for attendance in attendances:
+                            biometric_logger.info(f"[Attendance:  {attendance.uid if hasattr(attendance, 'uid') else None}, {attendance.__str__()}")
                             try:
                                 if attendance:
                                     user_id = attendance.user_id
