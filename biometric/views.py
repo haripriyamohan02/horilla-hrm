@@ -2159,6 +2159,11 @@ def biometric_device_live(request):
             if existing_thread:
                 existing_thread.stop()
                 del BIO_DEVICE_THREADS[device.id]
+        elif device.machine_type == "zk":
+            existing_thread = BIO_DEVICE_THREADS.get(device.id)
+            if existing_thread:
+                existing_thread.stop()
+                del BIO_DEVICE_THREADS[device.id]
 
         script = """
            <script>
