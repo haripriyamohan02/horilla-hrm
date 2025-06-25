@@ -2094,6 +2094,7 @@ def biometric_device_live(request):
                     device.is_scheduler = False
                     device.save()
                     instance.start()
+                    BIO_DEVICE_THREADS[device.id] = instance
             elif device.machine_type == "cosec":
                 cosec = COSECBiometric(
                     device.machine_ip,
