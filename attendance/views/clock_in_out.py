@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 from datetime import date, datetime, timedelta
 
 from django.contrib import messages
-from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -137,54 +136,52 @@ def clock_in_attendance_and_activity(
         start_time      : start time in shift schedule
         end_time        : end time in shift schedule
     """
-    with transaction.atomic():
-        Employee.objects.select_for_update().get(pk=employee.id)
-        # attendance activity create
-        open_activity = AttendanceActivity.objects.filter(
+    # attendance activity create
+    open_activity = AttendanceActivity.objects.filter(
+        employee_id=employee,
+        attendance_date=attendance_date,
+        clock_out=None,
+    ).first()
+
+    if not open_activity:
+        AttendanceActivity.objects.create(
             employee_id=employee,
             attendance_date=attendance_date,
-            clock_out=None,
-        ).first()
-
-        if not open_activity:
-            AttendanceActivity.objects.create(
-                employee_id=employee,
-                attendance_date=attendance_date,
-                clock_in_date=date_today,
-                shift_day=day,
-                clock_in=in_datetime,
-                in_datetime=in_datetime,
-            )
-        # create attendance if not exist
-        attendance = Attendance.objects.filter(
-            employee_id=employee, attendance_date=attendance_date
+            clock_in_date=date_today,
+            shift_day=day,
+            clock_in=in_datetime,
+            in_datetime=in_datetime,
         )
-        if not attendance.exists():
-            attendance = Attendance()
-            attendance.employee_id = employee
-            attendance.shift_id = shift
-            attendance.work_type_id = attendance.employee_id.employee_work_info.work_type_id
-            attendance.attendance_date = attendance_date
-            attendance.attendance_day = day
-            attendance.attendance_clock_in = now
-            attendance.attendance_clock_in_date = date_today
-            attendance.minimum_hour = minimum_hour
-            attendance.save()
-            # check here late come or not
+    # create attendance if not exist
+    attendance = Attendance.objects.filter(
+        employee_id=employee, attendance_date=attendance_date
+    )
+    if not attendance.exists():
+        attendance = Attendance()
+        attendance.employee_id = employee
+        attendance.shift_id = shift
+        attendance.work_type_id = attendance.employee_id.employee_work_info.work_type_id
+        attendance.attendance_date = attendance_date
+        attendance.attendance_day = day
+        attendance.attendance_clock_in = now
+        attendance.attendance_clock_in_date = date_today
+        attendance.minimum_hour = minimum_hour
+        attendance.save()
+        # check here late come or not
 
-            attendance = Attendance.find(attendance.id)
-            late_come(
-                attendance=attendance, start_time=start_time, end_time=end_time, shift=shift
-            )
-        else:
-            attendance = attendance[0]
-            attendance.attendance_clock_out = None
-            attendance.attendance_clock_out_date = None
-            attendance.save()
-            # delete if the attendance marked the early out
-            early_out_instance = attendance.late_come_early_out.filter(type="early_out")
-            if early_out_instance.exists():
-                early_out_instance[0].delete()
+        attendance = Attendance.find(attendance.id)
+        late_come(
+            attendance=attendance, start_time=start_time, end_time=end_time, shift=shift
+        )
+    else:
+        attendance = attendance[0]
+        attendance.attendance_clock_out = None
+        attendance.attendance_clock_out_date = None
+        attendance.save()
+        # delete if the attendance marked the early out
+        early_out_instance = attendance.late_come_early_out.filter(type="early_out")
+        if early_out_instance.exists():
+            early_out_instance[0].delete()
     return attendance
 
 
@@ -241,59 +238,57 @@ def clock_in(request):
         # --- Begin fix for biometric punch-in always creating attendance ---
         is_biometric = request.__dict__.get("datetime") is not None
         if is_biometric:
-            with transaction.atomic():
-                # For biometric, employee is always resolved from request.user
-                employee, work_info = employee_exists(request)
-                if not employee or not work_info:
-                    return HttpResponse(_("Biometric punch could not resolve employee or work info."))
-                
-                Employee.objects.select_for_update().get(pk=employee.id)
-                datetime_now = request.datetime
-                
-                shift = work_info.shift_id
-                date_today = request.date if hasattr(request, "date") else datetime_now.date()
-                attendance_date = date_today
-                day = date_today.strftime("%A").lower()
-                day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
-                now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
-                minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
-                    day=day, shift=shift
+            # For biometric, employee is always resolved from request.user
+            employee, work_info = employee_exists(request)
+            if not employee or not work_info:
+                return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+            
+            datetime_now = request.datetime
+            
+            shift = work_info.shift_id
+            date_today = request.date if hasattr(request, "date") else datetime_now.date()
+            attendance_date = date_today
+            day = date_today.strftime("%A").lower()
+            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+            now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
+            minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+                day=day, shift=shift
+            )
+            # Always create attendance if not exists
+            attendance = Attendance.objects.filter(
+                employee_id=employee, attendance_date=attendance_date
+            ).first()
+            if not attendance:
+                attendance = Attendance()
+                attendance.employee_id = employee
+                attendance.shift_id = shift
+                attendance.work_type_id = work_info.work_type_id
+                attendance.attendance_date = attendance_date
+                attendance.attendance_day = day
+                attendance.attendance_clock_in = now
+                attendance.attendance_clock_in_date = date_today
+                attendance.minimum_hour = minimum_hour
+                attendance.save()
+                attendance = Attendance.find(attendance.id)
+                late_come(
+                    attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
                 )
-                # Always create attendance if not exists
-                attendance = Attendance.objects.filter(
-                    employee_id=employee, attendance_date=attendance_date
-                ).first()
-                if not attendance:
-                    attendance = Attendance()
-                    attendance.employee_id = employee
-                    attendance.shift_id = shift
-                    attendance.work_type_id = work_info.work_type_id
-                    attendance.attendance_date = attendance_date
-                    attendance.attendance_day = day
-                    attendance.attendance_clock_in = now
-                    attendance.attendance_clock_in_date = date_today
-                    attendance.minimum_hour = minimum_hour
-                    attendance.save()
-                    attendance = Attendance.find(attendance.id)
-                    late_come(
-                        attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
-                    )
-                # Only create a new AttendanceActivity for biometric punch-in if none is open
-                open_activity = AttendanceActivity.objects.filter(
+            # Only create a new AttendanceActivity for biometric punch-in if none is open
+            open_activity = AttendanceActivity.objects.filter(
+                employee_id=employee,
+                attendance_date=attendance_date,
+                clock_out=None
+            ).first()
+
+            if not open_activity:
+                AttendanceActivity.objects.create(
                     employee_id=employee,
                     attendance_date=attendance_date,
-                    clock_out=None
-                ).first()
-
-                if not open_activity:
-                    AttendanceActivity.objects.create(
-                        employee_id=employee,
-                        attendance_date=attendance_date,
-                        clock_in_date=date_today,
-                        shift_day=day,
-                        clock_in=datetime_now,
-                        in_datetime=datetime_now,
-                    )
+                    clock_in_date=date_today,
+                    shift_day=day,
+                    clock_in=datetime_now,
+                    in_datetime=datetime_now,
+                )
             # If an open activity exists, do not create a new one
             return render(request, "attendance/components/in_out_component.html")
         # --- End fix for biometric punch-in always creating attendance ---
@@ -344,125 +339,121 @@ def clock_out_attendance_and_activity(
         date_today  : today date
         now         : now
     """
-    with transaction.atomic():
-        # Lock the employee row for the duration of this transaction
-        locked_employee = Employee.objects.select_for_update().get(pk=employee.id)
-
-        attendance_activities = (
-            AttendanceActivity.objects.filter(
-                employee_id=locked_employee,
-            )
-            .order_by("attendance_date", "id")
-            .select_related("employee_id")
+    attendance_activities = (
+        AttendanceActivity.objects.filter(
+            employee_id=employee,
         )
-        attendance_activity = None  # Initialize attendance_activity
+        .order_by("attendance_date", "id")
+        .select_related("employee_id")
+    )
+    attendance_activity = None  # Initialize attendance_activity
 
-        if attendance_activities.filter(clock_out__isnull=True).exists():
-            attendance_activity = attendance_activities.filter(clock_out__isnull=True).last()
-            attendance_activity.clock_out = out_datetime
-            attendance_activity.clock_out_date = date_today
-            attendance_activity.out_datetime = out_datetime
-            attendance_activity.save()
+    if attendance_activities.filter(clock_out__isnull=True).exists():
+        attendance_activity = attendance_activities.filter(clock_out__isnull=True).last()
+        attendance_activity.clock_out = out_datetime
+        attendance_activity.clock_out_date = date_today
+        attendance_activity.out_datetime = out_datetime
+        attendance_activity.save()
 
-            attendance_activities = attendance_activities.filter(
-                attendance_date=attendance_activity.attendance_date
+        attendance_activities = attendance_activities.filter(
+            attendance_date=attendance_activity.attendance_date
+        )
+        # Here calculate the total durations between the attendance activities
+
+        duration = 0
+        for activity in attendance_activities:
+            in_datetime, out_datetime = activity_datetime(activity)
+            if not (in_datetime and out_datetime):
+                continue
+            difference = out_datetime - in_datetime
+            days_second = difference.days * 24 * 3600
+            seconds = difference.seconds
+            total_seconds = days_second + seconds
+            duration = duration + total_seconds
+        duration = format_time(duration)
+        # update clock out of attendance
+        attendance = Attendance.objects.filter(
+            employee_id=employee, attendance_date=attendance_activity.attendance_date
+        ).first()
+        if not attendance:
+            logger.error(
+                "Attendance record not found for activity %s", attendance_activity.id
             )
-            # Here calculate the total durations between the attendance activities
+            return None
+        attendance.attendance_clock_out = now + ":00"
+        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_worked_hour = duration
+        # Overtime calculation
+        attendance.attendance_overtime = overtime_calculation(attendance)
 
-            duration = 0
-            for activity in attendance_activities:
-                in_datetime, out_datetime = activity_datetime(activity)
-                if not (in_datetime and out_datetime):
-                    continue
-                difference = out_datetime - in_datetime
-                days_second = difference.days * 24 * 3600
-                seconds = difference.seconds
-                total_seconds = days_second + seconds
-                duration = duration + total_seconds
-            duration = format_time(duration)
-            # update clock out of attendance
-            attendance = Attendance.objects.filter(
-                employee_id=employee, attendance_date=attendance_activity.attendance_date
-            ).first()
-            if not attendance:
-                logger.error(
-                    "Attendance record not found for activity %s", attendance_activity.id
-                )
-                return None
-            attendance.attendance_clock_out = now + ":00"
-            attendance.attendance_clock_out_date = date_today
-            attendance.attendance_worked_hour = duration
-            # Overtime calculation
-            attendance.attendance_overtime = overtime_calculation(attendance)
+        # Validate the attendance as per the condition
+        attendance.attendance_validated = True
+        attendance.save()
 
-            # Validate the attendance as per the condition
-            attendance.attendance_validated = True
-            attendance.save()
+        return attendance
+    elif is_biometric:
+        shift = work_info.shift_id
+        attendance_date = date_today
+        day = date_today.strftime("%A").lower()
+        day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
 
-            return attendance
-        elif is_biometric:
-            shift = work_info.shift_id
-            attendance_date = date_today
-            day = date_today.strftime("%A").lower()
+        minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+            day=day, shift=shift
+        )
+        now_sec = strtime_seconds(now)
+        mid_day_sec = strtime_seconds("12:00")
+
+        if start_time_sec > end_time_sec and now_sec < mid_day_sec:
+            attendance_date = date_today - timedelta(days=1)
+            day = attendance_date.strftime("%A").lower()
             day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
+            minimum_hour, _, _ = shift_schedule_today(day=day, shift=shift)
 
-            minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
-                day=day, shift=shift
-            )
-            now_sec = strtime_seconds(now)
-            mid_day_sec = strtime_seconds("12:00")
+        attendance, created = Attendance.objects.get_or_create(
+            employee_id=employee,
+            attendance_date=attendance_date,
+            defaults={
+                "shift_id": shift,
+                "work_type_id": work_info.work_type_id,
+                "attendance_day": day,
+                "minimum_hour": minimum_hour,
+            },
+        )
 
-            if start_time_sec > end_time_sec and now_sec < mid_day_sec:
-                attendance_date = date_today - timedelta(days=1)
-                day = attendance_date.strftime("%A").lower()
-                day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
-                minimum_hour, _, _ = shift_schedule_today(day=day, shift=shift)
+        AttendanceActivity.objects.create(
+            employee_id=employee,
+            attendance_date=attendance_date,
+            clock_out_date=date_today,
+            shift_day=day,
+            clock_out=out_datetime,
+            out_datetime=out_datetime,
+        )
 
-            attendance, created = Attendance.objects.get_or_create(
-                employee_id=employee,
-                attendance_date=attendance_date,
-                defaults={
-                    "shift_id": shift,
-                    "work_type_id": work_info.work_type_id,
-                    "attendance_day": day,
-                    "minimum_hour": minimum_hour,
-                },
-            )
+        attendance_activities = AttendanceActivity.objects.filter(
+            employee_id=employee, attendance_date=attendance_date
+        )
 
-            AttendanceActivity.objects.create(
-                employee_id=employee,
-                attendance_date=attendance_date,
-                clock_out_date=date_today,
-                shift_day=day,
-                clock_out=out_datetime,
-                out_datetime=out_datetime,
-            )
+        duration = 0
+        for activity in attendance_activities:
+            in_datetime, out_datetime = activity_datetime(activity)
+            if not (in_datetime and out_datetime):
+                continue
+            difference = out_datetime - in_datetime
+            days_second = difference.days * 24 * 3600
+            seconds = difference.seconds
+            total_seconds = days_second + seconds
+            duration = duration + total_seconds
 
-            attendance_activities = AttendanceActivity.objects.filter(
-                employee_id=employee, attendance_date=attendance_date
-            )
-
-            duration = 0
-            for activity in attendance_activities:
-                in_datetime, out_datetime = activity_datetime(activity)
-                if not (in_datetime and out_datetime):
-                    continue
-                difference = out_datetime - in_datetime
-                days_second = difference.days * 24 * 3600
-                seconds = difference.seconds
-                total_seconds = days_second + seconds
-                duration = duration + total_seconds
-
-            duration = format_time(duration)
-            attendance.attendance_clock_out = now + ":00"
-            attendance.attendance_clock_out_date = date_today
-            attendance.attendance_worked_hour = duration
-            attendance.attendance_overtime = overtime_calculation(attendance)
-            attendance.attendance_validated = True
-            attendance.save()
-            return attendance
-        logger.error("No attendance clock in activity found that needs clocking out.")
-        return
+        duration = format_time(duration)
+        attendance.attendance_clock_out = now + ":00"
+        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_worked_hour = duration
+        attendance.attendance_overtime = overtime_calculation(attendance)
+        attendance.attendance_validated = True
+        attendance.save()
+        return attendance
+    logger.error("No attendance clock in activity found that needs clocking out.")
+    return
 
 
 def early_out_create(attendance):

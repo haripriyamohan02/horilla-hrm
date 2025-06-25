@@ -1836,8 +1836,8 @@ def assign_leave_type_import(request):
         for assign_leave in assign_leave_dicts:
             badge_id = str(assign_leave.get("Employee Badge ID", "")).strip().lower()
             assign_leave_type = assign_leave.get("Leave Type", "").strip().lower()
-            available_days = assign_leave.get("Available Days", "0")
-            cfd = assign_leave.get("Carry Forward Days", "0")
+            raw_available_days = assign_leave.get("Available Days", "")
+            cfd = assign_leave.get("Carry Forward Days", "")
             employee = employees.get(badge_id)
             leave_type = leave_types.get(assign_leave_type)
 
@@ -1861,9 +1861,14 @@ def assign_leave_type_import(request):
                 error_list.append(assign_leave)
                 continue
 
-            # If no errors, create the AvailableLeave instance
-            if available_days == 0:
+            # Only use default if missing/blank, not if 0
+            if raw_available_days in [None, '', 'nan']:
                 available_days = leave_type.total_days
+            else:
+                try:
+                    available_days = raw_available_days
+                except Exception:
+                    available_days = leave_type.total_days
 
             available_leave = AvailableLeave(
                 leave_type_id=leave_type,

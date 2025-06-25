@@ -68,8 +68,10 @@ if apps.is_installed("leave"):
             )
             BREAKDOWN_MAP = {
                 "full_day": "Full Day",
-                "first_half": "First Half",
-                "second_half": "Second Half",
+                "first_quarter": "First Quarter",
+                "second_quarter": "Second Quarter",
+                "third_quarter": "Third Quarter",
+                "fourth_quarter": "Fourth Quarter",
             }
 
             choice_gender = {
