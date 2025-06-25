@@ -111,7 +111,15 @@ if 'LIVE_MONITOR_THREAD' not in globals():
     LIVE_MONITOR_THREAD.start()
 
 def expose_thread_details(request):
-    return HttpResponse(BIO_DEVICE_THREADS)
+    details = {}
+    for device_id, thread in BIO_DEVICE_THREADS.items():
+        details[device_id] = {
+            "ip": getattr(thread, "machine_ip", None),
+            "port": getattr(thread, "port_no", None),
+            "is_alive": thread.is_alive(),
+            "name": thread.name,
+        }
+    return JsonResponse(details)
 
 def str_time_seconds(time):
     """
@@ -261,7 +269,9 @@ class ZKBioAttendance(Thread):
 
     def stop(self):
         """To stop the ZK live capture mode"""
-        self.conn.end_live_capture = True
+        self._stop_event.set()
+        if self.conn:
+            self.conn.end_live_capture = True   
 
 
 class COSECBioAttendanceThread(Thread):
