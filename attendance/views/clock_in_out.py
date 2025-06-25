@@ -235,20 +235,28 @@ def clock_in(request):
             company_id=company
         ).first()
     # request.__dict__.get("datetime")' used to check if the request is from a biometric device
+    biometric_logger.info("=" * 60)
+    biometric_logger.info("IP VALIDATION PROCESS STARTED")
+    biometric_logger.info("=" * 60)
     if (
         attendance_general_settings
         and attendance_general_settings.enable_check_in
         or request.__dict__.get("datetime")
     ):
+        biometric_logger.info("STEP 2: Retrieving allowed IP settings")
         allowed_attendance_ips = AttendanceAllowedIP.objects.first()
+        biometric_logger.debug(f"allowed_attendance_ips found: {bool(allowed_attendance_ips)}")
 
         if (
             not request.__dict__.get("datetime")
             and allowed_attendance_ips
             and allowed_attendance_ips.is_enabled
         ):
-            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-            ip = request.META.get("REMOTE_ADDR")
+            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR") if hasattr(request.META, 'get') else None
+            ip = request.META.get("REMOTE_ADDR") if hasattr(request.META, 'get') else None
+            
+            biometric_logger.debug(f"HTTP_X_FORWARDED_FOR: {x_forwarded_for}")
+            biometric_logger.debug(f"REMOTE_ADDR: {ip}")
             if x_forwarded_for:
                 ip = x_forwarded_for.split(",")[0]
 
