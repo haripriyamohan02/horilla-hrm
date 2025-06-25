@@ -75,23 +75,25 @@ def monitor_live_threads():
     from django.db import close_old_connections
     import logging
     logger = logging.getLogger(__name__)
+    biometric_logger = setup_biometric_logger()
     while True:
         close_old_connections()  # Prevent DB connection leaks in threads
         with BIO_THREAD_LOCK:
             for device in BiometricDevices.objects.filter(is_live=True):
                 thread = BIO_DEVICE_THREADS.get(device.id)
+                biometric_logger.info(f"Thread for device {device.id} is {thread}")
                 if not thread or not thread.is_alive():
-                    logger.warning(f"Live thread for device {device.id} not running. Restarting...")
+                    biometric_logger.warning(f"Live thread for device {device.id} not running. Restarting...")
                     if device.machine_type == 'zk':
                         new_thread = ZKBioAttendance(device.id,device.machine_ip, device.port, device.zk_password)
                         new_thread.start()
                         BIO_DEVICE_THREADS[device.id] = new_thread
-                        logger.info(f"Started ZKBioAttendance live thread for device {device.id}")
+                        biometric_logger.info(f"Started ZKBioAttendance live thread for device {device.id}, {device.machine_ip}, {device.port},")
                     elif device.machine_type == 'cosec':
                         new_thread = COSECBioAttendanceThread(device.id)
                         new_thread.start()
                         BIO_DEVICE_THREADS[device.id] = new_thread
-                        logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
+                        biometric_logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
                     # Add more device types if needed
             # Remove threads for devices that are no longer live
             for device_id in list(BIO_DEVICE_THREADS.keys()):
@@ -100,7 +102,7 @@ def monitor_live_threads():
                     if not device.is_live:
                         thread = BIO_DEVICE_THREADS[device_id]
                         if thread.is_alive():
-                            logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                            biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
                             if hasattr(thread, 'stop'):
                                 thread.stop()
                         del BIO_DEVICE_THREADS[device_id]
