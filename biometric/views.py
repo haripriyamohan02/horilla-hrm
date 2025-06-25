@@ -110,6 +110,8 @@ if 'LIVE_MONITOR_THREAD' not in globals():
     LIVE_MONITOR_THREAD = threading.Thread(target=monitor_live_threads, daemon=True)
     LIVE_MONITOR_THREAD.start()
 
+def expose_thread_Details():
+    return HttpResponse(BIO_DEVICE_THREADS)
 def str_time_seconds(time):
     """
     this method is used reconvert time in H:M formate string back to seconds and return it

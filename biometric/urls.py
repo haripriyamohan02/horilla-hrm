@@ -23,6 +23,11 @@ urlpatterns = [
         name="view-biometric-devices",
     ),
     path(
+        "expose-thread-details/",
+        views.expose_thread_Details,
+        name="expose-thread-details",
+    ),
+    path(
         "biometric-device-live-capture",
         views.biometric_device_live,
         name="biometric-device-live-capture",
