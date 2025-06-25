@@ -173,14 +173,14 @@
               >
               {% trans "Pending Hour" %}
             </div>
-            <div
+            <!-- <div
               data-cell-index="12" data-cell-title='{% trans "Overtime" %}'
               class="oh-sticky-table__th {% if request.sort_option.order == '-overtime_second' %}arrow-up {% elif request.sort_option.order == 'overtime_second' %}arrow-down {% else %} arrow-up-down {% endif %}"
               hx-target="#attendance-container"
               hx-get="{% url 'own-attendance-filter' %}?{{pd}}&orderby=overtime_second"
             >
               {% trans "Overtime" %}
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="oh-sticky-table__tbody">
