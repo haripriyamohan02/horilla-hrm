@@ -113,7 +113,7 @@ if 'LIVE_MONITOR_THREAD' not in globals():
 def expose_thread_details(request):
     details = {}
     for device_id, thread in BIO_DEVICE_THREADS.items():
-        details[device_id] = {
+        details[str(device_id)] = {
             "ip": getattr(thread, "machine_ip", None),
             "port": getattr(thread, "port_no", None),
             "is_alive": thread.is_alive(),
