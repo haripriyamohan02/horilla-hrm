@@ -24,7 +24,7 @@ urlpatterns = [
     ),
     path(
         "expose-thread-details/",
-        views.expose_thread_Details,
+        views.expose_thread_details,
         name="expose-thread-details",
     ),
     path(
