@@ -251,6 +251,7 @@ def clock_in(request):
             not request.__dict__.get("datetime")
             and allowed_attendance_ips
             and allowed_attendance_ips.is_enabled
+            and hasattr(request, 'META')
         ):
             x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR") if hasattr(request.META, 'get') else None
             ip = request.META.get("REMOTE_ADDR") if hasattr(request.META, 'get') else None
