@@ -181,6 +181,7 @@
         </div>
     {% endif %}
 {% endif %}
+{% if request.user.is_superuser %}
 {% if not 'employees_chart' in charts %}
     {% if 'employees_chart'|feature_is_accessible:request or perms.employee.view_employee or request.user|is_reportingmanager %}
         <div class="col-12 col-sm-12 col-md-12 col-lg-4 oh-card-dashboard--moveable dashboardChart" id="movable5">
@@ -200,6 +201,8 @@
         </div>
     {% endif %}
 {% endif %}
+{% endif %}
+{% if request.user.is_superuser %}
 {% if not 'department_chart' in charts %}
     {% if 'department_chart'|feature_is_accessible:request or perms.employee.view_employee or request.user|is_reportingmanager %}
         <div class="col-12 col-sm-12 col-md-12 col-lg-4 oh-card-dashboard--moveable dashboardChart" id="movable6">
@@ -219,6 +222,8 @@
         </div>
     {% endif %}
 {% endif %}
+{% endif %}
+{% if request.user.is_superuser %}
 {% if not 'gender_chart' in charts %}
     {% if 'gender_chart'|feature_is_accessible:request or perms.employee.view_employee or request.user|is_reportingmanager %}
         <div class="col-12 col-sm-12 col-md-12 col-lg-4 oh-card-dashboard--moveable dashboardChart" id="movable7">
@@ -238,6 +243,8 @@
         </div>
     {% endif %}
 {% endif %}
+{% endif %}
+{% if request.user.is_superuser %}
 {% if not 'objective_status' in charts and "pms"|app_installed %}
     <div class="col-12 col-sm-12 col-md-12 col-lg-4 oh-card-dashboard--moveable dashboardChart" id="movable9">
         <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent">
@@ -254,6 +261,7 @@
             </div>
         </div>
     </div>
+{% endif %}
 {% endif %}
 {% if "pms"|app_installed and not 'key_result_status' in charts %}
     {% if perms.pms.view_employeekeyresult or request.user|is_reportingmanager %}
@@ -402,6 +410,7 @@
         </div>
     {% endif %}
 {% endif %}
+{% if request.user.is_superuser %}
 {% if "pms"|app_installed and not 'feedback_answer' in charts %}
     <div class="col-12 col-sm-12 col-md-12 col-lg-6 oh-card-dashboard--moveable dashboardChart" id="feedbackAnswer">
         <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent" style="height:425px">
@@ -419,6 +428,7 @@
             </div>
         </div>
     </div>
+{% endif %}
 {% endif %}
 {% if "asset"|app_installed and not 'asset_request_approve' in charts %}
     {% if perms.asset.view_assetrequest %}
