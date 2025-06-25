@@ -246,7 +246,7 @@ def clock_in(request):
         biometric_logger.info("STEP 2: Retrieving allowed IP settings")
         allowed_attendance_ips = AttendanceAllowedIP.objects.first()
         biometric_logger.debug(f"allowed_attendance_ips found: {bool(allowed_attendance_ips)}")
-
+        biometric_logger.debug(f"if condition data: {request, allowed_attendance_ips}")
         if (
             not request.__dict__.get("datetime")
             and allowed_attendance_ips
