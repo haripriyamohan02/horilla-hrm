@@ -32,7 +32,7 @@ from django.db import OperationalError
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
-from attendance.views.clock_in_out import clock_in, clock_out
+from attendance.views.clock_in_out import clock_in, clock_out, setup_biometric_logger
 from base.methods import get_key_instances, get_pagination
 from employee.models import Employee, EmployeeWorkInformation
 from horilla.decorators import (
@@ -204,7 +204,12 @@ class ZKBioAttendance(Thread):
         self.conn = None
 
     def run(self):
+        biometric_logger = setup_biometric_logger()
+        thread_id = threading.get_ident()
+
         try:
+            biometric_logger.info(f"[Thread {thread_id}] Starting ZKBioAttendance for {self.machine_ip}:{self.port_no}")
+
             zk_device = ZK(
                 self.machine_ip,
                 port=self.port_no,
@@ -215,63 +220,98 @@ class ZKBioAttendance(Thread):
             )
             conn = zk_device.connect()
             self.conn = conn
+
             if conn:
                 device = BiometricDevices.objects.filter(
                     machine_ip=self.machine_ip, port=self.port_no
                 ).first()
+
                 if device and device.is_live:
+                    biometric_logger.info(f"[Thread {thread_id}] Connected to device {device.id} ({device.machine_ip}:{device.port}) - Role: {device.role}")
+
                     while not self._stop_event.is_set():
                         attendances = conn.live_capture()
+
                         for attendance in attendances:
                             try:
                                 if attendance:
                                     user_id = attendance.user_id
-                                    date_time = django_timezone.make_aware(
-                                        attendance.timestamp
-                                    )
+                                    date_time = django_timezone.make_aware(attendance.timestamp)
                                     date = date_time.date()
-                                    time = date_time.time()
-                                    bio_id = BiometricEmployees.objects.filter(
-                                        user_id=user_id, device_id=device
-                                    ).first()
-                                    if bio_id:
-                                        # Use device role field for check-in/out
-                                        if device.role == 'in':
-                                            clock_in(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
-                                            )
-                                        elif device.role == 'out':
-                                            clock_out(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
-                                            )
-                                        else:
-                                            logger.warning(f"Unknown device role: {device.role}")
-                                    
+                                    time = date_time.time() 
                                     device.last_fetch_date = date
                                     device.last_fetch_time = time
                                     device.save()
+                                    bio_id = BiometricEmployees.objects.filter(
+                                        user_id=user_id, device_id=device
+                                    ).first()
+
+                                    biometric_logger.info(
+                                        f"[Thread {thread_id}] Received punch -> User: {user_id}, Timestamp: {attendance.timestamp}, Device: {device.id}, Role: {device.role}"
+                                    )
+
+                                    if bio_id:
+                                        request_obj = Request(
+                                            user=bio_id.employee_id.employee_user_id,
+                                            date=date,
+                                            time=time,
+                                            datetime=date_time,
+                                            meta={
+                                                "REMOTE_ADDR": "127.0.0.1",  # or your internal trusted IP
+                                                "HTTP_X_FORWARDED_FOR": "127.0.0.1"
+                                            }
+                                        )
+
+                                        if device.role == 'in':
+                                            biometric_logger.info(
+                                                f"[Thread {thread_id}] Clock IN → User: {request_obj.user}, DateTime: {request_obj.datetime}"
+                                            )
+                                            try:
+                                                clock_in(request_obj)
+                                            except Exception as error:
+                                                biometric_logger.error(
+                                                    "Got an error in clock_out", error
+                                                )
+                                                continue
+
+                                        elif device.role == 'out':
+                                            biometric_logger.info(
+                                                f"[Thread {thread_id}] Clock OUT → User: {request_obj.user}, DateTime: {request_obj.datetime}"
+                                            )
+                                            try:
+                                                clock_out(request_obj)
+                                            except Exception as error:
+                                                biometric_logger.error(
+                                                    "Got an error in clock_out", error
+                                                )
+                                                continue
+                                        else:
+                                            biometric_logger.warning(f"[Thread {thread_id}] Unknown role '{device.role}' on device {device.id}")
+                                    else:
+                                        biometric_logger.warning(f"[Thread {thread_id}] No BiometricEmployee found for user {user_id} on device {device.id}")
 
                             except Exception as error:
-                                logger.error(f"Failed to process a punch. User: {attendance.user_id if attendance else 'Unknown'}. Error: {error}")
-                                continue # Continue to the next punch
+                                biometric_logger.error(
+                                    f"[Thread {thread_id}] Failed to process punch (User: {attendance.user_id if attendance else 'Unknown'}). Error: {error}",
+                                    exc_info=True
+                                )
+                                continue
+        except ConnectionResetError as error:
+            ZKBioAttendance(self.machine_ip, self.port_no, self.password).start()
         except Exception as e:
-            logger.error(f"Biometric thread for {self.machine_ip} has failed and stopped. It will be restarted by the monitor. Error: {e}")
+            biometric_logger.error(
+                f"[Thread {thread_id}] Biometric thread for {self.machine_ip} failed and will be restarted. Error: {e}",
+                exc_info=True
+            )
 
     def stop(self):
         """To stop the ZK live capture mode"""
+        thread_id = threading.get_ident()
+        biometric_logger = setup_biometric_logger()
+        biometric_logger.info(f"[Thread {thread_id}] Stopping ZKBioAttendance for {self.machine_ip}:{self.port_no}")
         self._stop_event.set()
         if self.conn:
-            self.conn.end_live_capture = True   
+            self.conn.end_live_capture = True
 
 
 class COSECBioAttendanceThread(Thread):
