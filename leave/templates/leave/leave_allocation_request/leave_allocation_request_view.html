@@ -96,7 +96,7 @@
 									class="oh-accordion-header"
 									onclick="event.stopImmediatePropagation();$(this).parent().toggleClass('oh-accordion--show');"
 								>
-									{% trans "Leave Allocation Request" %}
+									{% trans "Special Leave Request" %}
 								</div>
 								<div class="oh-accordion-body">
 									<div class="row">
@@ -269,11 +269,11 @@
 	<div class="oh-tabs">
 		<ul class="oh-tabs__tablist">
 			<li class="oh-tabs__tab oh-tabs__tab--active" data-target="#tab_1">
-				{% trans "My leave allocation request" %}
+				{% trans "My Special leave request" %}
 			</li>
 			{% if request.user|is_reportingmanager or perms.leave.view_leaveallocationrequest %}
 			<li class="oh-tabs__tab" data-target="#tab_2">
-				{% trans "Leave allocation requests" %}
+				{% trans "Special leave requests" %}
 			</li>
 			{% endif %}
 		</ul>
@@ -284,7 +284,7 @@
 		<div class="oh-empty">
 			<img src="{% static 'images/ui/search.svg' %}" class="oh-404__image" alt="Page not found. 404." />
 			<h1 class="oh-empty__title">{% trans "No Records found." %}</h1>
-			<p class="oh-empty__subtitle">{% trans "There are no leave allocation requests at the moment." %}</p>
+			<p class="oh-empty__subtitle">{% trans "There are no special leave requests at the moment." %}</p>
 		</div>
 	{% endif %}
 </div>
