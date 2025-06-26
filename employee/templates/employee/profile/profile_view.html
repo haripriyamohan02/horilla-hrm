@@ -193,7 +193,7 @@
 							{% endif %} -->
 
 							{% if "attendance"|app_installed %}
-							<li data-cell-index="14" data-cell-title="{% trans "Penalty Account" %}" class="oh-general__tab">
+							<!-- <li data-cell-index="14" data-cell-title="{% trans "Penalty Account" %}" class="oh-general__tab">
 								<a
 								data-action="general-tab"
 								data-target="#penaltyTarget"
@@ -202,7 +202,7 @@
 								role="button"
 								>{% trans "Penalty Account" %}</a
 								>
-							</li>
+							</li> -->
 							{% endif %}
 
 							{% if "asset"|app_installed %}
@@ -235,7 +235,7 @@
 							</li>
 							{% endif %}
 
-							<li data-cell-index="11" data-cell-title="{% trans 'Documents' %}" class="oh-general__tab">
+							<!-- <li data-cell-index="11" data-cell-title="{% trans 'Documents' %}" class="oh-general__tab">
 								<a
 								hx-get="{% url 'document-tab' employee.id %}?employee_view=true"
 								hx-target="#document_target"
@@ -245,7 +245,7 @@
 								role="button"
 								>{% trans "Documents" %}</a
 								>
-							</li>
+							</li> -->
 
 							<!-- {% if "payroll"|app_installed %}
 							<li data-cell-index="10" data-cell-title="{% trans 'Bonus Points' %}" class="oh-general__tab">
