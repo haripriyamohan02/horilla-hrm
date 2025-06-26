@@ -65,6 +65,20 @@ def get_companies(request):
         ],
     ] + companies
     selected_company = request.session.get("selected_company")
+    # If not set, default to tringapps (first non-all company)
+    if not selected_company or selected_company == "all":
+        for company in companies:
+            if company[1] == "tringapps":
+                request.session["selected_company"] = str(company[0])
+                company[3] = True
+                request.session["selected_company_instance"] = {
+                    "company": company[1],
+                    "icon": company[2],
+                    "text": "",
+                    "id": company[0],
+                }
+                selected_company = str(company[0])
+                break
     company_selected = False
     if selected_company and selected_company == "all":
         companies[0][3] = True
