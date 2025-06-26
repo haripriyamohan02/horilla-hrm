@@ -30,9 +30,12 @@ from horilla.horilla_settings import HORILLA_DATE_FORMATS, HORILLA_TIME_FORMATS
 def filtersubordinates(request, queryset, perm=None, field="employee_id"):
     """
     This method is used to filter out subordinates queryset element.
+    Now always restricts to only subordinates, regardless of permissions, except for admin users (superuser or staff), who see all.
     """
     user = request.user
-    if user.has_perm(perm):
+
+    # Admins (superuser or staff) see all
+    if user.is_superuser or user.is_staff:
         return queryset
 
     if not request:
