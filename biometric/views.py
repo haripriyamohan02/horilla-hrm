@@ -6,6 +6,7 @@ as well as scheduling attendance capture. Also provides views for managing emplo
 registered on biometric devices.
 """
 
+from collections import defaultdict
 import json
 import logging
 from datetime import datetime, timedelta
@@ -32,7 +33,7 @@ from django.db import OperationalError
 
 from attendance.methods.utils import Request
 from attendance.models import AttendanceActivity
-from attendance.views.clock_in_out import clock_in, clock_out
+from attendance.views.clock_in_out import clock_in, clock_out, setup_biometric_logger
 from base.methods import get_key_instances, get_pagination
 from employee.models import Employee, EmployeeWorkInformation
 from horilla.decorators import (
@@ -68,47 +69,71 @@ if 'BIO_DEVICE_THREADS' not in globals():
     BIO_DEVICE_THREADS = {}
 
 # Monitor thread to keep live capture running
+BIO_THREAD_LOCK = threading.Lock()
+MAX_IDLE_SECONDS = 1 * 60 * 60  # 1 hour
 
 def monitor_live_threads():
     from django.db import close_old_connections
     import logging
     logger = logging.getLogger(__name__)
+    biometric_logger = setup_biometric_logger()
     while True:
         close_old_connections()  # Prevent DB connection leaks in threads
-        for device in BiometricDevices.objects.filter(is_live=True):
-            thread = BIO_DEVICE_THREADS.get(device.id)
-            if not thread or not thread.is_alive():
-                logger.warning(f"Live thread for device {device.id} not running. Restarting...")
-                if device.machine_type == 'zk':
-                    new_thread = ZKBioAttendance(device.machine_ip, device.port, device.zk_password)
-                    new_thread.start()
-                    BIO_DEVICE_THREADS[device.id] = new_thread
-                    logger.info(f"Started ZKBioAttendance live thread for device {device.id}")
-                elif device.machine_type == 'cosec':
-                    new_thread = COSECBioAttendanceThread(device.id)
-                    new_thread.start()
-                    BIO_DEVICE_THREADS[device.id] = new_thread
-                    logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
-                # Add more device types if needed
-        # Remove threads for devices that are no longer live
-        for device_id in list(BIO_DEVICE_THREADS.keys()):
-            try:
-                device = BiometricDevices.objects.get(id=device_id)
-                if not device.is_live:
-                    thread = BIO_DEVICE_THREADS[device_id]
-                    if thread.is_alive():
-                        logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
-                        if hasattr(thread, 'stop'):
-                            thread.stop()
+        with BIO_THREAD_LOCK:
+            for device in BiometricDevices.objects.filter(is_live=True):
+                thread = BIO_DEVICE_THREADS.get(device.id)
+                biometric_logger.info(f"Thread for device {device.id} is {thread}")
+                if not thread or not thread.is_alive():
+                    biometric_logger.warning(f"Live thread for device {device.id} not running. Restarting...")
+                    if device.machine_type == 'zk':
+                        if thread.is_alive():
+                            biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                            if hasattr(thread, 'stop'):
+                                thread.stop()
+                        del BIO_DEVICE_THREADS[device.id]
+                        new_thread = ZKBioAttendance(device.id,device.machine_ip, device.port, device.zk_password)
+                        new_thread.start()
+                        BIO_DEVICE_THREADS[device.id] = new_thread
+                        biometric_logger.info(f"Started ZKBioAttendance live thread for device {device.id}, {device.machine_ip}, {device.port},")
+                    elif device.machine_type == 'cosec':
+                        new_thread = COSECBioAttendanceThread(device.id)
+                        new_thread.start()
+                        BIO_DEVICE_THREADS[device.id] = new_thread
+                        biometric_logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
+                elif thread and thread.is_alive():
+                    if device.machine_type == 'zk':
+                        last_active = getattr(thread, 'last_active_time', None)
+                        if last_active and (time.time() - last_active > MAX_IDLE_SECONDS):
+                            logger.warning(f"Thread for device {device.id} idle for too long. Restarting...")
+                            if hasattr(thread, 'stop'):
+                                thread.stop()
+                            del BIO_DEVICE_THREADS[device.id]
+                            new_thread = ZKBioAttendance(device.id,device.machine_ip, device.port, device.zk_password)
+                            new_thread.start()
+                            BIO_DEVICE_THREADS[device.id] = new_thread
+                            biometric_logger.info(f"Started ZKBioAttendance live thread for device {device.id}, {device.machine_ip}, {device.port},")
+                            continue
+                    # Add more device types if needed
+            # Remove threads for devices that are no longer live
+            for device_id in list(BIO_DEVICE_THREADS.keys()):
+                try:
+                    device = BiometricDevices.objects.get(id=device_id)
+                    if not device.is_live:
+                        thread = BIO_DEVICE_THREADS[device_id]
+                        if thread.is_alive():
+                            biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                            if hasattr(thread, 'stop'):
+                                thread.stop()
+                        del BIO_DEVICE_THREADS[device_id]
+                except ObjectDoesNotExist:
                     del BIO_DEVICE_THREADS[device_id]
-            except ObjectDoesNotExist:
-                del BIO_DEVICE_THREADS[device_id]
         time.sleep(60)  # Check every 60 seconds
 
 # Start the monitor thread at module load (only if not already started)
 if 'LIVE_MONITOR_THREAD' not in globals():
     LIVE_MONITOR_THREAD = threading.Thread(target=monitor_live_threads, daemon=True)
     LIVE_MONITOR_THREAD.start()
+
 
 def str_time_seconds(time):
     """
@@ -184,16 +209,26 @@ class ZKBioAttendance(Thread):
     - stop(): Sets the _stop_event to signal the thread to stop gracefully.
     """
 
-    def __init__(self, machine_ip, port_no, password):
+    def __init__(self, device_id, machine_ip, port_no, password):
         super().__init__()
+        self.device_id = device_id  # You’ll have to pass this in!
+        self.name = f"ZKBioThread-{device_id}"
         self.machine_ip = machine_ip
         self.port_no = port_no
         self.password = int(password)
         self._stop_event = Event()  # Initialize stop event
         self.conn = None
+        self.punch_cache = defaultdict(float)
+        self.cache_hits = 0  
+        self.last_active_time = time.time()  
 
     def run(self):
+        biometric_logger = setup_biometric_logger()
+        thread_id = threading.get_ident()
+
         try:
+            biometric_logger.info(f"[Thread {thread_id}] Starting ZKBioAttendance for {self.machine_ip}:{self.port_no}")
+
             zk_device = ZK(
                 self.machine_ip,
                 port=self.port_no,
@@ -204,61 +239,115 @@ class ZKBioAttendance(Thread):
             )
             conn = zk_device.connect()
             self.conn = conn
+
             if conn:
                 device = BiometricDevices.objects.filter(
                     machine_ip=self.machine_ip, port=self.port_no
                 ).first()
+
                 if device and device.is_live:
+                    biometric_logger.info(f"[Thread {thread_id}] Connected to device {device.id} ({device.machine_ip}:{device.port}) - Role: {device.role}")
+
                     while not self._stop_event.is_set():
                         attendances = conn.live_capture()
+
                         for attendance in attendances:
+                            biometric_logger.info(f"[Attendance:  {attendance.uid if hasattr(attendance, 'uid') else None}, {attendance.__str__()}")
                             try:
                                 if attendance:
                                     user_id = attendance.user_id
-                                    date_time = django_timezone.make_aware(
-                                        attendance.timestamp
-                                    )
+                                    date_time = django_timezone.make_aware(attendance.timestamp)
+                                    timestamp = attendance.timestamp
                                     date = date_time.date()
-                                    time = date_time.time()
+                                    time_ = date_time.time() 
+                                    device.last_fetch_date = date
+                                    device.last_fetch_time = time_
+                                    device.save()
+                                    # Skip duplicate punches
+                                    cache_key = f"{user_id}-{timestamp}"
+                                    now = time.time()
+
+                                    if now - self.punch_cache[cache_key] < 5:
+                                        biometric_logger.info(f"[Thread {thread_id}] Skipping duplicate punch {cache_key}")
+                                        continue
+
+                                    self.punch_cache[cache_key] = now
+                                    self.cache_hits += 1
+                                    self.last_active_time = now  # Updated only for a new punch
+                                    # Cleanup old cache entries every 100 punches
+                                    if self.cache_hits % 100 == 0:
+                                        expiry_threshold = now - 10
+                                        self.punch_cache = {
+                                            k: v for k, v in    self.punch_cache.items() if v > expiry_threshold
+                                        }
+                                        biometric_logger.debug(f"[Thread {thread_id}] Cleaned up punch cache. Remaining entries: {len(self.punch_cache)}")
+
                                     bio_id = BiometricEmployees.objects.filter(
                                         user_id=user_id, device_id=device
                                     ).first()
+
+                                    biometric_logger.info(
+                                        f"[Thread {thread_id}] Received punch -> User: {user_id}, Timestamp: {attendance.timestamp}, Device: {device.id}, Role: {device.role}"
+                                    )
+
                                     if bio_id:
-                                        # Use device role field for check-in/out
+                                        request_obj = Request(
+                                            user=bio_id.employee_id.employee_user_id,
+                                            date=date,
+                                            time=time,
+                                            datetime=date_time
+                                        )
+
                                         if device.role == 'in':
-                                            clock_in(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
+                                            biometric_logger.info(
+                                                f"[Thread {thread_id}] Clock IN → User: {request_obj.user}, DateTime: {request_obj.datetime}"
                                             )
+                                            try:
+                                                clock_in(request_obj)
+                                            except Exception as error:
+                                                biometric_logger.error(
+                                                    "Got an error in clock_out", error
+                                                )
+                                                continue
+
                                         elif device.role == 'out':
-                                            clock_out(
-                                                Request(
-                                                    user=bio_id.employee_id.employee_user_id,
-                                                    date=date,
-                                                    time=time,
-                                                    datetime=date_time,
-                                                )
+                                            biometric_logger.info(
+                                                f"[Thread {thread_id}] Clock OUT → User: {request_obj.user}, DateTime: {request_obj.datetime}"
                                             )
+                                            try:
+                                                clock_out(request_obj)
+                                            except Exception as error:
+                                                biometric_logger.error(
+                                                    "Got an error in clock_out", error
+                                                )
+                                                continue
                                         else:
-                                            logger.warning(f"Unknown device role: {device.role}")
-                                    
-                                    device.last_fetch_date = date
-                                    device.last_fetch_time = time
-                                    device.save()
+                                            biometric_logger.warning(f"[Thread {thread_id}] Unknown role '{device.role}' on device {device.id}")
+                                    else:
+                                        biometric_logger.warning(f"[Thread {thread_id}] No BiometricEmployee found for user {user_id} on device {device.id}")
 
                             except Exception as error:
-                                logger.error(f"Failed to process a punch. User: {attendance.user_id if attendance else 'Unknown'}. Error: {error}")
-                                continue # Continue to the next punch
+                                biometric_logger.error(
+                                    f"[Thread {thread_id}] Failed to process punch (User: {attendance.user_id if attendance else 'Unknown'}). Error: {error}",
+                                    exc_info=True
+                                )
+                                continue
+        except ConnectionResetError as error:
+            ZKBioAttendance(self.device_id,self.machine_ip, self.port_no, self.password).start()
         except Exception as e:
-            logger.error(f"Biometric thread for {self.machine_ip} has failed and stopped. It will be restarted by the monitor. Error: {e}")
+            biometric_logger.error(
+                f"[Thread {thread_id}] Biometric thread for {self.machine_ip} failed and will be restarted. Error: {e}",
+                exc_info=True
+            )
 
     def stop(self):
         """To stop the ZK live capture mode"""
-        self.conn.end_live_capture = True
+        thread_id = threading.get_ident()
+        biometric_logger = setup_biometric_logger()
+        biometric_logger.info(f"[Thread {thread_id}] Stopping ZKBioAttendance for {self.machine_ip}:{self.port_no}")
+        self._stop_event.set()
+        if self.conn:
+            self.conn.end_live_capture = True
 
 
 class COSECBioAttendanceThread(Thread):
@@ -2053,6 +2142,7 @@ def biometric_device_live(request):
     :param request: The Django request object.
     :return: A JsonResponse containing a script to be executed on the client side.
     """
+    biometric_logger = setup_biometric_logger()
     is_live = request.GET.get("is_live")
     device_id = request.GET.get("deviceId")
     device = BiometricDevices.objects.get(id=device_id)
@@ -2074,13 +2164,21 @@ def biometric_device_live(request):
                     ommit_ping=False,
                 )
                 conn = zk_device.connect()
-                instance = ZKBioAttendance(machine_ip, port_no, password)
+                existing_thread = BIO_DEVICE_THREADS.get(device.id)
+                if existing_thread:
+                    if existing_thread.is_alive():
+                        biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                        if hasattr(thread, 'stop'):
+                            thread.stop()
+                    del BIO_DEVICE_THREADS[device.id]
+                instance = ZKBioAttendance(device.id,machine_ip, port_no, password)
                 conn.test_voice(index=14)
                 if conn:
                     device.is_live = True
                     device.is_scheduler = False
                     device.save()
                     instance.start()
+                    BIO_DEVICE_THREADS[device.id] = instance
             elif device.machine_type == "cosec":
                 cosec = COSECBiometric(
                     device.machine_ip,
@@ -2141,6 +2239,11 @@ def biometric_device_live(request):
         device.is_live = False
         device.save()
         if device.machine_type == "cosec":
+            existing_thread = BIO_DEVICE_THREADS.get(device.id)
+            if existing_thread:
+                existing_thread.stop()
+                del BIO_DEVICE_THREADS[device.id]
+        elif device.machine_type == "zk":
             existing_thread = BIO_DEVICE_THREADS.get(device.id)
             if existing_thread:
                 existing_thread.stop()

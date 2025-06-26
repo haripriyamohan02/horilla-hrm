@@ -35,10 +35,41 @@ from base.context_processors import (
     enable_late_come_early_out_tracking,
     timerunner_enabled,
 )
+import os
 from base.models import AttendanceAllowedIP, Company, EmployeeShiftDay
 from horilla.decorators import hx_request_required, login_required
 from horilla.horilla_middlewares import _thread_locals
 
+# Configure logging specifically for biometric attendance
+def setup_biometric_logger():
+    """Setup dedicated logger for biometric attendance operations"""
+    logger = logging.getLogger('biometric_attendance')
+    
+    # Avoid adding multiple handlers if logger already exists
+    if not logger.handlers:
+        logger.setLevel(logging.DEBUG)
+        
+        # Create logs directory if it doesn't exist
+        log_dir = 'logs'
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        
+        # Create file handler with timestamp in filename
+        log_filename = f"{log_dir}/biometric_attendance_{datetime.now().strftime('%Y%m%d')}.log"
+        file_handler = logging.FileHandler(log_filename)
+        file_handler.setLevel(logging.DEBUG)
+        
+        # Create formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        file_handler.setFormatter(formatter)
+        
+        # Add handler to logger
+        logger.addHandler(file_handler)
+    
+    return logger
 
 def late_come_create(attendance):
     """
@@ -191,6 +222,7 @@ def clock_in(request):
     """
     This method is used to mark the attendance once per a day and multiple attendance activities.
     """
+    biometric_logger = setup_biometric_logger()
     # check wether check in/check out feature is enabled
     selected_company = request.session.get("selected_company")
     if selected_company == "all":
@@ -203,20 +235,30 @@ def clock_in(request):
             company_id=company
         ).first()
     # request.__dict__.get("datetime")' used to check if the request is from a biometric device
+    biometric_logger.info("=" * 60)
+    biometric_logger.info("IP VALIDATION PROCESS STARTED")
+    biometric_logger.info("=" * 60)
     if (
         attendance_general_settings
         and attendance_general_settings.enable_check_in
         or request.__dict__.get("datetime")
     ):
+        biometric_logger.info("STEP 2: Retrieving allowed IP settings")
         allowed_attendance_ips = AttendanceAllowedIP.objects.first()
-
+        biometric_logger.debug(f"allowed_attendance_ips found: {bool(allowed_attendance_ips)}")
+        biometric_logger.debug(f"if condition data: {request, allowed_attendance_ips}")
         if (
             not request.__dict__.get("datetime")
             and allowed_attendance_ips
             and allowed_attendance_ips.is_enabled
+            and hasattr(request, 'META')
+            and isinstance(request.META, dict)  # This is the key fix
         ):
-            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-            ip = request.META.get("REMOTE_ADDR")
+            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR") if hasattr(request.META, 'get') else None
+            ip = request.META.get("REMOTE_ADDR") if hasattr(request.META, 'get') else None
+            
+            biometric_logger.debug(f"HTTP_X_FORWARDED_FOR: {x_forwarded_for}")
+            biometric_logger.debug(f"REMOTE_ADDR: {ip}")
             if x_forwarded_for:
                 ip = x_forwarded_for.split(",")[0]
 
@@ -238,59 +280,167 @@ def clock_in(request):
         # --- Begin fix for biometric punch-in always creating attendance ---
         is_biometric = request.__dict__.get("datetime") is not None
         if is_biometric:
-            # For biometric, employee is always resolved from request.user
-            employee, work_info = employee_exists(request)
-            if not employee or not work_info:
-                return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+            biometric_logger.info("=" * 60)
+            biometric_logger.info("BIOMETRIC ATTENDANCE PROCESS STARTED")
+            biometric_logger.info("=" * 60)
             
-            datetime_now = request.datetime
-            
-            shift = work_info.shift_id
-            date_today = request.date if hasattr(request, "date") else datetime_now.date()
-            attendance_date = date_today
-            day = date_today.strftime("%A").lower()
-            day, _ = EmployeeShiftDay.objects.get_or_create(day=day)
-            now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
-            minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
-                day=day, shift=shift
-            )
-            # Always create attendance if not exists
-            attendance = Attendance.objects.filter(
-                employee_id=employee, attendance_date=attendance_date
-            ).first()
-            if not attendance:
-                attendance = Attendance()
-                attendance.employee_id = employee
-                attendance.shift_id = shift
-                attendance.work_type_id = work_info.work_type_id
-                attendance.attendance_date = attendance_date
-                attendance.attendance_day = day
-                attendance.attendance_clock_in = now
-                attendance.attendance_clock_in_date = date_today
-                attendance.minimum_hour = minimum_hour
-                attendance.save()
-                attendance = Attendance.find(attendance.id)
-                late_come(
-                    attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
+            try:
+                # Step 1: Employee Resolution
+                biometric_logger.info("STEP 1: Resolving employee from request.user")
+                biometric_logger.debug(f"Request user: {getattr(request, 'user', 'No user found')}")
+                
+                employee, work_info = employee_exists(request)
+                
+                if not employee:
+                    biometric_logger.error("Employee resolution failed - No employee found")
+                    return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+                
+                if not work_info:
+                    biometric_logger.error("Work info resolution failed - No work info found")
+                    biometric_logger.debug(f"Employee found: {employee}, but work_info is None")
+                    return HttpResponse(_("Biometric punch could not resolve employee or work info."))
+                
+                biometric_logger.info(f"Employee successfully resolved: {employee}")
+                biometric_logger.info(f"Work info successfully resolved: {work_info}")
+                biometric_logger.debug(f"Employee ID: {getattr(employee, 'id', 'No ID')}")
+                biometric_logger.debug(f"Work info shift: {getattr(work_info, 'shift_id', 'No shift')}")
+                
+                # Step 2: DateTime Processing
+                biometric_logger.info("STEP 2: Processing datetime information")
+                datetime_now = request.datetime
+                biometric_logger.debug(f"Request datetime: {datetime_now}")
+                
+                shift = work_info.shift_id
+                biometric_logger.info(f"Shift assigned: {shift}")
+                
+                date_today = request.date if hasattr(request, "date") else datetime_now.date()
+                biometric_logger.debug(f"Date today determined: {date_today}")
+                biometric_logger.debug(f"Used request.date: {hasattr(request, 'date')}")
+                
+                attendance_date = date_today
+                biometric_logger.debug(f"Attendance date set: {attendance_date}")
+                
+                # Step 3: Day Processing
+                biometric_logger.info("STEP 3: Processing day information")
+                day = date_today.strftime("%A").lower()
+                biometric_logger.debug(f"Day string generated: {day}")
+                
+                day_obj, day_created = EmployeeShiftDay.objects.get_or_create(day=day)
+                biometric_logger.info(f"Day object {'created' if day_created else 'retrieved'}: {day_obj}")
+                
+                # Step 4: Time Processing
+                biometric_logger.info("STEP 4: Processing time information")
+                now = request.time.strftime("%H:%M") if hasattr(request, "time") else datetime_now.strftime("%H:%M")
+                biometric_logger.debug(f"Current time determined: {now}")
+                biometric_logger.debug(f"Used request.time: {hasattr(request, 'time')}")
+                
+                # Step 5: Shift Schedule
+                biometric_logger.info("STEP 5: Getting shift schedule for today")
+                biometric_logger.debug(f"Calling shift_schedule_today with day={day_obj}, shift={shift}")
+                
+                minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
+                    day=day_obj, shift=shift
                 )
-            # Only create a new AttendanceActivity for biometric punch-in if none is open
-            open_activity = AttendanceActivity.objects.filter(
-                employee_id=employee,
-                attendance_date=attendance_date,
-                clock_out=None
-            ).first()
-
-            if not open_activity:
-                AttendanceActivity.objects.create(
+                biometric_logger.info(f"Shift schedule retrieved - Min hours: {minimum_hour}, Start: {start_time_sec}, End: {end_time_sec}")
+                
+                # Step 6: Attendance Processing
+                biometric_logger.info("STEP 6: Processing attendance record")
+                biometric_logger.debug(f"Searching for existing attendance - Employee: {employee}, Date: {attendance_date}")
+                
+                attendance = Attendance.objects.filter(
+                    employee_id=employee, attendance_date=attendance_date
+                ).first()
+                
+                if not attendance:
+                    biometric_logger.info("No existing attendance found - Creating new attendance record")
+                    
+                    attendance = Attendance()
+                    attendance.employee_id = employee
+                    attendance.shift_id = shift
+                    attendance.work_type_id = work_info.work_type_id
+                    attendance.attendance_date = attendance_date
+                    attendance.attendance_day = day_obj
+                    attendance.attendance_clock_in = now
+                    attendance.attendance_clock_in_date = date_today
+                    attendance.minimum_hour = minimum_hour
+                    
+                    biometric_logger.debug("Attendance object populated with data")
+                    biometric_logger.debug(f"- Employee ID: {employee}")
+                    biometric_logger.debug(f"- Shift ID: {shift}")
+                    biometric_logger.debug(f"- Work Type ID: {work_info.work_type_id}")
+                    biometric_logger.debug(f"- Attendance Date: {attendance_date}")
+                    biometric_logger.debug(f"- Day: {day_obj}")
+                    biometric_logger.debug(f"- Clock In: {now}")
+                    biometric_logger.debug(f"- Clock In Date: {date_today}")
+                    biometric_logger.debug(f"- Minimum Hour: {minimum_hour}")
+                    
+                    attendance.save()
+                    biometric_logger.info(f"New attendance record saved with ID: {attendance.id}")
+                    
+                    # Refresh attendance object
+                    attendance = Attendance.find(attendance.id)
+                    biometric_logger.debug("Attendance object refreshed from database")
+                    
+                    # Step 7: Late Come Processing
+                    biometric_logger.info("STEP 7: Processing late come calculation")
+                    biometric_logger.debug(f"Calling late_come with attendance={attendance.id}, start_time={start_time_sec}, end_time={end_time_sec}, shift={shift}")
+                    
+                    late_come(
+                        attendance=attendance, start_time=start_time_sec, end_time=end_time_sec, shift=shift
+                    )
+                    biometric_logger.info("Late come calculation completed")
+                else:
+                    biometric_logger.info(f"Existing attendance found with ID: {attendance.id}")
+                    biometric_logger.debug(f"Existing attendance details - Clock in: {attendance.attendance_clock_in}, Date: {attendance.attendance_date}")
+                
+                # Step 8: Attendance Activity Processing
+                biometric_logger.info("STEP 8: Processing attendance activity")
+                biometric_logger.debug(f"Searching for open activity - Employee: {employee}, Date: {attendance_date}")
+                
+                open_activity = AttendanceActivity.objects.filter(
                     employee_id=employee,
                     attendance_date=attendance_date,
-                    clock_in_date=date_today,
-                    shift_day=day,
-                    clock_in=datetime_now,
-                    in_datetime=datetime_now,
-                )
-            # If an open activity exists, do not create a new one
-            return render(request, "attendance/components/in_out_component.html")
+                    clock_out=None
+                ).first()
+                
+                if not open_activity:
+                    biometric_logger.info("No open activity found - Creating new attendance activity")
+                    
+                    activity_data = {
+                        'employee_id': employee,
+                        'attendance_date': attendance_date,
+                        'clock_in_date': date_today,
+                        'shift_day': day_obj,
+                        'clock_in': datetime_now,
+                        'in_datetime': datetime_now,
+                    }
+                    
+                    biometric_logger.debug("Activity data prepared:")
+                    for key, value in activity_data.items():
+                        biometric_logger.debug(f"- {key}: {value}")
+                    
+                    new_activity = AttendanceActivity.objects.create(**activity_data)
+                    biometric_logger.info(f"New attendance activity created with ID: {new_activity.id}")
+                    
+                else:
+                    biometric_logger.info(f"Open activity exists with ID: {open_activity.id} - No new activity created")
+                    biometric_logger.debug(f"Open activity details - Clock in: {open_activity.clock_in}, Date: {open_activity.attendance_date}")
+                
+                # Step 9: Response
+                biometric_logger.info("STEP 9: Rendering response")
+                biometric_logger.info("Biometric attendance process completed successfully")
+                biometric_logger.info("=" * 60)
+                
+                return render(request, "attendance/components/in_out_component.html")
+                
+            except Exception as e:
+                biometric_logger.error("=" * 60)
+                biometric_logger.error("BIOMETRIC ATTENDANCE PROCESS FAILED")
+                biometric_logger.error(f"Error: {str(e)}")
+                biometric_logger.error(f"Error type: {type(e).__name__}")
+                biometric_logger.exception("Full exception traceback:")
+                biometric_logger.error("=" * 60)
+                raise
         # --- End fix for biometric punch-in always creating attendance ---
 
         # UI or other punch-in logic (unchanged)
@@ -531,6 +681,7 @@ def clock_out(request):
     """
     This method is used to set the out date and time for attendance and attendance activity
     """
+    biometric_logger = setup_biometric_logger()
     # check wether check in/check out feature is enabled
     selected_company = request.session.get("selected_company")
     if selected_company == "all":
