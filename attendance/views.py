@@ -824,7 +824,7 @@ def clock_out_attendance_and_activity(employee, date_today, now):
     if attendance_activities.exists():
         attendance_activity = attendance_activities.last()
         attendance_activity.clock_out = now
-        attendance_activity.clock_out_date = date_today
+        attendance_activity.clock_out_date = attendance_activity.attendance_date
         attendance_activity.save()
     attendance_activities = attendance_activities.filter(~Q(clock_out=None)).filter(
         attendance_date=attendance_activity.attendance_date
@@ -845,7 +845,7 @@ def clock_out_attendance_and_activity(employee, date_today, now):
         "-attendance_date", "-id"
     )[0]
     attendance.attendance_clock_out = now
-    attendance.attendance_clock_out_date = date_today
+    attendance.attendance_clock_out_date = attendance_activity.attendance_date
     attendance.attendance_worked_hour = duration
     attendance.save()
     # Overtime calculation
