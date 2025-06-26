@@ -252,6 +252,7 @@ def clock_in(request):
             and allowed_attendance_ips
             and allowed_attendance_ips.is_enabled
             and hasattr(request, 'META')
+            and isinstance(request.META, dict)  # This is the key fix
         ):
             x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR") if hasattr(request.META, 'get') else None
             ip = request.META.get("REMOTE_ADDR") if hasattr(request.META, 'get') else None

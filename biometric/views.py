@@ -70,6 +70,7 @@ if 'BIO_DEVICE_THREADS' not in globals():
 
 # Monitor thread to keep live capture running
 BIO_THREAD_LOCK = threading.Lock()
+MAX_IDLE_SECONDS = 1 * 60 * 60  # 1 hour
 
 def monitor_live_threads():
     from django.db import close_old_connections
@@ -99,6 +100,19 @@ def monitor_live_threads():
                         new_thread.start()
                         BIO_DEVICE_THREADS[device.id] = new_thread
                         biometric_logger.info(f"Started COSECBioAttendanceThread live thread for device {device.id}")
+                elif thread and thread.is_alive():
+                    if device.machine_type == 'zk':
+                        last_active = getattr(thread, 'last_active_time', None)
+                        if last_active and (time.time() - last_active > MAX_IDLE_SECONDS):
+                            logger.warning(f"Thread for device {device.id} idle for too long. Restarting...")
+                            if hasattr(thread, 'stop'):
+                                thread.stop()
+                            del BIO_DEVICE_THREADS[device.id]
+                            new_thread = ZKBioAttendance(device.id,device.machine_ip, device.port, device.zk_password)
+                            new_thread.start()
+                            BIO_DEVICE_THREADS[device.id] = new_thread
+                            biometric_logger.info(f"Started ZKBioAttendance live thread for device {device.id}, {device.machine_ip}, {device.port},")
+                            continue
                     # Add more device types if needed
             # Remove threads for devices that are no longer live
             for device_id in list(BIO_DEVICE_THREADS.keys()):
@@ -216,6 +230,7 @@ class ZKBioAttendance(Thread):
         self.conn = None
         self.punch_cache = defaultdict(float)
         self.cache_hits = 0  
+        self.last_active_time = time.time()  
 
     def run(self):
         biometric_logger = setup_biometric_logger()
@@ -268,7 +283,7 @@ class ZKBioAttendance(Thread):
 
                                     self.punch_cache[cache_key] = now
                                     self.cache_hits += 1
-
+                                    self.last_active_time = now  # Updated only for a new punch
                                     # Cleanup old cache entries every 100 punches
                                     if self.cache_hits % 100 == 0:
                                         expiry_threshold = now - 10
