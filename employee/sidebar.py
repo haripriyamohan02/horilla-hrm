@@ -24,11 +24,11 @@ SUBMENUS = [
         "redirect": reverse("employee-view"),
         "accessibility": "employee.sidebar.employee_accessibility",
     },
-    {
-        "menu": trans("Document Requests"),
-        "redirect": reverse("document-request-view"),
-        "accessibility": "employee.sidebar.document_accessibility",
-    },
+    # {
+    #     "menu": trans("Document Requests"),
+    #     "redirect": reverse("document-request-view"),
+    #     "accessibility": "employee.sidebar.document_accessibility",
+    # },
     {
         "menu": trans("Shift Requests"),
         "redirect": reverse("shift-request-view"),
