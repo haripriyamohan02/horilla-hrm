@@ -283,7 +283,10 @@ class LeaveType(HorillaModel):
 
     def clean(self, *args, **kwargs):
         if self.is_compensatory_leave:
-            if LeaveType.objects.filter(is_compensatory_leave=True).count() >= 1:
+            queryset = LeaveType.objects.filter(is_compensatory_leave=True)
+            if self.pk:
+                queryset = queryset.exclude(pk=self.pk)
+            if queryset.exists():
                 raise ValidationError(_("Compensatory Leave Request already exists."))
 
     def save(self, *args, **kwargs):
