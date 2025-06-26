@@ -230,6 +230,7 @@ function createAttendanceChart(dataSet, labels) {
       options: {
         responsive: true,
         animation: false,
+        animations: false,
         onClick: (e, activeEls) => {
           let datasetIndex = activeEls[0].datasetIndex;
           let dataIndex = activeEls[0].index;
