@@ -46,6 +46,10 @@ $(document).ready(function () {
         labels: dataSet.labels,
         datasets: dataSet.dataset,
       },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
     });
   }
 
