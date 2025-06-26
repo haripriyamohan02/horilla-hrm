@@ -69,21 +69,21 @@
 {% endif %}
 {% if "recruitment"|app_installed and perms.recruitment.view_candidate or request.user|is_stagemanager %}
     {% if not 'hired_candidates' in charts %}
-        <div class="col-12 col-sm-12 col-md-12 col-lg-6 oh-card-dashboard--moveable dashboardChart" id="movable2">
+        <!-- <div class="col-12 col-sm-12 col-md-12 col-lg-6 oh-card-dashboard--moveable dashboardChart" id="movable2">
             <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent">
                 <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
                     <span class="oh-card-dashboard__title">{% trans "Hired Candidates" %}</span>
                     <span class="float-end chart_close_button " role="button" data-chart="hired_candidates"
                         hx-post="{% url 'dashboard-components-toggle' %}?chart_id=hired_candidates" hx-target="#movable2"
                         hx-swap="outerHTML">
-                        <!-- <i class="material-icons fw-lighter fs-5">close</i> -->
+                        <i class="material-icons fw-lighter fs-5">close</i>
                     </span>
                 </div>
                 <div class="oh-card-dashboard__body">
                     <canvas id="hiredCandidate" style="cursor: pointer"></canvas>
                 </div>
             </div>
-        </div>
+        </div> -->
     {% endif %}
     {% if "onboarding"|app_installed and not 'onboarding_candidates' in charts %}
         <div class="col-12 col-sm-12 col-md-12 col-lg-6 oh-card-dashboard--moveable dashboardChart" id="movable3">
