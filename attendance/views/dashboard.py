@@ -323,7 +323,18 @@ def dashboard_attendance(request):
         end_date = request.GET.get("end_date")
 
     # get all departments for filtration
-    departments = Department.objects.all()
+    if request.user.is_superuser:
+        departments = Department.objects.all()
+    else:
+        # Get the user's department
+        employee = getattr(request.user, 'employee_get', None)
+        user_department = None
+        if employee:
+            user_department = employee.get_department()
+        if user_department:
+            departments = Department.objects.filter(id=user_department.id)
+        else:
+            departments = Department.objects.none()
     for dept in departments:
         data_set.append(generate_data_set(request, start_date, type, end_date, dept))
     message = _("No records available at the moment.")
