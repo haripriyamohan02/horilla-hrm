@@ -45,6 +45,11 @@
                         {{form.employee_last_name.errors}}
                     </div>
                 </div>
+{% if request.user.groups.all.0.name == "Employee" %}
+<div style="pointer-events: none; opacity: 0.6;">
+{% else %}
+<div>
+{% endif %}
                 <div class="row">
                     <div class="col-12 col-sm-12 col-md-12 col-lg-6">
                         <label class="oh-label" for="email"
@@ -59,6 +64,7 @@
                         {{form.phone}} {{form.phone.errors}}
                     </div>
                 </div>
+</div>
                 <div class="row" data-select2-id="select2-data-46-nz80">
                     <div
                         class="col-12 col-sm-12 col-md-12 col-lg-6"
