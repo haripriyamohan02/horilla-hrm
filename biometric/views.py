@@ -134,16 +134,6 @@ if 'LIVE_MONITOR_THREAD' not in globals():
     LIVE_MONITOR_THREAD = threading.Thread(target=monitor_live_threads, daemon=True)
     LIVE_MONITOR_THREAD.start()
 
-def expose_thread_details(request):
-    details = {}
-    for device_id, thread in BIO_DEVICE_THREADS.items():
-        details[str(device_id)] = {
-            "ip": getattr(thread, "machine_ip", None),
-            "port": getattr(thread, "port_no", None),
-            "is_alive": thread.is_alive(),
-            "name": thread.name,
-        }
-    return JsonResponse(details)
 
 def str_time_seconds(time):
     """
