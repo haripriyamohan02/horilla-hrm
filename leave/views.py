@@ -3355,7 +3355,7 @@ def leave_allocation_request_create(request):
     ].queryset | Employee.objects.filter(employee_user_id=request.user)
     if request.method == "POST":
         form = LeaveAllocationRequestForm(request.POST, request.FILES)
-        form.fields["leave_type_id"].queryset = LeaveType.objects.filter(id__in=[7, 8, 9, 10])
+        form.fields["leave_type_id"].queryset = LeaveType.objects.filter(id__in=[7,8, 9, 10])
         if form.is_valid():
             leave_allocation_request = form.save(commit=False)
             leave_allocation_request.skip_history = False
