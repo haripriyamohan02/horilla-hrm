@@ -47,7 +47,7 @@
                 <div class="oh-sticky-table__th">{% trans "Year" %}</div>
                 <div class="oh-sticky-table__th">{% trans "Worked Hours" %}</div>
                 <div class="oh-sticky-table__th">{% trans "Pending Hours" %}</div>
-                <div class="oh-sticky-table__th">{% trans "Overtime" %}</div>
+                <!-- <div class="oh-sticky-table__th">{% trans "Overtime" %}</div> -->
                 {% if perms.attendance.change_attendanceovertime or perms.attendance.delete_attendanceovertime or request.user|is_reportingmanager %}
                   <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
                 {% endif %}

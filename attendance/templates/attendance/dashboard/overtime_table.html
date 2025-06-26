@@ -17,9 +17,9 @@
                             {% trans "Out Date" %}
                         </div>
                     {% endif %}
-                    <div class="oh-sticky-table__th">
+                    <!-- <div class="oh-sticky-table__th">
                         {% trans "Overtime" %}
-                    </div>
+                    </div> -->
                     <div class="oh-sticky-table__th">{% trans "Actions" %}</div>
                 </div>
             </div>
@@ -54,12 +54,12 @@
                         <div class="oh-sticky-table__td">
                             {{attendance.attendance_overtime}}
                         </div>
-                        <div class="oh-sticky-table__td">
+                        <!-- <div class="oh-sticky-table__td">
                             <a href="{% url 'approve-overtime' attendance.id %}" onclick="event.stopPropagation()"
                                 class="oh-btn oh-btn oh-btn--success w-100" title="{% trans 'Approve Overtime' %}">
                                 <ion-icon class="me-1 md hydrated" name="checkmark-outline" role="img" aria-label="checkmark outline"></ion-icon>
                             </a>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             {% endfor %}
