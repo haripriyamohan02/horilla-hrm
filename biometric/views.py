@@ -85,6 +85,11 @@ def monitor_live_threads():
                 if not thread or not thread.is_alive():
                     biometric_logger.warning(f"Live thread for device {device.id} not running. Restarting...")
                     if device.machine_type == 'zk':
+                        if thread.is_alive():
+                            biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                            if hasattr(thread, 'stop'):
+                                thread.stop()
+                        del BIO_DEVICE_THREADS[device.id]
                         new_thread = ZKBioAttendance(device.id,device.machine_ip, device.port, device.zk_password)
                         new_thread.start()
                         BIO_DEVICE_THREADS[device.id] = new_thread
@@ -2132,6 +2137,7 @@ def biometric_device_live(request):
     :param request: The Django request object.
     :return: A JsonResponse containing a script to be executed on the client side.
     """
+    biometric_logger = setup_biometric_logger()
     is_live = request.GET.get("is_live")
     device_id = request.GET.get("deviceId")
     device = BiometricDevices.objects.get(id=device_id)
@@ -2153,6 +2159,13 @@ def biometric_device_live(request):
                     ommit_ping=False,
                 )
                 conn = zk_device.connect()
+                existing_thread = BIO_DEVICE_THREADS.get(device.id)
+                if existing_thread:
+                    if existing_thread.is_alive():
+                        biometric_logger.info(f"Stopping live thread for device {device_id} (is_live toggled off)")
+                        if hasattr(thread, 'stop'):
+                            thread.stop()
+                    del BIO_DEVICE_THREADS[device.id]
                 instance = ZKBioAttendance(device.id,machine_ip, port_no, password)
                 conn.test_voice(index=14)
                 if conn:
