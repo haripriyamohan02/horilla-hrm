@@ -9,15 +9,18 @@
             @click.outside="open = false" style="display:none; margin-top:115%;">
             <ul class="oh-dropdown__items">
                 {% for company in all_companies %}
-                    {% if company.1 == 'tringapps' %}
-                        <li class="oh-dropdown__item">
-                            <a hx-get="{% url 'update-selected-company' %}?company_id={{company.0}}&next={{ request.path }}" class="oh-dropdown__link">
-                                <img src="{{company.2}}" class="oh-dropdown__lang-icon" style="border-radius: 50%;" />
-                                {{company.1}}
+                    <li class="oh-dropdown__item">
+                        <a hx-get="{% url 'update-selected-company' %}?company_id={{company.0}}&next={{ request.path }}"class="oh-dropdown__link">
+                            <img src="{{company.2}}" class="oh-dropdown__lang-icon" style="border-radius: 50%;" />
+                            {{company.1}}
+                            {% if company.3 %}
                                 <ion-icon name="checkmark-circle-outline" style="position: relative; top: 3.3px; color: green; font-size: 1.2em;"></ion-icon>
-                            </a>
-                        </li>
-                    {% endif %}
+                            {% endif %}
+                            {% if not company_selected and request.user.employee_get.employee_work_info.company_id.id == company.0 %}
+                                <ion-icon name="checkmark-circle-outline" style="position: relative; top: 3.3px; color: green; font-size: 1.2em;"></ion-icon>
+                            {% endif %}
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         </div>
