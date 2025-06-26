@@ -396,12 +396,12 @@
 
 							{% if "pms"|app_installed %}
 								{% if perms.pms.view_feedback or request.user|check_manager:employee or request.user == employee.employee_user_id %}
-									<li data-cell-index="17" data-cell-title="{% trans 'Performance' %}" class="oh-general__tab">
+									<!-- <li data-cell-index="17" data-cell-title="{% trans 'Performance' %}" class="oh-general__tab">
 										<a hx-get={% url 'performance-tab' employee.id %} hx-target="#performance_target"
 											data-action="general-tab" data-target="#performance_target"
 											class="oh-general__tab-link" role="button">{% trans "Performance" %}
 										</a>
-									</li>
+									</li> -->
 								{% endif %}
 							{% endif %}
 
@@ -426,13 +426,13 @@
 							{% endif %}
 
 							{% if perms.horilla_documents.view_document or request.user == employee.employee_user_id %}
-								<li data-cell-index="20" data-cell-title="{% trans 'Documents' %}" class="oh-general__tab">
+								<!-- <li data-cell-index="20" data-cell-title="{% trans 'Documents' %}" class="oh-general__tab">
 									<a hx-get="{% url 'document-tab' employee.id %}?employee_view=true"
 										hx-target="#document_target" data-action="general-tab"
 										data-target="#document_target" class="oh-general__tab-link" role="button">
 										{% trans "Documents" %}
 									</a>
-								</li>
+								</li> -->
 							{% endif %}
 
 							{% if perms.employee.view_employee %}
