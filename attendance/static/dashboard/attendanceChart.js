@@ -1,3 +1,8 @@
+// Disable all Chart.js animations globally
+if (window.Chart) {
+  Chart.defaults.animation = false;
+}
+
 staticUrl = $("#statiUrl").attr("data-url");
 $(document).ready(function () {
   // initializing the department overtime chart.
@@ -229,17 +234,17 @@ function createAttendanceChart(dataSet, labels) {
       data: data,
       options: {
         responsive: true,
-        animation: false,
-        animations: false,
-        transitions: {
-          active: { animation: { duration: 0 } },
+        aspectRatio: false,
+        indexAxis: "x",
+        scales: {
+          x: {
+            stacked: true, 
+          },
+          y: {
+            beginAtZero: true,
+            stacked: true,
+          },
         },
-        plugins: {
-          tooltip: { enabled: false },
-          legend: { display: false },
-        },
-        hover: { mode: null },
-        events: [],
         onClick: (e, activeEls) => {
           let datasetIndex = activeEls[0].datasetIndex;
           let dataIndex = activeEls[0].index;
