@@ -47,11 +47,11 @@ SUBMENUS = [
         "menu": _("Attendance Activities"),
         "redirect": reverse("attendance-activity-view"),
     },
-    {
-        "menu": _("Late Come Early Out"),
-        "redirect": reverse("late-come-early-out-view"),
-        "accessibility": "attendance.sidebar.tracking_accessibility",
-    },
+    # {
+    #     "menu": _("Late Come Early Out"),
+    #     "redirect": reverse("late-come-early-out-view"),
+    #     "accessibility": "attendance.sidebar.tracking_accessibility",
+    # },
 ]
 
 
