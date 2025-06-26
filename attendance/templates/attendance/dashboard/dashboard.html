@@ -58,45 +58,7 @@
             </div>
             <div class="oh-dashboard row pt-3">
                 <div class="oh-dashboard__movable-cards row mt-4">
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-4 ">
-                        <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent"
-                            style="min-height: 423px;">
-                            <div class="oh-card-dashboard__header oh-card-dashboard__header--divider"
-                                style="margin-bottom:2.25rem;" id="attendance_header">
-                                <div class="oh-card-dashboard__title mb-2">
-                                    {% trans "Attendance Analytic" %}
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <select id="type" class="oh-select" name="type" onchange="changeView(this)" style="
-                                        width: 150px;
-                                        padding: 3px;
-                                        color: #5e5c5c;
-                                    ">
-                                        <option value="day">
-                                            {% trans "Day" %}
-                                        </option>
-                                        <option value="weekly">
-                                            {% trans "Weekly" %}
-                                        </option>
-                                        <option value="monthly">
-                                            {% trans "Monthly" %}
-                                        </option>
-                                        <option value="date_range">
-                                            {% trans "Date range" %}
-                                        </option>
-                                    </select>
-                                    <span id="day_input">
-                                        <input type="date" class="mb-2 float-end pointer oh-select"
-                                            id="attendance_month" onchange="changeMonth()"
-                                            style="width: 100px; color: #5e5c5c" />
-                                    </span>
-                                </div>
-                                <div class="oh-card-dashboard__body">
-                                    <canvas id="dailyAnalytic" style="cursor: pointer"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Offline Employees Card -->
                     <div class="col-12 col-sm-12 col-md-12 col-lg-4">
                         <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent"
                             style="min-height: 423px">
@@ -110,8 +72,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-4 " id="pendingHours">
+                    <!-- Hours Chart Card -->
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-4" id="pendingHours">
                         <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent"
                             style="min-height: 423px;">
                             <div class="oh-card-dashboard__header oh-card-dashboard__header--divider"
@@ -132,12 +94,26 @@
                             </div>
                         </div>
                     </div>
+                    <!-- On Break Card -->
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-4 ">
+                        <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent"
+                        style="min-height: 423px;">
+                            <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
+                                <span class="oh-card-dashboard__title">{% trans "On Break" %}</span>
+                            </div>
+                            <div class="oh-card-dashboard__body" hx-get="{% url 'on-break-employees' %}" hx-trigger="load"
+                                id="onBreakEmployeesCard" style="height:275px">
+                                <div class="animated-background h-100"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="oh-dashboard row pt-3">
-                <div class="col-12 col-sm-12 col-md-12 col-lg-3 ">
-                    <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-4 ">
+                    <!-- <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent"
+                    style="min-height: 423px;">
                         <div class="oh-card-dashboard__header oh-card-dashboard__header--divider">
                             <span class="oh-card-dashboard__title">{% trans "On Break" %}</span>
                         </div>
@@ -146,7 +122,7 @@
                             id="onBreakEmployeesCard" style="height:400px">
                             <div class="animated-background h-100"></div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- <div class="col-12 col-sm-12 col-md-12 col-lg-9">
                     <div class="oh-card-dashboard oh-card-dashboard--no-scale oh-card-dashboard--transparent">
