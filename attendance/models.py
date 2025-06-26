@@ -590,6 +590,12 @@ class Attendance(HorillaModel):
                     {"attendance_clock_out": "Check-out time cannot be in the future"}
                 )
 
+        # Check for future attendance date
+        if self.attendance_date > today:
+            raise ValidationError(
+                {"attendance_date": "Attendance date cannot be in the future"}
+            )
+
 
 class AttendanceRequestFile(HorillaModel):
     file = models.FileField(upload_to="attendance/request_files")

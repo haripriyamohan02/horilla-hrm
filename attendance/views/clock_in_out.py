@@ -501,7 +501,7 @@ def clock_out_attendance_and_activity(
     if attendance_activities.filter(clock_out__isnull=True).exists():
         attendance_activity = attendance_activities.filter(clock_out__isnull=True).last()
         attendance_activity.clock_out = out_datetime
-        attendance_activity.clock_out_date = date_today
+        attendance_activity.clock_out_date = attendance_activity.attendance_date
         attendance_activity.out_datetime = out_datetime
         attendance_activity.save()
 
@@ -531,7 +531,7 @@ def clock_out_attendance_and_activity(
             )
             return None
         attendance.attendance_clock_out = now + ":00"
-        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_clock_out_date = attendance_activity.attendance_date
         attendance.attendance_worked_hour = duration
         # Overtime calculation
         attendance.attendance_overtime = overtime_calculation(attendance)
@@ -573,7 +573,7 @@ def clock_out_attendance_and_activity(
         AttendanceActivity.objects.create(
             employee_id=employee,
             attendance_date=attendance_date,
-            clock_out_date=date_today,
+            clock_out_date=attendance_date,
             shift_day=day,
             clock_out=out_datetime,
             out_datetime=out_datetime,
@@ -596,7 +596,7 @@ def clock_out_attendance_and_activity(
 
         duration = format_time(duration)
         attendance.attendance_clock_out = now + ":00"
-        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_clock_out_date = attendance_date
         attendance.attendance_worked_hour = duration
         attendance.attendance_overtime = overtime_calculation(attendance)
         attendance.attendance_validated = True
