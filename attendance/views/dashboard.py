@@ -52,18 +52,26 @@ def find_on_time(request, today, week_day, department=None):
     late_come = AttendanceLateComeEarlyOut.objects.filter(
         attendance_id__attendance_date=today, type="late_come"
     )
+    if department:
+        late_come = late_come.filter(
+            employee_id__employee_work_info__department_id=department
+        )
     on_time = len(attendances) - len(late_come)
     return on_time
 
 
-def find_expected_attendances(week_day):
+def find_expected_attendances(week_day, department=None):
     """
     This method is used to find count of expected attendances for the week day
     """
     employees = Employee.objects.filter(is_active=True)
+    if department:
+        employees = employees.filter(employee_work_info__department_id=department)
     if apps.is_installed("leave"):
         LeaveRequest = get_horilla_model_class(app_label="leave", model="leaverequest")
-        on_leave = LeaveRequest.objects.filter(status="Approved")
+        on_leave = LeaveRequest.objects.filter(
+            status="Approved", employee_id__in=employees
+        )
     else:
         on_leave = []
     expected_attendances = len(employees) - len(on_leave)
@@ -79,13 +87,21 @@ def dashboard(request):
     today = datetime.today()
     week_day = today.strftime("%A").lower()
 
-    on_time = find_on_time(request, today=today, week_day=week_day)
-    late_come = find_late_come(start_date=today)
+    department = None
+    if not request.user.is_superuser:
+        employee = getattr(request.user, "employee_get", None)
+        if employee:
+            department = employee.get_department()
+
+    on_time = find_on_time(request, today=today, week_day=week_day, department=department)
+    late_come = find_late_come(start_date=today, department=department)
     late_come_obj = len(late_come)
 
     marked_attendances = late_come_obj + on_time
 
-    expected_attendances = find_expected_attendances(week_day=week_day)
+    expected_attendances = find_expected_attendances(
+        week_day=week_day, department=department
+    )
     on_time_ratio = 0
     late_come_ratio = 0
     marked_attendances_ratio = 0
@@ -122,6 +138,15 @@ def on_break_employees(request):
     early_outs = AttendanceLateComeEarlyOut.objects.filter(
         type="early_out", attendance_id__attendance_date=today
     )
+    if not request.user.is_superuser:
+        employee = getattr(request.user, "employee_get", None)
+        department = employee.get_department() if employee else None
+        if department:
+            early_outs = early_outs.filter(
+                employee_id__employee_work_info__department_id=department
+            )
+        else:
+            early_outs = early_outs.none()
     filtered_early_outs = []
     for eo in early_outs:
         # Find any check-in after the early out's created_at for the same employee and date
@@ -169,6 +194,15 @@ def dashboard_approve_overtimes(request):
         employee_id__is_active=True,
         attendance_overtime_approve=False,
     )
+    if not request.user.is_superuser:
+        employee = getattr(request.user, "employee_get", None)
+        department = employee.get_department() if employee else None
+        if department:
+            ot_attendances = ot_attendances.filter(
+                employee_id__employee_work_info__department_id=department
+            )
+        else:
+            ot_attendances = ot_attendances.none()
     ot_attendances = filtersubordinates(
         request=request,
         perm="attendance.change_overtime",
@@ -346,8 +380,22 @@ def pending_hours(request):
     """
     pending hours chart dashboard view
     """
-    records = AttendanceOverTimeFilter(request.GET).qs
-    labels = list(Department.objects.values_list("department", flat=True))
+    from attendance.models import AttendanceOverTime
+
+    qs = AttendanceOverTime.objects.all()
+    if not request.user.is_superuser:
+        employee = getattr(request.user, "employee_get", None)
+        department = employee.get_department() if employee else None
+        if department:
+            qs = qs.filter(employee_id__employee_work_info__department_id=department)
+            labels = [department.department]
+        else:
+            qs = qs.none()
+            labels = []
+    else:
+        labels = list(Department.objects.values_list("department", flat=True))
+    records = AttendanceOverTimeFilter(request.GET, queryset=qs).qs
+
     data = {
         "labels": labels,
         "datasets": [
@@ -367,6 +415,12 @@ def department_overtime_chart(request):
         request.GET.get("end_date") if request.GET.get("end_date") else start_date
     )
 
+    department = None
+    if not request.user.is_superuser:
+        employee = getattr(request.user, "employee_get", None)
+        if employee:
+            department = employee.get_department()
+
     if chart_type == "day":
         start_date = start_date
         end_date = start_date
@@ -379,7 +433,7 @@ def department_overtime_chart(request):
         end_date = end_date
 
     attendance = total_attendance(
-        start_date=start_date, department=None, end_date=end_date
+        start_date=start_date, department=department, end_date=end_date
     )
 
     condition = AttendanceValidationCondition.objects.first()
