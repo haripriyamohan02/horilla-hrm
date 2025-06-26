@@ -234,6 +234,12 @@ function createAttendanceChart(dataSet, labels) {
         transitions: {
           active: { animation: { duration: 0 } },
         },
+        plugins: {
+          tooltip: { enabled: false },
+          legend: { display: false },
+        },
+        hover: { mode: null },
+        events: [],
         onClick: (e, activeEls) => {
           let datasetIndex = activeEls[0].datasetIndex;
           let dataIndex = activeEls[0].index;
