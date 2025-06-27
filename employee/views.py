@@ -1955,7 +1955,10 @@ def employee_bulk_delete(request):
                         if contract.contract_status != "active":
                             contract.delete()
             user = employee.employee_user_id
-            user.delete()
+            if user is not None:
+                user.delete()
+            else:
+                employee.delete()
             deleted_count += 1
         except Employee.DoesNotExist:
             messages.error(request, _("Employee not found."))
