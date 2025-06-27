@@ -2801,7 +2801,7 @@ def employee_dashboard(request):
     GET : return Employee dasboard template.
     """
     today = date.today()
-    user = Employee.objects.get(employee_user_id=request.user)
+    user = Employee.objects.entire().get(employee_user_id=request.user)
     leave_requests = LeaveRequest.objects.filter(employee_id=user)
     requested = leave_requests.filter(status="requested")
     approved = leave_requests.filter(status="approved")
@@ -2870,7 +2870,7 @@ def available_leave_chart(request):
     Returns:
     GET : return Json response of labels, dataset, message.
     """
-    user = Employee.objects.get(employee_user_id=request.user)
+    user = Employee.objects.entire().get(employee_user_id=request.user)
     available_leaves = AvailableLeave.objects.filter(employee_id=user).exclude(
         available_days=0
     )
