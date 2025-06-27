@@ -664,12 +664,12 @@ class EmployeeWorkInformation(models.Model):
     contract_end_date = models.DateField(
         blank=True, null=True, verbose_name=_("End Date")
     )
-    # basic_salary = models.IntegerField(
-    #     null=True, blank=True, default=0, verbose_name=_("Basic Salary")
-    # )
-    # salary_hour = models.IntegerField(
-    #     null=True, blank=True, default=0, verbose_name=_("Salary Per Hour")
-    # )
+    basic_salary = models.IntegerField(
+        null=True, blank=True, default=0, verbose_name=_("Basic Salary")
+    )
+    salary_hour = models.IntegerField(
+        null=True, blank=True, default=0, verbose_name=_("Salary Per Hour")
+    )
     additional_info = models.JSONField(null=True, blank=True)
     experience = models.FloatField(null=True, blank=True, default=0)
     history = HorillaAuditLog(
