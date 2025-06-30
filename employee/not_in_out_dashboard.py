@@ -23,7 +23,6 @@ from employee.filters import EmployeeFilter
 from employee.models import Employee
 from horilla import settings
 from horilla.decorators import login_required, manager_can_enter
-from attendance.models import AttendanceLateComeEarlyOut, AttendanceActivity
 
 
 def paginator_qry(qryset, page_number):
@@ -39,8 +38,8 @@ def paginator_qry(qryset, page_number):
 @manager_can_enter("employee.view_employee")
 def not_in_yet(request):
     """
-    This context processor will return the employees, if they not marked the attendance
-    for the day, and annotate with 'on_break' status for correct tag rendering.
+    This context processor wil return the employees, if they not marked the attendance
+    for the day
     """
     page_number = request.GET.get("page")
     previous_data = request.GET.urlencode()
@@ -49,37 +48,12 @@ def not_in_yet(request):
         .qs.exclude(employee_work_info__isnull=True)
         .filter(is_active=True)
     )
-    employees = paginator_qry(emps, page_number)
-    today = date.today()
-    employee_statuses = []
-    for emp in employees:
-        # Check if employee is on break (early out with no subsequent check-in)
-        early_outs = AttendanceLateComeEarlyOut.objects.filter(
-            employee_id=emp,
-            type="early_out",
-            attendance_id__attendance_date=today
-        )
-        is_on_break = False
-        for eo in early_outs:
-            has_checkin = AttendanceActivity.objects.filter(
-                employee_id=emp,
-                attendance_date=today,
-                clock_in__isnull=False,
-                clock_in_date=today,
-                in_datetime__gt=eo.created_at
-            ).exists()
-            if not has_checkin:
-                is_on_break = True
-                break
-        employee_statuses.append({
-            'employee': emp,
-            'on_break': is_on_break,
-        })
+
     return render(
         request,
         "dashboard/not_in_yet.html",
         {
-            "employees": employee_statuses,
+            "employees": paginator_qry(emps, page_number),
             "pd": previous_data,
         },
     )
