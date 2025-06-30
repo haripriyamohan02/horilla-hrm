@@ -844,16 +844,21 @@ def clock_out_attendance_and_activity(employee, date_today, now):
     attendance = Attendance.objects.filter(employee_id=employee).order_by(
         "-attendance_date", "-id"
     )[0]
-    attendance.attendance_clock_out = now
-    attendance.attendance_clock_out_date = attendance_activity.attendance_date
-    attendance.attendance_worked_hour = duration
-    attendance.save()
-    # Overtime calculation
-    attendance.attendance_overtime = overtime_calculation(attendance)
+    
+    # Only update attendance check-in and check-out if the dates match
+    # Check-in date should match with check-in date, check-out date should match with check-out date
+    if (attendance.attendance_clock_in_date == attendance_activity.clock_in_date and 
+        attendance_activity.clock_out_date == attendance_activity.attendance_date):
+        attendance.attendance_clock_out = now
+        attendance.attendance_clock_out_date = attendance_activity.attendance_date
+        attendance.attendance_worked_hour = duration
+        attendance.save()
+        # Overtime calculation
+        attendance.attendance_overtime = overtime_calculation(attendance)
 
-    # Validate the attendance as per the condition
-    attendance.attendance_validated = attendance_validate(attendance)
-    attendance.save()
+        # Validate the attendance as per the condition
+        attendance.attendance_validated = attendance_validate(attendance)
+        attendance.save()
 
     return
 

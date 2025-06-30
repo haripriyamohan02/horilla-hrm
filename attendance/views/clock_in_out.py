@@ -530,15 +530,15 @@ def clock_out_attendance_and_activity(
                 "Attendance record not found for activity %s", attendance_activity.id
             )
             return None
-        attendance.attendance_clock_out = now + ":00"
-        attendance.attendance_clock_out_date = attendance_activity.attendance_date
-        attendance.attendance_worked_hour = duration
-        # Overtime calculation
-        attendance.attendance_overtime = overtime_calculation(attendance)
-
-        # Validate the attendance as per the condition
-        attendance.attendance_validated = True
-        attendance.save()
+        
+        # Only update attendance check-in and check-out if the dates match
+        if attendance.attendance_clock_in_date == attendance_date:
+            attendance.attendance_clock_out = now + ":00"
+            attendance.attendance_clock_out_date = attendance_date
+            attendance.attendance_worked_hour = duration
+            attendance.attendance_overtime = overtime_calculation(attendance)
+            attendance.attendance_validated = True
+            attendance.save()
 
         return attendance
     elif is_biometric:
@@ -595,12 +595,16 @@ def clock_out_attendance_and_activity(
             duration = duration + total_seconds
 
         duration = format_time(duration)
-        attendance.attendance_clock_out = now + ":00"
-        attendance.attendance_clock_out_date = attendance_date
-        attendance.attendance_worked_hour = duration
-        attendance.attendance_overtime = overtime_calculation(attendance)
-        attendance.attendance_validated = True
-        attendance.save()
+        
+        # Only update attendance check-in and check-out if the dates match
+        if attendance.attendance_clock_in_date == attendance_date:
+            attendance.attendance_clock_out = now + ":00"
+            attendance.attendance_clock_out_date = attendance_date
+            attendance.attendance_worked_hour = duration
+            attendance.attendance_overtime = overtime_calculation(attendance)
+            attendance.attendance_validated = True
+            attendance.save()
+            
         return attendance
     logger.error("No attendance clock in activity found that needs clocking out.")
     return
